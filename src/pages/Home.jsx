@@ -1,30 +1,66 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Star } from 'lucide-react';
 
 export default function Home() {
   return (
     <>
-      {/* Hero — quieter, more editorial */}
-      <section className="hero">
-        <div className="hero-bg" aria-hidden="true" />
-        <div className="container hero-content">
-          <p className="eyebrow eyebrow-light hero-eyebrow">SUNYANI · GHANA</p>
-          <div className="hero-rule" aria-hidden="true" />
-          <h1 className="hero-title">
-            A quiet place<br />
-            to <span className="hero-accent">work and live.</span>
-          </h1>
-          <p className="lead lead-light hero-lead">
-            Home-Office Apartments — thoughtfully finished for how you actually spend your days.
-            Set in the calm of LivingSpring Gardens.
-          </p>
-          <div className="hero-actions">
-            <Link to="/book" className="btn btn-primary btn-lg">
-              Check availability
-            </Link>
-            <Link to="/apartments" className="btn btn-ghost-light btn-lg">
-              See the apartments <ArrowRight size={16} />
-            </Link>
+      {/* Hero — split layout, editorial */}
+      <section className="hero-split">
+        <div className="container hero-split-inner">
+          <div className="hero-text reveal">
+            <span className="hero-tag">
+              <Star size={12} fill="currentColor" strokeWidth={0} />
+              A boutique stay in Sunyani
+            </span>
+            <h1 className="hero-title-split">
+              A quiet place<br />
+              to <span className="hero-accent-ink">work and live.</span>
+            </h1>
+            <p className="lead hero-lead-split">
+              Home-Office Apartments — thoughtfully finished for how you actually spend your days.
+              Set in the calm of LivingSpring Gardens.
+            </p>
+            <div className="hero-actions">
+              <Link to="/book" className="btn btn-primary btn-lg">
+                Check availability
+              </Link>
+              <Link to="/apartments" className="btn btn-outline btn-lg">
+                See the apartments <ArrowRight size={16} />
+              </Link>
+            </div>
+            <div className="hero-meta">
+              <div className="hero-meta-item">
+                <div className="hero-meta-value">2</div>
+                <div className="hero-meta-label">Apartments</div>
+              </div>
+              <div className="hero-meta-item">
+                <div className="hero-meta-value">4.9<Star size={13} fill="currentColor" strokeWidth={0} /></div>
+                <div className="hero-meta-label">Guest rating</div>
+              </div>
+              <div className="hero-meta-item">
+                <div className="hero-meta-value">Fibre</div>
+                <div className="hero-meta-label">Wi-Fi</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="hero-visual reveal">
+            <div className="hero-photo hero-photo-main">
+              <img
+                src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1400&q=85"
+                alt="Interior of Home-Office Apartments"
+              />
+            </div>
+            <div className="hero-photo hero-photo-inset">
+              <img
+                src="https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=800&q=85"
+                alt="Dedicated workspace"
+              />
+            </div>
+            <div className="hero-badge">
+              <span className="hero-badge-dot" />
+              Now booking
+            </div>
           </div>
         </div>
       </section>

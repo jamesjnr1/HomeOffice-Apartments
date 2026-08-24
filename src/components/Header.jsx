@@ -10,8 +10,10 @@ export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [user, setUser] = useState(null);
 
-  const isHome = location.pathname === '/';
-  const solid = !isHome || scrolled;
+  // Header is always solid now — hero is a light layout so we no longer flip to a
+  // transparent-over-dark treatment. Scroll still triggers a subtle shadow.
+  const solid = true;
+  const scrolledShadow = scrolled;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -24,7 +26,6 @@ export default function Header() {
     setMobileOpen(false);
   }, [location.pathname]);
 
-  // Track auth state
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUser(data?.user ?? null));
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
@@ -41,7 +42,7 @@ export default function Header() {
 
   return (
     <>
-      <header className={`site-header ${solid ? 'solid' : ''}`}>
+      <header className={`site-header ${solid ? 'solid' : ''} ${scrolledShadow ? 'scrolled' : ''}`}>
         <div className="container header-inner">
           <NavLink to="/" className="brand" aria-label="Home-Office Apartments home">
             <span className="brand-primary">Home-Office Apartments</span>
