@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 export default function SignUp() {
@@ -36,17 +37,49 @@ export default function SignUp() {
   };
 
   return (
-    <section className="auth-page">
-      <div className="container">
-        <div className="auth-card">
-          <h1>Create your account</h1>
-          <p className="text-muted" style={{ marginBottom: 24 }}>
-            Book faster and manage your stays in your dashboard.
-          </p>
+    <div className="auth-split">
+      <aside className="auth-photo auth-photo-signup">
+        <div className="auth-photo-tint" />
+        <div className="auth-photo-content">
+          <Link to="/" className="auth-mono">
+            <span className="auth-mono-dot">H</span>
+            <span className="auth-mono-name">
+              Home-Office Apartments
+              <span className="auth-mono-sub">
+                and Living<span className="brand-accent">Spring</span> Gardens
+              </span>
+            </span>
+          </Link>
+          <div>
+            <h2 className="auth-photo-title">
+              A quiet space<br />
+              made for you.
+            </h2>
+            <p className="auth-photo-sub">
+              Create an account to save your booking details and get updates about your stay.
+            </p>
+          </div>
+        </div>
+      </aside>
+
+      <section className="auth-form-panel">
+        <div className="auth-form-inner">
+          <Link to="/" className="auth-mono auth-mono-tight" aria-label="Home">
+            <span className="auth-mono-dot">H</span>
+            <span className="auth-mono-name auth-mono-name-tight">
+              Home-Office
+              <span className="auth-mono-sub">
+                Living<span className="brand-accent">Spring</span> Gardens
+              </span>
+            </span>
+          </Link>
+
+          <h1 className="auth-title">Create your account</h1>
+          <p className="auth-lede">Book faster and manage your stays.</p>
 
           {error && <div className="form-error" style={{ marginBottom: 16 }}>{error}</div>}
 
-          <form onSubmit={submit}>
+          <form onSubmit={submit} className="auth-form">
             <div className="field">
               <label>Full name</label>
               <input
@@ -55,15 +88,17 @@ export default function SignUp() {
                 onChange={(e) => setFullName(e.target.value)}
                 required
                 autoFocus
+                placeholder="Your full name"
               />
             </div>
             <div className="field">
-              <label>Email</label>
+              <label>Email address</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                placeholder="you@example.com"
               />
             </div>
             <div className="field">
@@ -74,17 +109,18 @@ export default function SignUp() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={8}
+                placeholder="At least 8 characters"
               />
-              <small className="text-muted" style={{ fontSize: 12 }}>
-                At least 8 characters.
-              </small>
             </div>
+
             <button
               type="submit"
-              className="btn btn-primary btn-lg btn-block"
+              className="auth-submit"
               disabled={loading}
             >
-              {loading ? 'Creating account…' : 'Create account'}
+              {loading ? 'Creating account…' : (
+                <>Create account <ArrowRight size={18} /></>
+              )}
             </button>
           </form>
 
@@ -92,7 +128,7 @@ export default function SignUp() {
             Already have an account? <Link to="/signin">Sign in</Link>
           </p>
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
   );
 }
