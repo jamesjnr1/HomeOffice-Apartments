@@ -4,18 +4,19 @@ import { ArrowRight } from 'lucide-react';
 export default function Home() {
   return (
     <>
-      {/* Hero */}
+      {/* Hero — quieter, more editorial */}
       <section className="hero">
         <div className="hero-bg" aria-hidden="true" />
         <div className="container hero-content">
-          <p className="eyebrow eyebrow-light">SUNYANI · GHANA</p>
-          <h1>
-            A quiet place to<br />
-            <span className="hero-accent">work and live.</span>
+          <p className="eyebrow eyebrow-light hero-eyebrow">SUNYANI · GHANA</p>
+          <div className="hero-rule" aria-hidden="true" />
+          <h1 className="hero-title">
+            A quiet place<br />
+            to <span className="hero-accent">work and live.</span>
           </h1>
-          <p className="lead lead-light">
+          <p className="lead lead-light hero-lead">
             Home-Office Apartments — thoughtfully finished for how you actually spend your days.
-            Set in the calm of Living Spring Gardens.
+            Set in the calm of LivingSpring Gardens.
           </p>
           <div className="hero-actions">
             <Link to="/book" className="btn btn-primary btn-lg">
@@ -26,12 +27,9 @@ export default function Home() {
             </Link>
           </div>
         </div>
-        <div className="scroll-hint" aria-hidden="true">
-          SCROLL<span className="scroll-line" />
-        </div>
       </section>
 
-      {/* Short intro — two sentences, no more */}
+      {/* Short intro */}
       <section className="section">
         <div className="container">
           <div className="intro-block reveal">
@@ -50,7 +48,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Two-card teaser — one for Apartments, one for the Gardens. Nothing more. */}
+      {/* Two-card teaser */}
       <section className="section section-cream">
         <div className="container">
           <div className="teaser-grid">
@@ -77,11 +75,11 @@ export default function Home() {
               <div className="teaser-img">
                 <img
                   src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1400&q=80"
-                  alt="Living Spring Gardens compound"
+                  alt="LivingSpring Gardens compound"
                 />
               </div>
               <div className="teaser-body">
-                <p className="eyebrow">LIVING SPRING GARDENS</p>
+                <p className="eyebrow">LIVINGSPRING GARDENS</p>
                 <h3>The compound they sit in.</h3>
                 <p className="prose">
                   A quiet, green corner of Sunyani. Room to breathe.
@@ -95,7 +93,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Single closing CTA */}
+      {/* Closing CTA */}
       <section className="section cta-band">
         <div className="container">
           <div className="cta-content reveal">

@@ -50,7 +50,7 @@ export default function SignUp() {
               </span>
             </span>
           </Link>
-          <div>
+          <div className="auth-photo-headline">
             <h2 className="auth-photo-title">
               A quiet space<br />
               made for you.
@@ -64,9 +64,9 @@ export default function SignUp() {
 
       <section className="auth-form-panel">
         <div className="auth-form-inner">
-          <Link to="/" className="auth-mono auth-mono-tight" aria-label="Home">
+          <Link to="/" className="auth-mono" aria-label="Home">
             <span className="auth-mono-dot">H</span>
-            <span className="auth-mono-name auth-mono-name-tight">
+            <span className="auth-mono-name">
               Home-Office
               <span className="auth-mono-sub">
                 Living<span className="brand-accent">Spring</span> Gardens

@@ -6,7 +6,7 @@ export default function Gardens() {
     <>
       <section className="page-header">
         <div className="container">
-          <p className="eyebrow">LIVING SPRING GARDENS</p>
+          <p className="eyebrow">LIVINGSPRING GARDENS</p>
           <h1>The compound they sit in.</h1>
           <p className="lead">
             A quiet, green corner of Sunyani that our family has cared for over the years —
@@ -15,13 +15,13 @@ export default function Gardens() {
         </div>
       </section>
 
-      <section className="section" style={{ paddingTop: 0 }}>
+      <section className="section">
         <div className="container">
           <div className="two-col">
             <div className="reveal">
               <img
                 src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1400&q=80"
-                alt="Living Spring Gardens compound"
+                alt="LivingSpring Gardens compound"
                 className="rounded-img"
               />
             </div>
@@ -29,7 +29,7 @@ export default function Gardens() {
               <p className="eyebrow">A FAMILY GARDEN</p>
               <h2>Room to breathe.</h2>
               <p className="prose">
-                Living Spring Gardens is the family compound the apartments belong to.
+                LivingSpring Gardens is the family compound the apartments belong to.
                 Mature trees, a small orchard, and shaded paths that stay cool through the day.
               </p>
               <p className="prose">
@@ -75,7 +75,7 @@ export default function Gardens() {
               <p className="eyebrow">GETTING HERE</p>
               <h2>Central Sunyani.</h2>
               <p className="prose">
-                Living Spring Gardens is a short drive from the centre of Sunyani —
+                LivingSpring Gardens is a short drive from the centre of Sunyani —
                 close enough to reach the market, cafés, and banks in minutes;
                 far enough that you'll actually hear yourself think.
               </p>

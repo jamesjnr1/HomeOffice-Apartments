@@ -25,7 +25,8 @@ export default function Apartments() {
         </div>
       </section>
 
-      <section className="section" style={{ paddingTop: 0 }}>
+      {/* Breathing room between the header divider and the first image */}
+      <section className="section">
         <div className="container">
           <div className="two-col">
             <div className="reveal">
