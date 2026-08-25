@@ -220,7 +220,7 @@ body:has(.dash-shell) main { padding: 0 !important; }
 /* ---------- MAIN CONTENT ---------- */
 .dash-main {
   min-width: 0;
-  padding: 40px 40px 80px;
+  padding: 72px 40px 120px;
   overflow-x: hidden;
 }
 .dash-main-inner {
@@ -228,7 +228,7 @@ body:has(.dash-shell) main { padding: 0 !important; }
   margin: 0 auto;
 }
 @media (min-width: 1400px) {
-  .dash-main { padding: 48px 56px 80px; }
+  .dash-main { padding: 88px 56px 140px; }
 }
 
 /* ---------- MOBILE ---------- */
@@ -278,7 +278,7 @@ body:has(.dash-shell) main { padding: 0 !important; }
   .dash-sidebar.open { transform: translateX(0); }
   .dash-menu-close { display: inline-flex; }
   .dash-backdrop { display: block; }
-  .dash-main { padding: 24px 20px 60px; }
+  .dash-main { padding: 40px 20px 80px; }
 }
 
 /* ---------- PAGE HEADER ---------- */
