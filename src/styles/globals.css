@@ -1786,3 +1786,96 @@ body {
     to { opacity: 1; }
   }
 }
+/* =====================================================================
+   APPEND THIS TO src/styles/globals.css
+   Cinematic entry transition for Sign in / Book a stay clicks.
+   ===================================================================== */
+
+/* Turn off the earlier @view-transition page-turn effect so it doesn't
+   compete with the new cinematic overlay. Button-press feedback stays. */
+@view-transition { navigation: none; }
+::view-transition-old(root),
+::view-transition-new(root) { animation: none !important; }
+
+/* ============ ENTRY TRANSITION — cinematic house zoom ============ */
+.entry-transition {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  overflow: hidden;
+  pointer-events: none;
+  background: #0a1614;
+  perspective: 1600px;
+  animation: et-overlay 1050ms cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+
+.entry-transition-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform-origin: 50% 55%;
+  animation: et-zoom 1050ms cubic-bezier(0.65, 0, 0.35, 1) both;
+  will-change: transform, filter;
+}
+
+/* Soft vignette that fades away as we "arrive" */
+.entry-transition::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 55%, transparent 25%, rgba(10, 22, 20, .55) 100%);
+  pointer-events: none;
+  animation: et-vignette 1050ms cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+
+@keyframes et-overlay {
+  0%   { opacity: 0; }
+  10%  { opacity: 1; }
+  82%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes et-zoom {
+  0% {
+    transform: scale(1.02) rotateX(0deg) translateZ(0);
+    filter: brightness(0.35) blur(1px);
+  }
+  25% {
+    transform: scale(1.15) rotateX(0.4deg) translateZ(60px);
+    filter: brightness(0.65) blur(0px);
+  }
+  55% {
+    transform: scale(1.55) rotateX(1.2deg) translateZ(180px);
+    filter: brightness(0.9) blur(0.5px);
+  }
+  85% {
+    transform: scale(2.2) rotateX(2.4deg) translateZ(320px);
+    filter: brightness(1.25) blur(3px);
+  }
+  100% {
+    transform: scale(2.9) rotateX(3.2deg) translateZ(480px);
+    filter: brightness(1.6) blur(8px);
+  }
+}
+
+@keyframes et-vignette {
+  0%   { opacity: 1; }
+  55%  { opacity: 0.6; }
+  100% { opacity: 0; }
+}
+
+/* Reduced motion: much shorter, plain fade */
+@media (prefers-reduced-motion: reduce) {
+  .entry-transition {
+    animation: et-overlay-reduced 300ms ease both;
+  }
+  .entry-transition-image,
+  .entry-transition::after { animation: none; }
+  @keyframes et-overlay-reduced {
+    from { opacity: 0; }
+    50%  { opacity: 1; }
+    to   { opacity: 0; }
+  }
+}

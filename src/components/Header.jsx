@@ -1,7 +1,8 @@
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Menu, X, LayoutDashboard, LogOut } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import EntryTransition from './EntryTransition';
 
 export default function Header() {
   const location = useLocation();
@@ -9,6 +10,23 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [user, setUser] = useState(null);
+
+  // Entry transition state — only for Sign in and Book a stay from the header
+  const [transitionTo, setTransitionTo] = useState(null);
+
+  const startEntry = useCallback((path) => (e) => {
+    if (e) e.preventDefault();
+    setMobileOpen(false);
+    setTransitionTo(path);
+  }, []);
+
+  const finishEntry = useCallback(() => {
+    if (transitionTo) {
+      navigate(transitionTo);
+      // Clear on the next tick so the overlay stays through the swap
+      setTimeout(() => setTransitionTo(null), 150);
+    }
+  }, [transitionTo, navigate]);
 
   const solid = true;
   const scrolledShadow = scrolled;
@@ -42,7 +60,7 @@ export default function Header() {
     <>
       <header className={`site-header ${solid ? 'solid' : ''} ${scrolledShadow ? 'scrolled' : ''}`}>
         <div className="container header-inner">
-          <NavLink to="/" viewTransition className="brand" aria-label="Home-Office Apartments home">
+          <NavLink to="/" className="brand" aria-label="Home-Office Apartments home">
             <span className="brand-primary">Home-Office Apartments</span>
             <span className="brand-sub">
               and Living<span className="brand-accent">Spring</span> Gardens
@@ -50,22 +68,36 @@ export default function Header() {
           </NavLink>
 
           <nav className="nav-primary" aria-label="Primary">
-            <NavLink to="/" end viewTransition className="nav-link">Home</NavLink>
-            <NavLink to="/apartments" viewTransition className="nav-link">Apartments</NavLink>
-            <NavLink to="/gardens" viewTransition className="nav-link">Gardens</NavLink>
-            <NavLink to="/gallery" viewTransition className="nav-link">Gallery</NavLink>
-            <NavLink to="/about" viewTransition className="nav-link">About</NavLink>
+            <NavLink to="/" end className="nav-link">Home</NavLink>
+            <NavLink to="/apartments" className="nav-link">Apartments</NavLink>
+            <NavLink to="/gardens" className="nav-link">Gardens</NavLink>
+            <NavLink to="/gallery" className="nav-link">Gallery</NavLink>
+            <NavLink to="/about" className="nav-link">About</NavLink>
 
             {!user && (
               <>
-                <NavLink to="/signin" viewTransition className="nav-link">Sign in</NavLink>
-                <NavLink to="/book" viewTransition className="btn btn-primary">Book a stay</NavLink>
+                {/* Sign in — with cinematic entry transition */}
+                <a
+                  href="/signin"
+                  onClick={startEntry('/signin')}
+                  className="nav-link"
+                >
+                  Sign in
+                </a>
+                {/* Book a stay — with cinematic entry transition */}
+                <a
+                  href="/book"
+                  onClick={startEntry('/book')}
+                  className="btn btn-primary"
+                >
+                  Book a stay
+                </a>
               </>
             )}
 
             {user && (
               <>
-                <NavLink to="/dashboard" viewTransition className="nav-link nav-link-icon">
+                <NavLink to="/dashboard" className="nav-link nav-link-icon">
                   <LayoutDashboard size={16} /> Dashboard
                 </NavLink>
                 <button className="btn btn-outline nav-signout" onClick={signOut}>
@@ -102,23 +134,29 @@ export default function Header() {
           </button>
         </div>
         <nav>
-          <NavLink to="/" end viewTransition>Home</NavLink>
-          <NavLink to="/apartments" viewTransition>Apartments</NavLink>
-          <NavLink to="/gardens" viewTransition>Gardens</NavLink>
-          <NavLink to="/gallery" viewTransition>Gallery</NavLink>
-          <NavLink to="/about" viewTransition>About</NavLink>
+          <NavLink to="/" end>Home</NavLink>
+          <NavLink to="/apartments">Apartments</NavLink>
+          <NavLink to="/gardens">Gardens</NavLink>
+          <NavLink to="/gallery">Gallery</NavLink>
+          <NavLink to="/about">About</NavLink>
 
           {!user && (
             <>
-              <NavLink to="/signin" viewTransition>Sign in</NavLink>
-              <NavLink to="/signup" viewTransition>Sign up</NavLink>
-              <NavLink to="/book" viewTransition className="btn btn-primary btn-block">Book a stay</NavLink>
+              <a href="/signin" onClick={startEntry('/signin')}>Sign in</a>
+              <a href="/signup" onClick={startEntry('/signup')}>Sign up</a>
+              <a
+                href="/book"
+                onClick={startEntry('/book')}
+                className="btn btn-primary btn-block"
+              >
+                Book a stay
+              </a>
             </>
           )}
 
           {user && (
             <>
-              <NavLink to="/dashboard" viewTransition>Dashboard</NavLink>
+              <NavLink to="/dashboard">Dashboard</NavLink>
               <button className="btn btn-outline btn-block" onClick={signOut}>
                 Sign out
               </button>
@@ -126,6 +164,9 @@ export default function Header() {
           )}
         </nav>
       </div>
+
+      {/* Cinematic entry transition overlay (portal to body) */}
+      <EntryTransition destination={transitionTo} onComplete={finishEntry} />
     </>
   );
 }
