@@ -48,12 +48,15 @@ export default function DashboardLayout() {
     navigate('/');
   };
 
-  // Brand — matches the main site exactly
-  const Brand = () => (
-    <a href="/" className="dash-brand">
-      <span className="dash-brand-primary">Home-Office Apartments</span>
-      <span className="dash-brand-sub">
-        and Living<span className="dash-brand-accent">Spring</span> Gardens
+  // Compact, single-block brand that sits properly in the sidebar
+  const SidebarBrand = () => (
+    <a href="/" className="dash-brand-compact">
+      <span className="dash-brand-mark">H·O</span>
+      <span className="dash-brand-lines">
+        <span className="dash-brand-title">Home-Office</span>
+        <span className="dash-brand-sub">
+          Living<span className="dash-brand-spring">Spring</span> Gardens
+        </span>
       </span>
     </a>
   );
@@ -61,7 +64,7 @@ export default function DashboardLayout() {
   if (loading) {
     return (
       <div className="dash-loading">
-        <Brand />
+        <SidebarBrand />
         <p>Loading your dashboard…</p>
       </div>
     );
@@ -69,12 +72,13 @@ export default function DashboardLayout() {
 
   const displayName =
     user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'there';
+  const initial = displayName.charAt(0).toUpperCase();
 
   return (
     <div className="dash-shell">
       {/* Mobile top bar */}
       <div className="dash-mobile-bar">
-        <Brand />
+        <SidebarBrand />
         <button
           className="dash-menu-btn"
           onClick={() => setMobileNavOpen(true)}
@@ -87,7 +91,7 @@ export default function DashboardLayout() {
       {/* Sidebar */}
       <aside className={`dash-sidebar ${mobileNavOpen ? 'open' : ''}`}>
         <div className="dash-sidebar-head">
-          <Brand />
+          <SidebarBrand />
           <button
             className="dash-menu-btn dash-menu-close"
             onClick={() => setMobileNavOpen(false)}
@@ -99,34 +103,32 @@ export default function DashboardLayout() {
 
         <nav className="dash-nav">
           <NavLink to="/dashboard" end onClick={() => setMobileNavOpen(false)}>
-            <LayoutDashboard size={18} /> <span>Overview</span>
+            <LayoutDashboard size={17} /> <span>Overview</span>
           </NavLink>
           <NavLink to="/dashboard/bookings" onClick={() => setMobileNavOpen(false)}>
-            <CalendarDays size={18} /> <span>Bookings</span>
+            <CalendarDays size={17} /> <span>Bookings</span>
           </NavLink>
           <NavLink to="/dashboard/wishlist" onClick={() => setMobileNavOpen(false)}>
-            <Heart size={18} /> <span>Wishlist</span>
+            <Heart size={17} /> <span>Wishlist</span>
           </NavLink>
           <NavLink to="/dashboard/messages" onClick={() => setMobileNavOpen(false)}>
-            <MessageSquare size={18} /> <span>Messages</span>
+            <MessageSquare size={17} /> <span>Messages</span>
           </NavLink>
           <NavLink to="/dashboard/profile" onClick={() => setMobileNavOpen(false)}>
-            <UserCircle size={18} /> <span>Profile</span>
+            <UserCircle size={17} /> <span>Profile</span>
           </NavLink>
         </nav>
 
         <div className="dash-sidebar-foot">
           <div className="dash-user">
-            <div className="dash-avatar">
-              {displayName.charAt(0).toUpperCase()}
-            </div>
+            <div className="dash-avatar">{initial}</div>
             <div className="dash-user-meta">
               <div className="dash-user-name">{displayName}</div>
               <div className="dash-user-email">{user?.email}</div>
             </div>
           </div>
           <button className="dash-signout" onClick={handleSignOut}>
-            <LogOut size={16} /> Sign out
+            <LogOut size={15} /> Sign out
           </button>
         </div>
       </aside>
@@ -136,7 +138,9 @@ export default function DashboardLayout() {
       )}
 
       <main className="dash-main">
-        <Outlet context={{ user, displayName }} />
+        <div className="dash-main-inner">
+          <Outlet context={{ user, displayName }} />
+        </div>
       </main>
     </div>
   );
