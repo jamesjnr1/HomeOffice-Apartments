@@ -5,84 +5,65 @@ import {
   MapPin,
   Clock,
   ArrowRight,
-  Wifi,
-  Monitor,
-  Coffee,
   MessageSquare,
 } from 'lucide-react';
 
 /**
  * Overview
- * Landing screen after login. Shows the user's "next stay" as a hero card,
- * quick stats, and a small recommended-for-you row.
+ * Landing screen after login.
+ *
+ * Scope: this site represents ONLY Home-Office Apartments at LivingSpring Gardens.
+ * There are 2 apartments — no external listings, no "recommendations" from elsewhere.
  *
  * TODO(supabase): replace MOCK_* data with:
  *   supabase.from('bookings').select('*, apartments(*)').eq('guest_id', user.id)
- *   supabase.from('apartments').select('*').eq('published', true).limit(3)
+ *   supabase.from('apartments').select('*').eq('published', true)
  */
+
+// The only two apartments on the site
+const APARTMENTS = [
+  {
+    id: 'verandah',
+    name: 'The Verandah Apartment',
+    location: 'LivingSpring Gardens · Sunyani',
+    coverImage:
+      'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1400&q=85',
+    highlights: ['Sleeps 4', 'Fibre Wi-Fi', 'Private verandah'],
+  },
+  {
+    id: 'garden',
+    name: 'The Garden Apartment',
+    location: 'LivingSpring Gardens · Sunyani',
+    coverImage:
+      'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1400&q=85',
+    highlights: ['Sleeps 2', 'Fibre Wi-Fi', 'Garden-side'],
+  },
+];
 
 const MOCK_NEXT_STAY = {
   reference: 'HO-8FQ2P',
-  apartment: {
-    name: 'The North Ridge Loft',
-    city: 'Sunyani',
-    country: 'Ghana',
-    coverImage:
-      'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1600&q=80',
-  },
-  checkIn: new Date(Date.now() + 6 * 86400000), // 6 days out
+  apartment: APARTMENTS[0],
+  checkIn: new Date(Date.now() + 6 * 86400000),
   checkOut: new Date(Date.now() + 10 * 86400000),
   nights: 4,
   guests: 2,
 };
 
 const MOCK_STATS = {
-  upcomingBookings: 2,
-  pastStays: 7,
-  nightsWithUs: 34,
+  upcomingBookings: 1,
+  pastStays: 2,
+  nightsWithUs: 11,
 };
-
-const MOCK_RECOMMENDED = [
-  {
-    id: 'a-1',
-    name: 'Garden Studio',
-    city: 'Sunyani',
-    pricePerNight: 480,
-    coverImage:
-      'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1000&q=80',
-    highlights: ['Fast Wi-Fi', 'Standing desk'],
-  },
-  {
-    id: 'a-2',
-    name: 'Riverside Suite',
-    city: 'Sunyani',
-    pricePerNight: 620,
-    coverImage:
-      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1000&q=80',
-    highlights: ['Fibre internet', 'Ergo chair'],
-  },
-  {
-    id: 'a-3',
-    name: 'The Verandah Apartment',
-    city: 'Sunyani',
-    pricePerNight: 540,
-    coverImage:
-      'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1000&q=80',
-    highlights: ['Private balcony', 'Dual monitor'],
-  },
-];
 
 export default function Overview() {
   const { displayName } = useOutletContext();
   const [nextStay, setNextStay] = useState(null);
   const [stats, setStats] = useState(MOCK_STATS);
-  const [recommended, setRecommended] = useState([]);
 
   useEffect(() => {
     // TODO(supabase): fetch real data here
     setNextStay(MOCK_NEXT_STAY);
     setStats(MOCK_STATS);
-    setRecommended(MOCK_RECOMMENDED);
   }, []);
 
   const daysUntil = nextStay
@@ -92,7 +73,7 @@ export default function Overview() {
   return (
     <div className="dash-page">
       <header className="dash-page-head">
-        <p className="dash-eyebrow">DASHBOARD</p>
+        <span className="dash-eyebrow">DASHBOARD</span>
         <h1>Welcome back, {displayName}.</h1>
         <p className="dash-lead">Here's what's coming up.</p>
       </header>
@@ -110,11 +91,11 @@ export default function Overview() {
             </span>
           </div>
           <div className="dash-next-stay-body">
-            <p className="dash-eyebrow">YOUR NEXT STAY</p>
+            <span className="dash-eyebrow">YOUR NEXT STAY</span>
             <h2>{nextStay.apartment.name}</h2>
             <div className="dash-loc">
               <MapPin size={14} />
-              {nextStay.apartment.city}, {nextStay.apartment.country}
+              {nextStay.apartment.location}
             </div>
 
             <div className="dash-next-stay-details">
@@ -142,7 +123,7 @@ export default function Overview() {
 
             <div className="dash-next-stay-actions">
               <Link
-                to={`/dashboard/bookings/${nextStay.reference}`}
+                to="/dashboard/bookings"
                 className="dash-btn dash-btn-primary"
               >
                 View trip <ArrowRight size={16} />
@@ -165,22 +146,18 @@ export default function Overview() {
         <StatCard label="Nights with us" value={stats.nightsWithUs} suffix="total" />
       </section>
 
-      {/* Recommended */}
+      {/* Our apartments — the only two on the site */}
       <section>
         <div className="dash-section-head">
-          <h2>Recommended for you</h2>
-          <Link to="/explore" className="dash-linky">
-            View all apartments <ArrowRight size={14} />
+          <h2>Our apartments</h2>
+          <Link to="/apartments" className="dash-linky">
+            More about the apartments <ArrowRight size={14} />
           </Link>
         </div>
 
         <div className="dash-rec-grid">
-          {recommended.map((a) => (
-            <Link
-              key={a.id}
-              to={`/apartments/${a.id}`}
-              className="dash-rec-card"
-            >
+          {APARTMENTS.map((a) => (
+            <Link key={a.id} to="/apartments" className="dash-rec-card">
               <div className="dash-rec-img">
                 <img src={a.coverImage} alt={a.name} />
               </div>
@@ -188,25 +165,12 @@ export default function Overview() {
                 <h3>{a.name}</h3>
                 <div className="dash-loc">
                   <MapPin size={12} />
-                  {a.city}
+                  {a.location}
                 </div>
                 <div className="dash-rec-tags">
                   {a.highlights.map((h) => (
-                    <span key={h} className="dash-tag">
-                      {h.includes('Wi-Fi') || h.includes('internet') ? (
-                        <Wifi size={12} />
-                      ) : h.includes('desk') || h.includes('monitor') ? (
-                        <Monitor size={12} />
-                      ) : (
-                        <Coffee size={12} />
-                      )}
-                      {h}
-                    </span>
+                    <span key={h} className="dash-tag">{h}</span>
                   ))}
-                </div>
-                <div className="dash-rec-price">
-                  <strong>GHS {a.pricePerNight}</strong>
-                  <span> / night</span>
                 </div>
               </div>
             </Link>

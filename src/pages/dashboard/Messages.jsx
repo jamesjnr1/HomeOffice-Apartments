@@ -3,61 +3,35 @@ import { formatDistanceToNow } from 'date-fns';
 import { Send, Search } from 'lucide-react';
 
 /**
- * Messages
- * Two-pane inbox: conversations left, thread right.
+ * Messages — a single conversation with the host.
+ * There is only one host (the family managing the compound), so no
+ * multi-conversation inbox is needed.
  *
- * TODO(supabase): replace MOCK data + wire up real-time with:
- *   supabase.from('conversations').select('*, messages(*)').eq('user_id', user.id)
+ * TODO(supabase): replace MOCK data + wire up real-time:
+ *   supabase.from('messages').select('*').eq('guest_id', user.id)
  *   supabase.channel('messages').on('postgres_changes', ..., handleNewMessage)
  */
+
+const HOST = {
+  name: 'Kwame Boateng',
+  avatar: 'KB',
+  role: 'Your host at LivingSpring Gardens',
+};
 
 const MOCK_CONVERSATIONS = [
   {
     id: 'c-1',
-    host: {
-      name: 'Kwame Boateng',
-      avatar: 'KB',
-      apartment: 'The North Ridge Loft',
-    },
-    lastMessage: 'Perfect — see you Friday. The check-in code is 4471.',
+    host: HOST,
+    lastMessage: 'Perfect — see you on Monday. The check-in code is 4471.',
     lastAt: new Date(Date.now() - 2 * 3600000),
     unread: 0,
     messages: [
-      { id: 1, from: 'host', body: 'Hi James — thanks for booking!', at: new Date(Date.now() - 26 * 3600000) },
+      { id: 1, from: 'host', body: 'Hi James — thanks for booking The Verandah Apartment.', at: new Date(Date.now() - 26 * 3600000) },
       { id: 2, from: 'host', body: 'The apartment is ready and I\'ve stocked the fridge with breakfast basics.', at: new Date(Date.now() - 26 * 3600000 + 60000) },
       { id: 3, from: 'me', body: 'Amazing, thank you! What time can I check in?', at: new Date(Date.now() - 5 * 3600000) },
       { id: 4, from: 'host', body: 'Anytime after 2 PM. Let me know when you\'re close.', at: new Date(Date.now() - 4 * 3600000) },
       { id: 5, from: 'me', body: 'Great. I\'ll be arriving around 3.', at: new Date(Date.now() - 3 * 3600000) },
-      { id: 6, from: 'host', body: 'Perfect — see you Friday. The check-in code is 4471.', at: new Date(Date.now() - 2 * 3600000) },
-    ],
-  },
-  {
-    id: 'c-2',
-    host: {
-      name: 'Ama Danso',
-      avatar: 'AD',
-      apartment: 'Garden Studio',
-    },
-    lastMessage: 'Would you like me to arrange airport pickup?',
-    lastAt: new Date(Date.now() - 26 * 3600000),
-    unread: 1,
-    messages: [
-      { id: 1, from: 'host', body: 'Hi James, welcome!', at: new Date(Date.now() - 48 * 3600000) },
-      { id: 2, from: 'host', body: 'Would you like me to arrange airport pickup?', at: new Date(Date.now() - 26 * 3600000) },
-    ],
-  },
-  {
-    id: 'c-3',
-    host: {
-      name: 'Support',
-      avatar: 'HO',
-      apartment: 'HomeOffice team',
-    },
-    lastMessage: 'Your invoice for HO-YB4LN is attached.',
-    lastAt: new Date(Date.now() - 6 * 86400000),
-    unread: 0,
-    messages: [
-      { id: 1, from: 'host', body: 'Your invoice for HO-YB4LN is attached.', at: new Date(Date.now() - 6 * 86400000) },
+      { id: 6, from: 'host', body: 'Perfect — see you on Monday. The check-in code is 4471.', at: new Date(Date.now() - 2 * 3600000) },
     ],
   },
 ];
@@ -84,7 +58,7 @@ export default function Messages() {
 
   const filtered = conversations.filter((c) =>
     c.host.name.toLowerCase().includes(query.toLowerCase()) ||
-    c.host.apartment.toLowerCase().includes(query.toLowerCase())
+    c.host.role.toLowerCase().includes(query.toLowerCase())
   );
 
   const send = (e) => {
@@ -110,8 +84,8 @@ export default function Messages() {
   return (
     <div className="dash-page dash-messages-page">
       <header className="dash-page-head">
-        <p className="dash-eyebrow">MESSAGES</p>
-        <h1>Inbox</h1>
+        <span className="dash-eyebrow">MESSAGES</span>
+        <h1>Messages with your host</h1>
       </header>
 
       <div className="dash-messages">
@@ -121,7 +95,7 @@ export default function Messages() {
             <Search size={14} />
             <input
               type="text"
-              placeholder="Search conversations…"
+              placeholder="Search…"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
@@ -145,7 +119,7 @@ export default function Messages() {
                     {formatDistanceToNow(c.lastAt, { addSuffix: false })}
                   </span>
                 </div>
-                <div className="dash-msg-apt">{c.host.apartment}</div>
+                <div className="dash-msg-apt">{c.host.role}</div>
                 <div className="dash-msg-preview">{c.lastMessage}</div>
               </div>
               {c.unread > 0 && <span className="dash-msg-unread">{c.unread}</span>}
@@ -166,7 +140,7 @@ export default function Messages() {
                 <div className="dash-msg-avatar">{active.host.avatar}</div>
                 <div>
                   <div className="dash-msg-name">{active.host.name}</div>
-                  <div className="dash-msg-apt">{active.host.apartment}</div>
+                  <div className="dash-msg-apt">{active.host.role}</div>
                 </div>
               </div>
 

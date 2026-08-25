@@ -4,26 +4,27 @@ import { format } from 'date-fns';
 import { Download, MessageSquare, ArrowRight, MapPin } from 'lucide-react';
 
 /**
- * Bookings
- * Tabbed view of Upcoming / Current / Past bookings.
- *
- * TODO(supabase): replace MOCK_BOOKINGS with:
- *   supabase
- *     .from('bookings')
- *     .select('*, apartments(name, city, cover_image)')
- *     .eq('guest_id', user.id)
- *     .order('check_in', { ascending: false })
+ * Bookings — all mocks are for The Verandah or The Garden Apartment.
+ * No other properties exist on this site.
  */
+
+const VERANDAH = {
+  name: 'The Verandah Apartment',
+  location: 'LivingSpring Gardens · Sunyani',
+  coverImage:
+    'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=85',
+};
+const GARDEN = {
+  name: 'The Garden Apartment',
+  location: 'LivingSpring Gardens · Sunyani',
+  coverImage:
+    'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=85',
+};
 
 const MOCK_BOOKINGS = [
   {
     reference: 'HO-8FQ2P',
-    apartment: {
-      name: 'The North Ridge Loft',
-      city: 'Sunyani',
-      coverImage:
-        'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80',
-    },
+    apartment: VERANDAH,
     checkIn: new Date(Date.now() + 6 * 86400000),
     checkOut: new Date(Date.now() + 10 * 86400000),
     nights: 4,
@@ -32,28 +33,8 @@ const MOCK_BOOKINGS = [
     status: 'CONFIRMED',
   },
   {
-    reference: 'HO-K3P9M',
-    apartment: {
-      name: 'Riverside Suite',
-      city: 'Sunyani',
-      coverImage:
-        'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80',
-    },
-    checkIn: new Date(Date.now() + 40 * 86400000),
-    checkOut: new Date(Date.now() + 44 * 86400000),
-    nights: 4,
-    guests: 1,
-    total: 2480,
-    status: 'PENDING',
-  },
-  {
     reference: 'HO-2XR7T',
-    apartment: {
-      name: 'Garden Studio',
-      city: 'Sunyani',
-      coverImage:
-        'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80',
-    },
+    apartment: GARDEN,
     checkIn: new Date(Date.now() - 30 * 86400000),
     checkOut: new Date(Date.now() - 26 * 86400000),
     nights: 4,
@@ -63,12 +44,7 @@ const MOCK_BOOKINGS = [
   },
   {
     reference: 'HO-YB4LN',
-    apartment: {
-      name: 'The Verandah Apartment',
-      city: 'Sunyani',
-      coverImage:
-        'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800&q=80',
-    },
+    apartment: VERANDAH,
     checkIn: new Date(Date.now() - 90 * 86400000),
     checkOut: new Date(Date.now() - 83 * 86400000),
     nights: 7,
@@ -109,9 +85,9 @@ export default function Bookings() {
   return (
     <div className="dash-page">
       <header className="dash-page-head">
-        <p className="dash-eyebrow">BOOKINGS</p>
+        <span className="dash-eyebrow">BOOKINGS</span>
         <h1>Your trips</h1>
-        <p className="dash-lead">Everywhere you're going, and everywhere you've been.</p>
+        <p className="dash-lead">Everywhere you're staying with us, and everywhere you've been.</p>
       </header>
 
       <div className="dash-tabs">
@@ -130,10 +106,10 @@ export default function Bookings() {
         <div className="dash-empty">
           <h3>Nothing here yet</h3>
           <p>
-            When you book a stay, it'll show up here. Browse apartments to plan your next trip.
+            When you book a stay at The Verandah or The Garden Apartment, it'll show up here.
           </p>
-          <Link to="/apartments" className="dash-btn dash-btn-primary">
-            Browse apartments <ArrowRight size={16} />
+          <Link to="/book" className="dash-btn dash-btn-primary">
+            Send an enquiry <ArrowRight size={16} />
           </Link>
         </div>
       ) : (
@@ -171,7 +147,7 @@ function BookingCard({ booking }) {
             <h3>{b.apartment.name}</h3>
             <div className="dash-loc">
               <MapPin size={12} />
-              {b.apartment.city}
+              {b.apartment.location}
             </div>
           </div>
           <StatusBadge status={b.status} />
@@ -209,12 +185,6 @@ function BookingCard({ booking }) {
           <button className="dash-btn dash-btn-ghost dash-btn-sm">
             <MessageSquare size={14} /> Message host
           </button>
-          <Link
-            to={`/dashboard/bookings/${b.reference}`}
-            className="dash-btn dash-btn-outline dash-btn-sm"
-          >
-            View details <ArrowRight size={14} />
-          </Link>
         </div>
       </div>
     </article>
