@@ -1,22 +1,14 @@
 import { Link } from 'react-router-dom';
 import {
-  Wifi,
-  Monitor,
-  Coffee,
-  UtensilsCrossed,
-  Snowflake,
-  Bath,
-  ShieldCheck,
-  Trees,
-  ArrowRight,
+  Wifi, Monitor, Coffee, UtensilsCrossed, Snowflake, Bath, ShieldCheck, Trees, ArrowRight,
 } from 'lucide-react';
 
 export default function Apartments() {
   return (
     <>
-      <section className="page-header">
+      <section className="page-header page-header-v2">
         <div className="container">
-          <p className="eyebrow">THE APARTMENTS</p>
+          <span className="eyebrow">THE APARTMENTS</span>
           <h1>Built for how you work.</h1>
           <p className="lead">
             Two self-contained apartments, each with a proper kitchen, a real workspace,
@@ -25,12 +17,11 @@ export default function Apartments() {
         </div>
       </section>
 
-      {/* Breathing room between the header divider and the first image */}
       <section className="section">
         <div className="container">
           <div className="two-col">
             <div className="reveal">
-              <p className="eyebrow">DESIGNED FOR REMOTE WORK</p>
+              <span className="eyebrow">DESIGNED FOR REMOTE WORK</span>
               <h2>Everything you need to focus.</h2>
               <p className="prose">
                 Fast fibre Wi-Fi, a dedicated desk with a comfortable chair, and quiet corners
@@ -43,7 +34,7 @@ export default function Apartments() {
             </div>
             <div className="reveal">
               <img
-                src="https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=1400&q=80"
+                src="https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=1400&q=85"
                 alt="Dedicated workspace"
                 className="rounded-img"
               />
@@ -54,8 +45,8 @@ export default function Apartments() {
 
       <section className="section section-cream">
         <div className="container">
-          <div className="section-head reveal">
-            <p className="eyebrow">FEATURES</p>
+          <div className="section-head-left reveal">
+            <span className="eyebrow">FEATURES</span>
             <h2>Small comforts, well considered.</h2>
           </div>
 

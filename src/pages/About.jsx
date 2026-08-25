@@ -4,25 +4,25 @@ import { ArrowRight } from 'lucide-react';
 export default function About() {
   return (
     <>
-      <section className="page-header">
+      <section className="page-header page-header-v2">
         <div className="container">
-          <p className="eyebrow">ABOUT</p>
+          <span className="eyebrow">ABOUT</span>
           <h1>A family compound, opened to guests.</h1>
           <p className="lead">
-            Home-Office Apartments began as a simple idea — turn part of our family garden in Sunyani into
-            a home away from home for people passing through, working remotely, or visiting for a season.
+            Home-Office Apartments began as a simple idea — turn part of our family garden in Sunyani
+            into a home away from home for people passing through, working remotely, or visiting for a season.
           </p>
         </div>
       </section>
 
-      <section className="section" style={{ paddingTop: 0 }}>
+      <section className="section">
         <div className="container">
           <div className="two-col">
             <div className="reveal">
-              <p className="eyebrow">THE STORY</p>
+              <span className="eyebrow">THE STORY</span>
               <h2>Why we built it.</h2>
               <p className="prose">
-                Living Spring Gardens has been part of our family for years — the trees older
+                LivingSpring Gardens has been part of our family for years — the trees older
                 than most of us. When more of the family started working remotely, and more friends
                 started visiting Sunyani for a week at a time, the question came up naturally:
                 could we make part of it a place other people would want to stay?
@@ -34,8 +34,8 @@ export default function About() {
             </div>
             <div className="reveal">
               <img
-                src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1400&q=80"
-                alt="Living Spring Gardens"
+                src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1400&q=85"
+                alt="LivingSpring Gardens"
                 className="rounded-img"
               />
             </div>
@@ -48,13 +48,13 @@ export default function About() {
           <div className="two-col">
             <div className="reveal">
               <img
-                src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1400&q=80"
+                src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1400&q=85"
                 alt="Sunyani surroundings"
                 className="rounded-img"
               />
             </div>
             <div className="reveal">
-              <p className="eyebrow">SUNYANI</p>
+              <span className="eyebrow">SUNYANI</span>
               <h2>The garden city of the Bono Region.</h2>
               <p className="prose">
                 Sunyani is smaller and calmer than the coastal cities — a good pace of life,

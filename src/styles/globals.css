@@ -1396,3 +1396,304 @@ body:has(.auth-split) main { padding: 0; }
 .site-header.solid.scrolled {
   box-shadow: var(--shadow-sm);
 }
+/* =====================================================================
+   APPEND THIS TO src/styles/globals.css
+   Overrides earlier hero/gallery/page-header patches for a cleaner result.
+   ===================================================================== */
+
+/* ==== Retire earlier hero styles so nothing conflicts ==== */
+.hero, .hero-split { display: none; }
+
+/* ============ HERO v2 — full-bleed photo, editorial text ============ */
+.hero-v2 {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  color: #fff;
+  padding: 0 0 96px;
+}
+
+.hero-v2-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.hero-v2-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.02);
+}
+.hero-v2-scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(20,30,25,.15) 0%, rgba(20,30,25,.15) 45%, rgba(20,30,25,.75) 100%),
+    linear-gradient(90deg, rgba(20,30,25,.55) 0%, rgba(20,30,25,0) 55%);
+}
+
+.hero-v2-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+}
+.hero-v2-inner {
+  max-width: 720px;
+  text-align: left;
+}
+
+.hero-v2-tag {
+  display: inline-block;
+  padding: 8px 16px;
+  border: 1px solid rgba(255,255,255,.35);
+  border-radius: 999px;
+  font-size: 12px;
+  letter-spacing: .04em;
+  color: #fff;
+  backdrop-filter: blur(6px);
+  background: rgba(255,255,255,.08);
+  margin-bottom: 24px;
+}
+
+.hero-v2-title {
+  font-size: clamp(48px, 7vw, 92px);
+  font-weight: 500;
+  letter-spacing: -.045em;
+  line-height: .98;
+  color: #fff;
+  margin: 0 0 28px;
+}
+
+.hero-v2-lead {
+  font-size: 18px;
+  line-height: 1.6;
+  color: rgba(255,255,255,.9);
+  margin: 0 0 40px;
+  max-width: 560px;
+}
+
+.hero-v2-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 700px) {
+  .hero-v2 { padding-bottom: 60px; min-height: 88vh; }
+  .hero-v2-title { font-size: clamp(38px, 10vw, 56px); }
+  .hero-v2-lead { font-size: 16px; margin-bottom: 32px; }
+}
+
+/* ============ PAGE HEADER — left-aligned, cleaner ============ */
+.page-header-v2 {
+  padding: 180px 0 80px;
+  background: #fff;
+  border-bottom: 0;
+  text-align: left;
+}
+.page-header-v2 .container { max-width: 900px; }
+.page-header-v2 .eyebrow { margin-bottom: 20px; }
+.page-header-v2 h1 {
+  font-size: clamp(40px, 5.5vw, 68px);
+  font-weight: 500;
+  letter-spacing: -.035em;
+  line-height: 1.02;
+  margin: 0 0 24px;
+}
+.page-header-v2 .lead {
+  font-size: 19px;
+  color: var(--muted);
+  max-width: 640px;
+  margin: 0;
+}
+
+/* ============ TYPOGRAPHY BALANCE (site-wide) ============ */
+
+/* Left-align text by default — no more centered walls of prose */
+.intro-block,
+.section-head { text-align: left; margin-left: 0; margin-right: 0; max-width: none; }
+.intro-block .prose,
+.intro-block .lead { margin-left: 0; margin-right: 0; }
+
+/* New left-aligned intro variant used on Home */
+.intro-v2 {
+  max-width: 780px;
+  text-align: left;
+}
+.intro-v2 h2 {
+  font-size: clamp(28px, 3.4vw, 44px);
+  font-weight: 500;
+  letter-spacing: -.025em;
+  line-height: 1.15;
+  margin: 12px 0 20px;
+}
+.intro-v2 .prose {
+  font-size: 17px;
+  color: var(--muted);
+  line-height: 1.7;
+  margin: 0 0 20px;
+  max-width: 620px;
+}
+
+/* Narrow section variant */
+.section-narrow { padding: 100px 0; }
+@media (max-width: 720px) { .section-narrow { padding: 60px 0; } }
+
+/* Left-aligned section head (replaces old centered .section-head where needed) */
+.section-head-left {
+  text-align: left;
+  max-width: 720px;
+  margin: 0 0 48px;
+}
+.section-head-left h2 {
+  margin: 12px 0 0;
+  font-size: clamp(28px, 3.2vw, 40px);
+  font-weight: 500;
+  letter-spacing: -.025em;
+}
+
+/* Cleaner base type — reduce heaviness for premium feel */
+h1, h2 { font-weight: 500; }
+h1 { letter-spacing: -.035em; }
+h2 { letter-spacing: -.025em; }
+
+/* Eyebrow refinement */
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 500;
+  display: inline-block;
+  margin: 0 0 14px;
+}
+
+/* Prose defaults — tighter max-width for readability */
+.prose { font-size: 16px; line-height: 1.7; max-width: 620px; }
+
+/* ============ TEASER CARDS — left-aligned bodies ============ */
+.teaser-body { text-align: left; padding: 32px; }
+.teaser-body .eyebrow { margin-bottom: 10px; }
+.teaser-body h3 {
+  margin: 0 0 12px;
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: -.02em;
+}
+.teaser-body .prose {
+  max-width: none;
+  font-size: 15.5px;
+  margin: 0 0 18px;
+  color: var(--muted);
+}
+.teaser-body .link-arrow { font-size: 14px; }
+.teaser-card {
+  border-radius: 18px;
+  transition: transform .35s var(--ease), box-shadow .35s var(--ease);
+}
+.teaser-card:hover { transform: translateY(-4px); }
+
+/* ============ TWO-COL — better vertical rhythm ============ */
+.two-col { gap: 88px; }
+.two-col .eyebrow { margin-bottom: 14px; }
+.two-col h2 {
+  font-size: clamp(28px, 3.4vw, 40px);
+  font-weight: 500;
+  margin: 0 0 20px;
+}
+.two-col .prose { max-width: none; font-size: 16px; color: var(--muted); line-height: 1.7; }
+.two-col .rounded-img { border-radius: 16px; aspect-ratio: 5/6; }
+
+@media (max-width: 900px) { .two-col { gap: 40px; } }
+
+/* ============ FEATURES — quieter, more editorial ============ */
+.feature h3 {
+  margin: 16px 0 6px;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -.005em;
+}
+.feature p {
+  color: var(--muted);
+  font-size: 14.5px;
+  line-height: 1.6;
+}
+.feature-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--accent-soft);
+}
+
+/* ============ STAT BAND — cleaner ============ */
+.stat-value { font-weight: 500; letter-spacing: -.025em; }
+.stat-card { padding: 36px 24px; }
+
+/* ============ CTA BAND ============ */
+.cta-band { padding: 120px 0; }
+.cta-content h2 {
+  font-size: clamp(32px, 4vw, 48px);
+  font-weight: 500;
+  letter-spacing: -.03em;
+  margin: 0 0 16px;
+}
+.cta-content { text-align: center; }
+
+/* ============ GALLERY v2 — pure images, no text ============ */
+.gallery-v2 {
+  padding: 88px 0 120px;   /* top clearance so images don't touch the fixed header */
+  background: #fff;
+}
+.gallery-v2-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 8px;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 8px;
+}
+.gallery-v2-item {
+  margin: 0;
+  overflow: hidden;
+  background: var(--bg-soft);
+  position: relative;
+}
+.gallery-v2-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1.1s var(--ease), filter .4s var(--ease);
+  display: block;
+}
+.gallery-v2-item:hover img { transform: scale(1.04); }
+
+@media (max-width: 900px) {
+  .gallery-v2 { padding: 80px 0 80px; }
+  .gallery-v2-grid { grid-template-columns: repeat(6, 1fr); }
+  /* Force everything to span all 6 columns on tablet */
+  .gallery-v2-item { grid-column: span 6 !important; aspect-ratio: 4/3 !important; }
+}
+@media (max-width: 500px) {
+  .gallery-v2-grid { gap: 4px; padding: 0 4px; }
+}
+
+/* ============ MISC CLEANUP ============ */
+
+/* Body base — slightly warmer ink, better rendering */
+body {
+  font-weight: 400;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Buttons — slightly larger radius, softer feel */
+.btn { border-radius: 999px; font-weight: 500; }
+.btn-lg { padding: 17px 30px; font-size: 15.5px; }
+
+/* Container widths — allow content to breathe on large screens */
+.container { max-width: 1280px; }
+
+/* Kill any leftover centered section heads on Apartments/Gardens/About */
+.section-head { text-align: left; }

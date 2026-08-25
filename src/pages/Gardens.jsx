@@ -4,9 +4,9 @@ import { ArrowRight, MapPin, Trees, Sun, Wind } from 'lucide-react';
 export default function Gardens() {
   return (
     <>
-      <section className="page-header">
+      <section className="page-header page-header-v2">
         <div className="container">
-          <p className="eyebrow">LIVINGSPRING GARDENS</p>
+          <span className="eyebrow">LIVINGSPRING GARDENS</span>
           <h1>The compound they sit in.</h1>
           <p className="lead">
             A quiet, green corner of Sunyani that our family has cared for over the years —
@@ -20,13 +20,13 @@ export default function Gardens() {
           <div className="two-col">
             <div className="reveal">
               <img
-                src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1400&q=80"
+                src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1400&q=85"
                 alt="LivingSpring Gardens compound"
                 className="rounded-img"
               />
             </div>
             <div className="reveal">
-              <p className="eyebrow">A FAMILY GARDEN</p>
+              <span className="eyebrow">A FAMILY GARDEN</span>
               <h2>Room to breathe.</h2>
               <p className="prose">
                 LivingSpring Gardens is the family compound the apartments belong to.
@@ -43,8 +43,8 @@ export default function Gardens() {
 
       <section className="section section-cream">
         <div className="container">
-          <div className="section-head reveal">
-            <p className="eyebrow">THE FEEL OF THE PLACE</p>
+          <div className="section-head-left reveal">
+            <span className="eyebrow">THE FEEL OF THE PLACE</span>
             <h2>Small, considered, unhurried.</h2>
           </div>
 
@@ -72,7 +72,7 @@ export default function Gardens() {
         <div className="container">
           <div className="two-col">
             <div className="reveal">
-              <p className="eyebrow">GETTING HERE</p>
+              <span className="eyebrow">GETTING HERE</span>
               <h2>Central Sunyani.</h2>
               <p className="prose">
                 LivingSpring Gardens is a short drive from the centre of Sunyani —
@@ -89,7 +89,7 @@ export default function Gardens() {
             </div>
             <div className="reveal">
               <img
-                src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1400&q=80"
+                src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1400&q=85"
                 alt="Sunyani greenery"
                 className="rounded-img"
               />

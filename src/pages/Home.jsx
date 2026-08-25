@@ -1,81 +1,49 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Star } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 export default function Home() {
   return (
     <>
-      {/* Hero — split layout, editorial */}
-      <section className="hero-split">
-        <div className="container hero-split-inner">
-          <div className="hero-text reveal">
-            <span className="hero-tag">
-              <Star size={12} fill="currentColor" strokeWidth={0} />
-              A boutique stay in Sunyani
-            </span>
-            <h1 className="hero-title-split">
-              A quiet place<br />
-              to <span className="hero-accent-ink">work and live.</span>
+      {/* Hero — full-bleed photo, editorial text at bottom-left */}
+      <section className="hero-v2">
+        <div className="hero-v2-bg" aria-hidden="true">
+          <img
+            src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=2400&q=90"
+            alt="Home-Office Apartments — a considered stay"
+          />
+          <div className="hero-v2-scrim" />
+        </div>
+
+        <div className="container hero-v2-content">
+          <div className="hero-v2-inner">
+            <span className="hero-v2-tag">A boutique stay in Sunyani</span>
+            <h1 className="hero-v2-title">
+              A quiet place to<br />
+              work and live.
             </h1>
-            <p className="lead hero-lead-split">
-              Home-Office Apartments — thoughtfully finished for how you actually spend your days.
-              Set in the calm of LivingSpring Gardens.
+            <p className="hero-v2-lead">
+              Home-Office Apartments — thoughtfully finished for how you actually spend your days,
+              set in the calm of LivingSpring Gardens.
             </p>
-            <div className="hero-actions">
-              <Link to="/book" className="btn btn-primary btn-lg">
-                Check availability
-              </Link>
-              <Link to="/apartments" className="btn btn-outline btn-lg">
+            <div className="hero-v2-actions">
+              <Link to="/book" className="btn btn-primary btn-lg">Check availability</Link>
+              <Link to="/apartments" className="btn btn-ghost-light btn-lg">
                 See the apartments <ArrowRight size={16} />
               </Link>
-            </div>
-            <div className="hero-meta">
-              <div className="hero-meta-item">
-                <div className="hero-meta-value">2</div>
-                <div className="hero-meta-label">Apartments</div>
-              </div>
-              <div className="hero-meta-item">
-                <div className="hero-meta-value">4.9<Star size={13} fill="currentColor" strokeWidth={0} /></div>
-                <div className="hero-meta-label">Guest rating</div>
-              </div>
-              <div className="hero-meta-item">
-                <div className="hero-meta-value">Fibre</div>
-                <div className="hero-meta-label">Wi-Fi</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="hero-visual reveal">
-            <div className="hero-photo hero-photo-main">
-              <img
-                src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1400&q=85"
-                alt="Interior of Home-Office Apartments"
-              />
-            </div>
-            <div className="hero-photo hero-photo-inset">
-              <img
-                src="https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=800&q=85"
-                alt="Dedicated workspace"
-              />
-            </div>
-            <div className="hero-badge">
-              <span className="hero-badge-dot" />
-              Now booking
             </div>
           </div>
         </div>
       </section>
 
-      {/* Short intro */}
-      <section className="section">
+      {/* Intro — LEFT aligned prose (no more centered walls of text) */}
+      <section className="section section-narrow">
         <div className="container">
-          <div className="intro-block reveal">
-            <p className="eyebrow">A HOME AWAY FROM HOME</p>
-            <h2>
-              Warm timber. Cool tile. A shaded verandah for<br /> morning coffee.
-            </h2>
-            <p className="prose intro-lede">
-              Two self-contained apartments in a peaceful compound in Sunyani, built for the way you work
-              from home and the way you rest.
+          <div className="intro-v2 reveal">
+            <span className="eyebrow">A HOME AWAY FROM HOME</span>
+            <h2>Warm timber. Cool tile. A shaded verandah for morning coffee.</h2>
+            <p className="prose">
+              Two self-contained apartments in a peaceful compound in Sunyani, built for the way you
+              work from home and the way you rest.
             </p>
             <Link to="/apartments" className="link-arrow">
               Explore the apartments <ArrowRight size={14} />
@@ -84,7 +52,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Two-card teaser */}
+      {/* Two-card teaser — left-aligned inside each card */}
       <section className="section section-cream">
         <div className="container">
           <div className="teaser-grid">
@@ -96,14 +64,10 @@ export default function Home() {
                 />
               </div>
               <div className="teaser-body">
-                <p className="eyebrow">THE APARTMENTS</p>
+                <span className="eyebrow">THE APARTMENTS</span>
                 <h3>Built for how you work.</h3>
-                <p className="prose">
-                  Fast Wi-Fi, dedicated desk, and a well-considered kitchen.
-                </p>
-                <span className="link-arrow">
-                  See the apartments <ArrowRight size={14} />
-                </span>
+                <p className="prose">Fast Wi-Fi, dedicated desk, and a well-considered kitchen.</p>
+                <span className="link-arrow">See the apartments <ArrowRight size={14} /></span>
               </div>
             </Link>
 
@@ -115,31 +79,23 @@ export default function Home() {
                 />
               </div>
               <div className="teaser-body">
-                <p className="eyebrow">LIVINGSPRING GARDENS</p>
+                <span className="eyebrow">LIVINGSPRING GARDENS</span>
                 <h3>The compound they sit in.</h3>
-                <p className="prose">
-                  A quiet, green corner of Sunyani. Room to breathe.
-                </p>
-                <span className="link-arrow">
-                  Meet the gardens <ArrowRight size={14} />
-                </span>
+                <p className="prose">A quiet, green corner of Sunyani. Room to breathe.</p>
+                <span className="link-arrow">Meet the gardens <ArrowRight size={14} /></span>
               </div>
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Closing CTA */}
+      {/* Closing CTA — stays centered because it's meant to be a moment */}
       <section className="section cta-band">
         <div className="container">
           <div className="cta-content reveal">
             <h2>Ready to plan your stay?</h2>
-            <p className="lead lead-light">
-              Enquire about availability. We usually reply within a day.
-            </p>
-            <Link to="/book" className="btn btn-primary btn-lg">
-              Send an enquiry
-            </Link>
+            <p className="lead lead-light">Enquire about availability. We usually reply within a day.</p>
+            <Link to="/book" className="btn btn-primary btn-lg">Send an enquiry</Link>
           </div>
         </div>
       </section>
