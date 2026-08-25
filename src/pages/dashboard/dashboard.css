@@ -1093,3 +1093,22 @@ body:has(.dash-shell) main { padding: 0 !important; }
 @media (max-width: 900px) {
   .dash-main { padding: 40px 20px 80px !important; }
 }
+
+/* Dashboard spacing pass */
+.dash-main { padding: 96px 40px 160px !important; }
+@media (min-width: 1400px) {
+  .dash-main { padding: 112px 56px 180px !important; }
+}
+@media (max-width: 900px) {
+  .dash-main { padding: 56px 20px 100px !important; }
+}
+.dash-page-head { margin-bottom: 48px !important; }
+.dash-next-stay { margin-bottom: 48px !important; }
+.dash-stat-grid { margin-bottom: 64px !important; }
+.dash-section-head { margin-bottom: 32px !important; }
+@media (max-width: 900px) {
+  .dash-page-head { margin-bottom: 36px !important; }
+  .dash-next-stay { margin-bottom: 32px !important; }
+  .dash-stat-grid { margin-bottom: 44px !important; }
+  .dash-section-head { margin-bottom: 24px !important; }
+}
