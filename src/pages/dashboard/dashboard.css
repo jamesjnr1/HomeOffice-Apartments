@@ -1,7 +1,15 @@
 /* =====================================================================
    HomeOffice Apartments — Dashboard Design System
+   (Premium consistency pass — matches main site typography & brand)
    ===================================================================== */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* ==== Hide the main site header + footer on dashboard routes ==== */
+body:has(.dash-shell) .site-header,
+body:has(.dash-shell) .site-footer {
+  display: none !important;
+}
+body:has(.dash-shell) main { padding: 0 !important; }
 
 .dash-shell,
 .dash-shell * {
@@ -33,7 +41,7 @@
   --ease:       cubic-bezier(.22,.61,.36,1);
 
   display: grid;
-  grid-template-columns: 260px 1fr;
+  grid-template-columns: 280px 1fr;
   min-height: 100vh;
   background: var(--bg-soft);
   color: var(--ink);
@@ -49,26 +57,47 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 20px;
   font-family: 'Poppins', sans-serif;
-  color: #6a706d;
+  color: var(--muted, #6a706d);
+  padding: 40px;
 }
-.dash-loading-brand {
+.dash-loading p { color: #6a706d; margin: 0; font-size: 14px; }
+
+/* ---------- Brand (matches main site) ---------- */
+.dash-brand {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1.1;
+  color: var(--ink, #1f2b26);
+  text-decoration: none;
+}
+.dash-brand-primary {
   font-weight: 700;
-  font-size: 26px;
-  letter-spacing: -0.03em;
-  color: #1f2b26;
+  font-size: 18px;
+  letter-spacing: -.03em;
+  color: inherit;
 }
-.dash-brand-accent { color: #2d6a4f; }
+.dash-brand-sub {
+  font-weight: 400;
+  font-size: 11px;
+  letter-spacing: .02em;
+  color: var(--muted, #6a706d);
+}
+.dash-brand-accent {
+  color: var(--accent, #2d6a4f);
+  font-weight: 500;
+}
 
 /* ---------- Sidebar ---------- */
 .dash-sidebar {
   background: #fff;
   border-right: 1px solid var(--line);
-  padding: 24px 16px;
+  padding: 28px 18px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 28px;
   position: sticky;
   top: 0;
   height: 100vh;
@@ -80,13 +109,7 @@
   justify-content: space-between;
   padding: 0 8px;
 }
-.dash-brand {
-  font-weight: 700;
-  font-size: 22px;
-  letter-spacing: -0.03em;
-  color: var(--ink);
-  text-decoration: none;
-}
+
 .dash-nav {
   display: flex;
   flex-direction: column;
@@ -96,7 +119,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 14px;
+  padding: 11px 14px;
   border-radius: 10px;
   color: var(--muted);
   text-decoration: none;
@@ -163,7 +186,7 @@
   align-items: center;
   gap: 8px;
   width: 100%;
-  padding: 10px 14px;
+  padding: 11px 14px;
   border: 0;
   background: transparent;
   color: var(--muted);
@@ -216,48 +239,46 @@
     position: fixed;
     top: 0;
     left: 0;
-    width: 280px;
+    width: 300px;
     height: 100vh;
     z-index: 50;
     transform: translateX(-100%);
     transition: transform .3s var(--ease);
   }
   .dash-sidebar.open { transform: translateX(0); }
-  .dash-sidebar.open + .dash-backdrop,
-  .dash-menu-close { display: flex; }
-  .dash-backdrop { display: block; }
   .dash-menu-close { display: inline-flex; }
+  .dash-backdrop { display: block; }
 }
 
 /* ---------- Main content ---------- */
 .dash-main {
-  padding: 40px 48px 80px;
+  padding: 48px 56px 80px;
   overflow-x: hidden;
 }
-@media (max-width: 900px) { .dash-main { padding: 24px 20px 60px; } }
+@media (max-width: 900px) { .dash-main { padding: 28px 20px 60px; } }
 
-.dash-page-head {
-  margin-bottom: 32px;
-}
+/* Page head — matches premium site typography */
+.dash-page-head { margin-bottom: 40px; }
 .dash-eyebrow {
-  font-size: 12px;
-  letter-spacing: .2em;
+  font-size: 11px;
+  letter-spacing: .24em;
   text-transform: uppercase;
   color: var(--muted);
   font-weight: 500;
-  margin: 0 0 8px;
+  margin: 0 0 14px;
 }
 .dash-page-head h1 {
-  margin: 0 0 6px;
-  font-size: clamp(28px, 3vw, 38px);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1.15;
+  margin: 0 0 8px;
+  font-size: clamp(28px, 3vw, 40px);
+  font-weight: 500;
+  letter-spacing: -.03em;
+  line-height: 1.1;
 }
 .dash-lead {
-  font-size: 15px;
+  font-size: 16px;
   color: var(--muted);
   margin: 0;
+  line-height: 1.55;
 }
 .dash-text-muted { color: var(--muted); }
 
@@ -267,7 +288,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 10px 18px;
+  padding: 11px 20px;
   border-radius: 999px;
   border: 1px solid transparent;
   font: inherit;
@@ -300,7 +321,7 @@
 /* ---------- Next stay hero ---------- */
 .dash-next-stay {
   display: grid;
-  grid-template-columns: 300px 1fr;
+  grid-template-columns: 320px 1fr;
   background: #fff;
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
@@ -313,7 +334,7 @@
 }
 .dash-next-stay-img {
   position: relative;
-  min-height: 240px;
+  min-height: 260px;
 }
 .dash-next-stay-img img {
   position: absolute;
@@ -337,12 +358,12 @@
   color: var(--accent);
   backdrop-filter: blur(6px);
 }
-.dash-next-stay-body { padding: 32px; }
+.dash-next-stay-body { padding: 36px; }
 .dash-next-stay-body h2 {
   margin: 8px 0 6px;
-  font-size: 24px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: -.02em;
 }
 .dash-loc {
   display: inline-flex;
@@ -357,7 +378,7 @@
   grid-template-columns: repeat(4, 1fr);
   gap: 20px;
   margin: 24px 0;
-  padding: 20px 0;
+  padding: 22px 0;
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
 }
@@ -366,16 +387,17 @@
 }
 .dash-detail-label {
   font-size: 11px;
-  letter-spacing: .08em;
+  letter-spacing: .12em;
   text-transform: uppercase;
   color: var(--muted);
-  font-weight: 600;
-  margin-bottom: 4px;
+  font-weight: 500;
+  margin-bottom: 6px;
 }
 .dash-detail-value {
   font-size: 15px;
   font-weight: 500;
   color: var(--ink);
+  letter-spacing: -.005em;
 }
 .dash-mono {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -393,33 +415,34 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
-  margin-bottom: 40px;
+  margin-bottom: 44px;
 }
 @media (max-width: 700px) { .dash-stat-grid { grid-template-columns: 1fr; } }
 .dash-stat {
   background: #fff;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  padding: 20px 24px;
+  padding: 24px 26px;
   box-shadow: var(--shadow-sm);
 }
 .dash-stat-label {
-  font-size: 12px;
-  letter-spacing: .08em;
+  font-size: 11px;
+  letter-spacing: .12em;
   text-transform: uppercase;
   color: var(--muted);
-  font-weight: 600;
+  font-weight: 500;
 }
 .dash-stat-value {
-  font-size: 34px;
-  font-weight: 600;
-  margin-top: 4px;
-  letter-spacing: -0.02em;
+  font-size: 36px;
+  font-weight: 500;
+  margin-top: 6px;
+  letter-spacing: -.025em;
+  line-height: 1;
 }
 .dash-stat-suffix {
   font-size: 13px;
   color: var(--muted);
-  margin-top: 2px;
+  margin-top: 4px;
 }
 
 /* ---------- Section head ---------- */
@@ -428,13 +451,13 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 22px;
 }
 .dash-section-head h2 {
   margin: 0;
-  font-size: 20px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -.02em;
 }
 
 /* ---------- Recommended cards ---------- */
@@ -469,11 +492,12 @@
   transition: transform .5s var(--ease);
 }
 .dash-rec-card:hover .dash-rec-img img { transform: scale(1.05); }
-.dash-rec-body { padding: 16px; }
+.dash-rec-body { padding: 18px; }
 .dash-rec-body h3 {
   margin: 0 0 4px;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 500;
+  letter-spacing: -.01em;
 }
 .dash-rec-tags {
   display: flex;
@@ -537,13 +561,10 @@
 }
 
 /* ---------- Booking cards ---------- */
-.dash-booking-list {
-  display: grid;
-  gap: 16px;
-}
+.dash-booking-list { display: grid; gap: 16px; }
 .dash-booking {
   display: grid;
-  grid-template-columns: 220px 1fr;
+  grid-template-columns: 240px 1fr;
   background: #fff;
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -554,32 +575,32 @@
   .dash-booking { grid-template-columns: 1fr; }
 }
 .dash-booking-img {
-  width: 100%;
-  height: 100%;
+  width: 100%; height: 100%;
   min-height: 180px;
   object-fit: cover;
 }
-.dash-booking-body { padding: 20px 24px; }
+.dash-booking-body { padding: 22px 26px; }
 .dash-booking-top {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 }
 .dash-booking-top h3 {
   margin: 0 0 4px;
-  font-size: 17px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: -.015em;
 }
 .dash-booking-meta {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 14px 24px;
-  padding: 16px 0;
+  padding: 18px 0;
   border-top: 1px solid var(--line-2);
   border-bottom: 1px solid var(--line-2);
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 }
 .dash-booking-actions {
   display: flex;
@@ -639,12 +660,13 @@
 }
 .dash-heart:hover { transform: scale(1.08); }
 .dash-heart.active { color: var(--accent); }
-.dash-wishlist-body { padding: 16px; }
+.dash-wishlist-body { padding: 18px; }
 .dash-wishlist-body h3 {
   margin: 0 0 4px;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--ink);
+  letter-spacing: -.01em;
 }
 .dash-wishlist-body a { text-decoration: none; color: inherit; }
 
@@ -660,7 +682,7 @@
 .dash-empty h3 {
   color: var(--ink);
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 500;
   margin: 0 0 8px;
 }
 .dash-empty p {
@@ -748,10 +770,7 @@
   font-size: 12px;
   flex-shrink: 0;
 }
-.dash-msg-item-body {
-  flex: 1;
-  min-width: 0;
-}
+.dash-msg-item-body { flex: 1; min-width: 0; }
 .dash-msg-item-top {
   display: flex;
   justify-content: space-between;
@@ -831,18 +850,13 @@
   color: #fff;
   border-color: var(--accent);
 }
-.dash-msg-body {
-  font-size: 14px;
-  line-height: 1.5;
-}
+.dash-msg-body { font-size: 14px; line-height: 1.5; }
 .dash-msg-at {
   font-size: 11px;
   color: var(--muted);
   margin-top: 4px;
 }
-.dash-msg-bubble.me .dash-msg-at {
-  color: rgba(255,255,255,.75);
-}
+.dash-msg-bubble.me .dash-msg-at { color: rgba(255,255,255,.75); }
 .dash-msg-composer {
   display: flex;
   gap: 8px;
@@ -891,13 +905,14 @@
   background: #fff;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  padding: 28px;
+  padding: 30px;
   box-shadow: var(--shadow-sm);
 }
 .dash-card-h {
   margin: 0 0 6px;
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 500;
+  letter-spacing: -.01em;
 }
 .dash-card-sub {
   margin: 0 0 20px;
@@ -913,8 +928,9 @@
 }
 .dash-profile-head h2 {
   margin: 0 0 4px;
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -.02em;
 }
 .dash-profile-head p { margin: 0; font-size: 14px; }
 
@@ -940,7 +956,7 @@
 }
 .dash-field input,
 .dash-field select {
-  padding: 10px 14px;
+  padding: 11px 14px;
   border: 1px solid var(--line);
   border-radius: 10px;
   font: inherit;

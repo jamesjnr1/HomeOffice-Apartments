@@ -10,24 +10,9 @@ import {
   Menu,
   X,
 } from 'lucide-react';
-import { supabase } from '../../lib/supabase'; // <-- adjust to your supabase client path
+import { supabase } from '../../lib/supabase';
 import './dashboard.css';
 
-/**
- * DashboardLayout
- * - Protects the /dashboard/* routes (redirects unauthed users to /login)
- * - Renders the sidebar + top bar + <Outlet/> for nested routes
- *
- * Wire into your router (e.g. App.jsx) like:
- *
- *   <Route path="/dashboard" element={<DashboardLayout />}>
- *     <Route index element={<Overview />} />
- *     <Route path="bookings" element={<Bookings />} />
- *     <Route path="wishlist" element={<Wishlist />} />
- *     <Route path="messages" element={<Messages />} />
- *     <Route path="profile" element={<Profile />} />
- *   </Route>
- */
 export default function DashboardLayout() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
@@ -40,7 +25,7 @@ export default function DashboardLayout() {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!mounted) return;
       if (!user) {
-        navigate('/login', { replace: true });
+        navigate('/signin', { replace: true });
         return;
       }
       setUser(user);
@@ -48,7 +33,7 @@ export default function DashboardLayout() {
     });
 
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session?.user) navigate('/login', { replace: true });
+      if (!session?.user) navigate('/signin', { replace: true });
       else setUser(session.user);
     });
 
@@ -60,15 +45,23 @@ export default function DashboardLayout() {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    navigate('/login');
+    navigate('/');
   };
+
+  // Brand — matches the main site exactly
+  const Brand = () => (
+    <a href="/" className="dash-brand">
+      <span className="dash-brand-primary">Home-Office Apartments</span>
+      <span className="dash-brand-sub">
+        and Living<span className="dash-brand-accent">Spring</span> Gardens
+      </span>
+    </a>
+  );
 
   if (loading) {
     return (
       <div className="dash-loading">
-        <div className="dash-loading-brand">
-          Home<span className="dash-brand-accent">Office</span>
-        </div>
+        <Brand />
         <p>Loading your dashboard…</p>
       </div>
     );
@@ -81,9 +74,7 @@ export default function DashboardLayout() {
     <div className="dash-shell">
       {/* Mobile top bar */}
       <div className="dash-mobile-bar">
-        <a href="/" className="dash-brand">
-          Home<span className="dash-brand-accent">Office</span>
-        </a>
+        <Brand />
         <button
           className="dash-menu-btn"
           onClick={() => setMobileNavOpen(true)}
@@ -96,9 +87,7 @@ export default function DashboardLayout() {
       {/* Sidebar */}
       <aside className={`dash-sidebar ${mobileNavOpen ? 'open' : ''}`}>
         <div className="dash-sidebar-head">
-          <a href="/" className="dash-brand">
-            Home<span className="dash-brand-accent">Office</span>
-          </a>
+          <Brand />
           <button
             className="dash-menu-btn dash-menu-close"
             onClick={() => setMobileNavOpen(false)}
@@ -142,15 +131,10 @@ export default function DashboardLayout() {
         </div>
       </aside>
 
-      {/* Backdrop for mobile drawer */}
       {mobileNavOpen && (
-        <div
-          className="dash-backdrop"
-          onClick={() => setMobileNavOpen(false)}
-        />
+        <div className="dash-backdrop" onClick={() => setMobileNavOpen(false)} />
       )}
 
-      {/* Main content */}
       <main className="dash-main">
         <Outlet context={{ user, displayName }} />
       </main>
