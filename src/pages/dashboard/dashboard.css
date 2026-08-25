@@ -1112,3 +1112,9 @@ body:has(.dash-shell) main { padding: 0 !important; }
   .dash-stat-grid { margin-bottom: 44px !important; }
   .dash-section-head { margin-bottom: 24px !important; }
 }
+
+/* FORCE top space on every dashboard page */
+.dash-page-head { padding-top: 80px !important; }
+@media (max-width: 900px) {
+  .dash-page-head { padding-top: 48px !important; }
+}
