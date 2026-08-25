@@ -1697,3 +1697,92 @@ body {
 
 /* Kill any leftover centered section heads on Apartments/Gardens/About */
 .section-head { text-align: left; }
+/* =====================================================================
+   APPEND THIS TO src/styles/globals.css
+   Premium 3D transitions + tactile button feedback
+   ===================================================================== */
+
+/* ============ BUTTON PRESS — immediate tactile feedback ============ */
+/* Every button + primary link presses down when clicked */
+.btn {
+  transform-style: preserve-3d;
+  transition:
+    background-color .2s var(--ease),
+    color .2s var(--ease),
+    transform .18s var(--ease),
+    box-shadow .18s var(--ease);
+}
+.btn:active {
+  transform: translateZ(-4px) scale(.97);
+  transition-duration: 80ms;
+}
+.btn-primary:active {
+  box-shadow: 0 2px 6px rgba(45, 106, 79, .3);
+}
+
+/* Nav links also get the tactile feel */
+.nav-link {
+  transform-style: preserve-3d;
+  transition:
+    background-color .2s var(--ease),
+    color .3s var(--ease),
+    transform .18s var(--ease);
+}
+.nav-link:active {
+  transform: scale(.96);
+  transition-duration: 80ms;
+}
+
+/* ============ PAGE TRANSITIONS — 3D perspective ============ */
+/* Enables the View Transitions API for cross-document + SPA nav */
+@view-transition {
+  navigation: auto;
+}
+
+/* Old page: fade out with subtle 3D lean-back */
+::view-transition-old(root) {
+  animation: 380ms cubic-bezier(.22, .61, .36, 1) both page-out;
+}
+
+/* New page: fade in from slight forward 3D angle */
+::view-transition-new(root) {
+  animation: 420ms cubic-bezier(.22, .61, .36, 1) both page-in;
+}
+
+@keyframes page-out {
+  from {
+    opacity: 1;
+    transform: perspective(1400px) rotateY(0deg) translateZ(0) translateY(0);
+    filter: blur(0);
+  }
+  to {
+    opacity: 0;
+    transform: perspective(1400px) rotateY(-4deg) translateZ(-120px) translateY(-8px);
+    filter: blur(2px);
+  }
+}
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: perspective(1400px) rotateY(4deg) translateZ(-120px) translateY(12px);
+    filter: blur(3px);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(1400px) rotateY(0deg) translateZ(0) translateY(0);
+    filter: blur(0);
+  }
+}
+
+/* Respect user's reduced-motion preference */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: 200ms ease both fade-only;
+  }
+  @keyframes fade-only {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+}

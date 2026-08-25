@@ -10,8 +10,6 @@ export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [user, setUser] = useState(null);
 
-  // Header is always solid now — hero is a light layout so we no longer flip to a
-  // transparent-over-dark treatment. Scroll still triggers a subtle shadow.
   const solid = true;
   const scrolledShadow = scrolled;
 
@@ -44,7 +42,7 @@ export default function Header() {
     <>
       <header className={`site-header ${solid ? 'solid' : ''} ${scrolledShadow ? 'scrolled' : ''}`}>
         <div className="container header-inner">
-          <NavLink to="/" className="brand" aria-label="Home-Office Apartments home">
+          <NavLink to="/" viewTransition className="brand" aria-label="Home-Office Apartments home">
             <span className="brand-primary">Home-Office Apartments</span>
             <span className="brand-sub">
               and Living<span className="brand-accent">Spring</span> Gardens
@@ -52,22 +50,22 @@ export default function Header() {
           </NavLink>
 
           <nav className="nav-primary" aria-label="Primary">
-            <NavLink to="/" end className="nav-link">Home</NavLink>
-            <NavLink to="/apartments" className="nav-link">Apartments</NavLink>
-            <NavLink to="/gardens" className="nav-link">Gardens</NavLink>
-            <NavLink to="/gallery" className="nav-link">Gallery</NavLink>
-            <NavLink to="/about" className="nav-link">About</NavLink>
+            <NavLink to="/" end viewTransition className="nav-link">Home</NavLink>
+            <NavLink to="/apartments" viewTransition className="nav-link">Apartments</NavLink>
+            <NavLink to="/gardens" viewTransition className="nav-link">Gardens</NavLink>
+            <NavLink to="/gallery" viewTransition className="nav-link">Gallery</NavLink>
+            <NavLink to="/about" viewTransition className="nav-link">About</NavLink>
 
             {!user && (
               <>
-                <NavLink to="/signin" className="nav-link">Sign in</NavLink>
-                <NavLink to="/book" className="btn btn-primary">Book a stay</NavLink>
+                <NavLink to="/signin" viewTransition className="nav-link">Sign in</NavLink>
+                <NavLink to="/book" viewTransition className="btn btn-primary">Book a stay</NavLink>
               </>
             )}
 
             {user && (
               <>
-                <NavLink to="/dashboard" className="nav-link nav-link-icon">
+                <NavLink to="/dashboard" viewTransition className="nav-link nav-link-icon">
                   <LayoutDashboard size={16} /> Dashboard
                 </NavLink>
                 <button className="btn btn-outline nav-signout" onClick={signOut}>
@@ -104,23 +102,23 @@ export default function Header() {
           </button>
         </div>
         <nav>
-          <NavLink to="/" end>Home</NavLink>
-          <NavLink to="/apartments">Apartments</NavLink>
-          <NavLink to="/gardens">Gardens</NavLink>
-          <NavLink to="/gallery">Gallery</NavLink>
-          <NavLink to="/about">About</NavLink>
+          <NavLink to="/" end viewTransition>Home</NavLink>
+          <NavLink to="/apartments" viewTransition>Apartments</NavLink>
+          <NavLink to="/gardens" viewTransition>Gardens</NavLink>
+          <NavLink to="/gallery" viewTransition>Gallery</NavLink>
+          <NavLink to="/about" viewTransition>About</NavLink>
 
           {!user && (
             <>
-              <NavLink to="/signin">Sign in</NavLink>
-              <NavLink to="/signup">Sign up</NavLink>
-              <NavLink to="/book" className="btn btn-primary btn-block">Book a stay</NavLink>
+              <NavLink to="/signin" viewTransition>Sign in</NavLink>
+              <NavLink to="/signup" viewTransition>Sign up</NavLink>
+              <NavLink to="/book" viewTransition className="btn btn-primary btn-block">Book a stay</NavLink>
             </>
           )}
 
           {user && (
             <>
-              <NavLink to="/dashboard">Dashboard</NavLink>
+              <NavLink to="/dashboard" viewTransition>Dashboard</NavLink>
               <button className="btn btn-outline btn-block" onClick={signOut}>
                 Sign out
               </button>
