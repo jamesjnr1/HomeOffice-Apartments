@@ -1045,3 +1045,51 @@ body:has(.dash-shell) main { padding: 0 !important; }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
 }
+/* =====================================================================
+   APPEND THIS TO src/pages/dashboard/dashboard.css
+   Restores the wordmark brand and adds top/bottom breathing room.
+   ===================================================================== */
+
+/* --- Brand: restore two-line wordmark, remove H·O box --- */
+.dash-brand {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1.15;
+  text-decoration: none;
+  color: inherit;
+  min-width: 0;
+}
+.dash-brand-primary {
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: -.025em;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.dash-brand-sub {
+  font-weight: 400;
+  font-size: 10.5px;
+  color: var(--muted);
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+.dash-brand-accent { color: var(--accent); font-weight: 500; }
+
+/* Hide the H·O box variant if any of it lingers */
+.dash-brand-compact,
+.dash-brand-mark,
+.dash-brand-lines,
+.dash-brand-title,
+.dash-brand-spring { display: none !important; }
+
+/* --- Main content: more breathing room top and bottom --- */
+.dash-main { padding: 72px 40px 120px !important; }
+
+@media (min-width: 1400px) {
+  .dash-main { padding: 88px 56px 140px !important; }
+}
+
+@media (max-width: 900px) {
+  .dash-main { padding: 40px 20px 80px !important; }
+}

@@ -48,15 +48,12 @@ export default function DashboardLayout() {
     navigate('/');
   };
 
-  // Compact, single-block brand that sits properly in the sidebar
-  const SidebarBrand = () => (
-    <a href="/" className="dash-brand-compact">
-      <span className="dash-brand-mark">H·O</span>
-      <span className="dash-brand-lines">
-        <span className="dash-brand-title">Home-Office</span>
-        <span className="dash-brand-sub">
-          Living<span className="dash-brand-spring">Spring</span> Gardens
-        </span>
+  // Original wordmark brand (no H·O box)
+  const Brand = () => (
+    <a href="/" className="dash-brand">
+      <span className="dash-brand-primary">Home-Office Apartments</span>
+      <span className="dash-brand-sub">
+        and Living<span className="dash-brand-accent">Spring</span> Gardens
       </span>
     </a>
   );
@@ -64,7 +61,7 @@ export default function DashboardLayout() {
   if (loading) {
     return (
       <div className="dash-loading">
-        <SidebarBrand />
+        <Brand />
         <p>Loading your dashboard…</p>
       </div>
     );
@@ -78,7 +75,7 @@ export default function DashboardLayout() {
     <div className="dash-shell">
       {/* Mobile top bar */}
       <div className="dash-mobile-bar">
-        <SidebarBrand />
+        <Brand />
         <button
           className="dash-menu-btn"
           onClick={() => setMobileNavOpen(true)}
@@ -91,7 +88,7 @@ export default function DashboardLayout() {
       {/* Sidebar */}
       <aside className={`dash-sidebar ${mobileNavOpen ? 'open' : ''}`}>
         <div className="dash-sidebar-head">
-          <SidebarBrand />
+          <Brand />
           <button
             className="dash-menu-btn dash-menu-close"
             onClick={() => setMobileNavOpen(false)}
