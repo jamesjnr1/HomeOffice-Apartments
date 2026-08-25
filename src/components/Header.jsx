@@ -1,8 +1,7 @@
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { Menu, X, LayoutDashboard, LogOut } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import EntryTransition from './EntryTransition';
 
 export default function Header() {
   const location = useLocation();
@@ -10,23 +9,6 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [user, setUser] = useState(null);
-
-  // Entry transition state — only for Sign in and Book a stay from the header
-  const [transitionTo, setTransitionTo] = useState(null);
-
-  const startEntry = useCallback((path) => (e) => {
-    if (e) e.preventDefault();
-    setMobileOpen(false);
-    setTransitionTo(path);
-  }, []);
-
-  const finishEntry = useCallback(() => {
-    if (transitionTo) {
-      navigate(transitionTo);
-      // Clear on the next tick so the overlay stays through the swap
-      setTimeout(() => setTransitionTo(null), 150);
-    }
-  }, [transitionTo, navigate]);
 
   const solid = true;
   const scrolledShadow = scrolled;
@@ -76,22 +58,8 @@ export default function Header() {
 
             {!user && (
               <>
-                {/* Sign in — with cinematic entry transition */}
-                <a
-                  href="/signin"
-                  onClick={startEntry('/signin')}
-                  className="nav-link"
-                >
-                  Sign in
-                </a>
-                {/* Book a stay — with cinematic entry transition */}
-                <a
-                  href="/book"
-                  onClick={startEntry('/book')}
-                  className="btn btn-primary"
-                >
-                  Book a stay
-                </a>
+                <NavLink to="/signin" className="nav-link">Sign in</NavLink>
+                <NavLink to="/book" className="btn btn-primary">Book a stay</NavLink>
               </>
             )}
 
@@ -142,15 +110,9 @@ export default function Header() {
 
           {!user && (
             <>
-              <a href="/signin" onClick={startEntry('/signin')}>Sign in</a>
-              <a href="/signup" onClick={startEntry('/signup')}>Sign up</a>
-              <a
-                href="/book"
-                onClick={startEntry('/book')}
-                className="btn btn-primary btn-block"
-              >
-                Book a stay
-              </a>
+              <NavLink to="/signin">Sign in</NavLink>
+              <NavLink to="/signup">Sign up</NavLink>
+              <NavLink to="/book" className="btn btn-primary btn-block">Book a stay</NavLink>
             </>
           )}
 
@@ -164,9 +126,6 @@ export default function Header() {
           )}
         </nav>
       </div>
-
-      {/* Cinematic entry transition overlay (portal to body) */}
-      <EntryTransition destination={transitionTo} onComplete={finishEntry} />
     </>
   );
 }

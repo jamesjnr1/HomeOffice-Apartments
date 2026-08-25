@@ -16,7 +16,6 @@ export default function Home() {
 
         <div className="container hero-v2-content">
           <div className="hero-v2-inner">
-            <span className="hero-v2-tag">A boutique stay in Sunyani</span>
             <h1 className="hero-v2-title">
               A quiet place to<br />
               work and live.
@@ -35,7 +34,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Intro — LEFT aligned prose */}
+      {/* Intro */}
       <section className="section section-narrow">
         <div className="container">
           <div className="intro-v2 reveal">
