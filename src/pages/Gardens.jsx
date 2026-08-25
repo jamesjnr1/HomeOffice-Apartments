@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, MapPin, Trees, Sun, Wind } from 'lucide-react';
+import { ArrowRight, MapPin, Trees, Lightbulb, Home } from 'lucide-react';
 
 export default function Gardens() {
   return (
@@ -7,10 +7,11 @@ export default function Gardens() {
       <section className="page-header page-header-v2">
         <div className="container">
           <span className="eyebrow">LIVINGSPRING GARDENS</span>
-          <h1>The compound they sit in.</h1>
+          <h1>The garden they open onto.</h1>
           <p className="lead">
-            A quiet, green corner of Sunyani that our family has cared for over the years —
-            now open, in part, to guests.
+            A private, landscaped garden that runs through the family compound —
+            mature trees, winding stone paths, warm evening lighting, and a small
+            pavilion at the far end.
           </p>
         </div>
       </section>
@@ -21,7 +22,7 @@ export default function Gardens() {
             <div className="reveal">
               <img
                 src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1400&q=85"
-                alt="LivingSpring Gardens compound"
+                alt="LivingSpring Gardens"
                 className="rounded-img"
               />
             </div>
@@ -29,12 +30,12 @@ export default function Gardens() {
               <span className="eyebrow">A FAMILY GARDEN</span>
               <h2>Room to breathe.</h2>
               <p className="prose">
-                LivingSpring Gardens is the family compound the apartments belong to.
-                Mature trees, a small orchard, and shaded paths that stay cool through the day.
+                LivingSpring Gardens has been growing here for years. It's the
+                outdoor heart of the compound — a place to walk in the morning,
+                sit with a book in the afternoon, and gather with people in the evening.
               </p>
               <p className="prose">
-                It's a quiet place set back from the main road — the kind of quiet
-                you only get from a garden that's been growing for years.
+                Every apartment opens onto it. It's part of every stay.
               </p>
             </div>
           </div>
@@ -44,7 +45,7 @@ export default function Gardens() {
       <section className="section section-cream">
         <div className="container">
           <div className="section-head-left reveal">
-            <span className="eyebrow">THE FEEL OF THE PLACE</span>
+            <span className="eyebrow">WHAT'S IN THE GARDEN</span>
             <h2>Small, considered, unhurried.</h2>
           </div>
 
@@ -52,17 +53,17 @@ export default function Gardens() {
             <div className="feature reveal">
               <div className="feature-icon"><Trees /></div>
               <h3>Mature trees</h3>
-              <p>Shade in the afternoons and birdsong in the mornings.</p>
+              <p>Old shade trees around the edges. Birdsong in the mornings, cool in the afternoons.</p>
             </div>
             <div className="feature reveal">
-              <div className="feature-icon"><Sun /></div>
-              <h3>Sunlit courtyard</h3>
-              <p>A small central courtyard, perfect for a slow breakfast.</p>
+              <div className="feature-icon"><Lightbulb /></div>
+              <h3>Lit stone paths</h3>
+              <p>Winding paths that light up softly in the evenings — the garden takes on a different feel after sunset.</p>
             </div>
             <div className="feature reveal">
-              <div className="feature-icon"><Wind /></div>
-              <h3>Fresh air</h3>
-              <p>Cross-ventilation designed into every apartment.</p>
+              <div className="feature-icon"><Home /></div>
+              <h3>A small pavilion</h3>
+              <p>A covered spot at the far end — coffee in the morning, conversation at night.</p>
             </div>
           </div>
         </div>
@@ -72,10 +73,10 @@ export default function Gardens() {
         <div className="container">
           <div className="two-col">
             <div className="reveal">
-              <span className="eyebrow">GETTING HERE</span>
+              <span className="eyebrow">WHERE IT IS</span>
               <h2>Central Sunyani.</h2>
               <p className="prose">
-                LivingSpring Gardens is a short drive from the centre of Sunyani —
+                The gardens sit in a quiet corner of central Sunyani —
                 close enough to reach the market, cafés, and banks in minutes;
                 far enough that you'll actually hear yourself think.
               </p>

@@ -35,7 +35,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Intro — LEFT aligned prose (no more centered walls of text) */}
+      {/* Intro — LEFT aligned prose */}
       <section className="section section-narrow">
         <div className="container">
           <div className="intro-v2 reveal">
@@ -43,7 +43,7 @@ export default function Home() {
             <h2>Warm timber. Cool tile. A shaded verandah for morning coffee.</h2>
             <p className="prose">
               Two self-contained apartments in a peaceful compound in Sunyani, built for the way you
-              work from home and the way you rest.
+              work from home and the way you rest. Every one opens onto the gardens.
             </p>
             <Link to="/apartments" className="link-arrow">
               Explore the apartments <ArrowRight size={14} />
@@ -52,7 +52,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Two-card teaser — left-aligned inside each card */}
+      {/* Two-card teaser */}
       <section className="section section-cream">
         <div className="container">
           <div className="teaser-grid">
@@ -75,21 +75,21 @@ export default function Home() {
               <div className="teaser-img">
                 <img
                   src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1400&q=80"
-                  alt="LivingSpring Gardens compound"
+                  alt="LivingSpring Gardens"
                 />
               </div>
               <div className="teaser-body">
                 <span className="eyebrow">LIVINGSPRING GARDENS</span>
-                <h3>The compound they sit in.</h3>
-                <p className="prose">A quiet, green corner of Sunyani. Room to breathe.</p>
-                <span className="link-arrow">Meet the gardens <ArrowRight size={14} /></span>
+                <h3>The garden they open onto.</h3>
+                <p className="prose">A private, landscaped garden inside the compound — mature trees, lit stone paths, and a small pavilion.</p>
+                <span className="link-arrow">Walk the gardens <ArrowRight size={14} /></span>
               </div>
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Closing CTA — stays centered because it's meant to be a moment */}
+      {/* Closing CTA */}
       <section className="section cta-band">
         <div className="container">
           <div className="cta-content reveal">
