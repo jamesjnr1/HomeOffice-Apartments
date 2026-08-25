@@ -1118,3 +1118,98 @@ body:has(.dash-shell) main { padding: 0 !important; }
 @media (max-width: 900px) {
   .dash-page-head { padding-top: 48px !important; }
 }
+/* =====================================================================
+   APPEND TO src/pages/dashboard/dashboard.css
+   Fix giant avatar circle + spelling fix styles
+   ===================================================================== */
+
+/* Kill any runaway .dash-avatar that got huge */
+.dash-avatar,
+.dash-avatar-lg {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  max-width: 32px !important;
+  max-height: 32px !important;
+  border-radius: 999px !important;
+  font-size: 13px !important;
+  flex-shrink: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* The new small avatar used in DashboardLayout sidebar */
+.dash-avatar-small {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  border-radius: 999px;
+  background: var(--accent, #2d6a4f);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+/* Brand spelling fix in sidebar */
+.dash-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-decoration: none;
+  color: var(--ink, #1f2b26);
+}
+.dash-brand-primary {
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: -.02em;
+  color: var(--ink, #1f2b26);
+  white-space: nowrap;
+}
+.dash-brand-sub {
+  font-weight: 400;
+  font-size: 10.5px;
+  color: var(--muted, #6a706d);
+}
+.dash-brand-accent { color: var(--accent, #2d6a4f); font-weight: 500; }
+
+/* Sidebar footer — no bottom overflow */
+.dash-sidebar-foot {
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid var(--line, #e8ebe8);
+  flex-shrink: 0;
+}
+.dash-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  margin-bottom: 6px;
+  overflow: hidden;
+}
+.dash-user-meta {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+}
+.dash-user-name {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--ink, #1f2b26);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dash-user-email {
+  font-size: 11.5px;
+  color: var(--muted, #6a706d);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
