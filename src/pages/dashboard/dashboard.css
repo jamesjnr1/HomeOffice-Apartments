@@ -560,3 +560,29 @@ body:has(.dash-shell) main { padding: 0 !important; }
 .dash-empty p { max-width: 380px; margin: 0 auto 20px; font-size: 13.5px; }
 .dash-empty-icon { color: #9aa19d; margin-bottom: 12px; }
 .dash-empty-inline { padding: 32px 20px; border: 1px solid #e8ebe8; background: #f7f8f6; }
+/* =====================================================================
+   APPEND TO src/pages/dashboard/dashboard.css
+   Single-pane message layout for guests (no thread list — one host only)
+   ===================================================================== */
+
+.dash-messages-single {
+  display: block !important;
+  grid-template-columns: none !important;
+}
+.dash-messages-single .dash-msg-thread-wrap {
+  height: calc(100vh - 260px);
+  min-height: 480px;
+  max-height: 680px;
+  background: #fff;
+  border: 1px solid #e8ebe8;
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+@media (max-width: 900px) {
+  .dash-messages-single .dash-msg-thread-wrap {
+    height: auto;
+    min-height: 420px;
+  }
+}

@@ -4,52 +4,38 @@ import { supabase } from '../../lib/supabase';
 import { formatDistanceToNow } from 'date-fns';
 
 /**
- * AdminMessages — real two-way messaging via Supabase.
+ * AdminMessages — matches the REAL live schema (single flat `messages` table,
+ * no `conversations` table). Grouped client-side by guest_id.
  *
- * Assumes these tables (matching the guest Messages page):
+ * Real columns: id, guest_id, guest_name, guest_email, guest_phone,
+ *               apartment, from_admin, body, created_at,
+ *               read_by_admin, read_by_guest
  *
- *   conversations (
- *     id uuid PK,
- *     guest_id uuid → auth.users,
- *     guest_name text,
- *     guest_email text,
- *     apartment text,
- *     last_message_at timestamptz,
- *     unread_by_admin int default 0,
- *     unread_by_guest int default 0
- *   )
- *
- *   messages (
- *     id uuid PK,
- *     conversation_id uuid → conversations,
- *     from_admin boolean,
- *     body text,
- *     created_at timestamptz
- *   )
- *
- * Adjust field names below if your migration used different ones.
+ * RLS (already correct, verified live):
+ *   - guests see only their own thread (guest_id = auth.uid()) or admins see all
+ *   - insert: from_admin=true requires is_admin(); from_admin=false requires guest_id = auth.uid()
+ *   - no impersonation possible either direction
  */
 
 export default function AdminMessages() {
-  const [convos, setConvos] = useState([]);
-  const [activeId, setActiveId] = useState(null);
-  const [messages, setMessages] = useState([]);
+  const [allMessages, setAllMessages] = useState([]);
+  const [activeGuestId, setActiveGuestId] = useState(null);
   const [draft, setDraft] = useState('');
   const [q, setQ] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const threadRef = useRef(null);
 
-  // ── Load conversations + subscribe to changes ──
+  // ── Load all messages, subscribe to realtime inserts/updates ──
   useEffect(() => {
-    loadConversations();
+    loadMessages();
 
     const sub = supabase
-      .channel('admin-conversations')
+      .channel('admin-messages')
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'conversations' },
-        () => loadConversations()
+        { event: '*', schema: 'public', table: 'messages' },
+        () => loadMessages()
       )
       .subscribe();
 
@@ -57,121 +43,117 @@ export default function AdminMessages() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ── Load messages when active conversation changes + subscribe to new ones ──
+  // Mark active thread as read whenever it changes or new messages arrive
   useEffect(() => {
-    if (!activeId) return;
+    if (activeGuestId) markThreadRead(activeGuestId);
+  }, [activeGuestId, allMessages]);
 
-    loadMessages(activeId);
-    markAsRead(activeId);
-
-    const sub = supabase
-      .channel(`admin-thread-${activeId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `conversation_id=eq.${activeId}`,
-        },
-        (payload) => {
-          setMessages(prev => {
-            // Avoid duplicates (own message may already be in state)
-            if (prev.some(m => m.id === payload.new.id)) return prev;
-            return [...prev, payload.new];
-          });
-          // If guest sent a new message while thread is open, mark it read
-          if (!payload.new.from_admin) markAsRead(activeId);
-        }
-      )
-      .subscribe();
-
-    return () => { supabase.removeChannel(sub); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeId]);
-
-  // Scroll thread to bottom on new messages
+  // Scroll to bottom on new messages
   useEffect(() => {
     threadRef.current?.scrollTo({ top: 99999, behavior: 'smooth' });
-  }, [messages]);
+  }, [activeGuestId, allMessages]);
 
-  const loadConversations = async () => {
+  const loadMessages = async () => {
     const { data, error } = await supabase
-      .from('conversations')
+      .from('messages')
       .select('*')
-      .order('last_message_at', { ascending: false, nullsFirst: false });
+      .order('created_at', { ascending: true });
 
     if (!error && data) {
-      setConvos(data);
-      if (!activeId && data.length > 0) {
-        setActiveId(data[0].id);
+      setAllMessages(data);
+      // Auto-select first guest thread if none selected yet
+      if (!activeGuestId && data.length > 0) {
+        const firstGuest = data[0].guest_id;
+        setActiveGuestId(firstGuest);
       }
     }
     setLoading(false);
   };
 
-  const loadMessages = async (convoId) => {
-    const { data, error } = await supabase
-      .from('messages')
-      .select('*')
-      .eq('conversation_id', convoId)
-      .order('created_at', { ascending: true });
+  const markThreadRead = async (guestId) => {
+    const unread = allMessages.filter(
+      m => m.guest_id === guestId && !m.from_admin && !m.read_by_admin
+    );
+    if (unread.length === 0) return;
 
-    if (!error && data) setMessages(data);
-  };
-
-  const markAsRead = async (convoId) => {
-    setConvos(prev => prev.map(c =>
-      c.id === convoId ? { ...c, unread_by_admin: 0 } : c
+    // Optimistic local update
+    setAllMessages(prev => prev.map(m =>
+      m.guest_id === guestId && !m.from_admin ? { ...m, read_by_admin: true } : m
     ));
+
     await supabase
-      .from('conversations')
-      .update({ unread_by_admin: 0 })
-      .eq('id', convoId);
+      .from('messages')
+      .update({ read_by_admin: true })
+      .eq('guest_id', guestId)
+      .eq('from_admin', false)
+      .eq('read_by_admin', false);
   };
 
   const send = async (e) => {
     e.preventDefault();
-    if (!draft.trim() || !activeId || sending) return;
+    if (!draft.trim() || !activeGuestId || sending) return;
 
+    const active = threads.find(t => t.guest_id === activeGuestId);
     const body = draft.trim();
     setDraft('');
     setSending(true);
 
-    const active = convos.find(c => c.id === activeId);
-
-    const { error } = await supabase
-      .from('messages')
-      .insert({
-        conversation_id: activeId,
-        from_admin: true,
-        body,
-      });
+    const { error } = await supabase.from('messages').insert({
+      guest_id: activeGuestId,
+      guest_name: active?.guest_name || null,
+      guest_email: active?.guest_email || null,
+      guest_phone: active?.guest_phone || null,
+      apartment: active?.apartment || null,
+      from_admin: true,
+      body,
+      read_by_admin: true,
+      read_by_guest: false,
+    });
 
     if (error) {
       setDraft(body); // restore on failure
-      setSending(false);
-      return;
     }
-
-    // Update conversation: bump timestamp + guest's unread count
-    await supabase
-      .from('conversations')
-      .update({
-        last_message_at: new Date().toISOString(),
-        unread_by_guest: (active?.unread_by_guest || 0) + 1,
-      })
-      .eq('id', activeId);
-
     setSending(false);
-    // The message will appear via realtime subscription
+    // New message shows via realtime subscription
   };
 
-  const active = convos.find(c => c.id === activeId);
-  const filtered = convos.filter(c =>
-    (c.guest_name || '').toLowerCase().includes(q.toLowerCase()) ||
-    (c.apartment || '').toLowerCase().includes(q.toLowerCase()) ||
-    (c.guest_email || '').toLowerCase().includes(q.toLowerCase())
+  // ── Group messages into per-guest threads ──
+  const threadMap = {};
+  allMessages.forEach(m => {
+    const key = m.guest_id;
+    if (!key) return;
+    if (!threadMap[key]) {
+      threadMap[key] = {
+        guest_id: key,
+        guest_name: m.guest_name || 'Guest',
+        guest_email: m.guest_email || '',
+        guest_phone: m.guest_phone || '',
+        apartment: m.apartment || '',
+        messages: [],
+        lastAt: m.created_at,
+      };
+    }
+    threadMap[key].messages.push(m);
+    threadMap[key].lastAt = m.created_at;
+    // Prefer the most recent non-null guest info
+    if (m.guest_name) threadMap[key].guest_name = m.guest_name;
+    if (m.guest_email) threadMap[key].guest_email = m.guest_email;
+    if (m.guest_phone) threadMap[key].guest_phone = m.guest_phone;
+    if (m.apartment) threadMap[key].apartment = m.apartment;
+  });
+
+  const threads = Object.values(threadMap)
+    .map(t => ({
+      ...t,
+      unread: t.messages.filter(m => !m.from_admin && !m.read_by_admin).length,
+    }))
+    .sort((a, b) => new Date(b.lastAt) - new Date(a.lastAt));
+
+  const active = threads.find(t => t.guest_id === activeGuestId);
+  const filtered = threads.filter(t =>
+    t.guest_name.toLowerCase().includes(q.toLowerCase()) ||
+    t.apartment.toLowerCase().includes(q.toLowerCase()) ||
+    t.guest_email.toLowerCase().includes(q.toLowerCase())
   );
 
   const avatar = (name) => {
@@ -182,32 +164,32 @@ export default function AdminMessages() {
   if (loading) {
     return (
       <div className="mgmt-page">
-        <header className="ad-page-head">
-          <span className="ad-eyebrow">MESSAGES</span>
+        <header className="mgmt-page-head">
+          <span className="mgmt-eyebrow">MESSAGES</span>
           <h1>Messages</h1>
         </header>
-        <div className="ad-empty"><p>Loading conversations…</p></div>
+        <div className="mgmt-empty"><p>Loading conversations…</p></div>
       </div>
     );
   }
 
   return (
-    <div className="mgmt-page ad-messages-page">
-      <header className="ad-page-head">
-        <span className="ad-eyebrow">MESSAGES</span>
+    <div className="mgmt-page mgmt-messages-page">
+      <header className="mgmt-page-head">
+        <span className="mgmt-eyebrow">MESSAGES</span>
         <h1>Messages</h1>
-        <p className="ad-lead">Reply to guest questions. Guests see your replies instantly.</p>
+        <p className="mgmt-lead">Reply to guest questions. Guests see your replies instantly.</p>
       </header>
 
-      {convos.length === 0 ? (
-        <div className="ad-empty">
-          <p>No conversations yet. Guests can start one from their dashboard.</p>
+      {threads.length === 0 ? (
+        <div className="mgmt-empty">
+          <p>No conversations yet. Guests can message you from their dashboard.</p>
         </div>
       ) : (
-        <div className="ad-messages">
-          {/* Left: conversation list */}
-          <aside className="ad-msg-list">
-            <div className="ad-msg-search">
+        <div className="mgmt-messages">
+          {/* Left: thread list */}
+          <aside className="mgmt-msg-list">
+            <div className="mgmt-msg-search">
               <Search size={13} />
               <input
                 type="text"
@@ -218,73 +200,76 @@ export default function AdminMessages() {
             </div>
 
             {filtered.length === 0 && (
-              <div className="ad-empty"><p>No matches.</p></div>
+              <div className="mgmt-empty"><p>No matches.</p></div>
             )}
 
-            {filtered.map(c => (
+            {filtered.map(t => (
               <button
-                key={c.id}
-                className={`ad-msg-item${c.id === activeId ? ' active' : ''}`}
-                onClick={() => setActiveId(c.id)}
+                key={t.guest_id}
+                className={`mgmt-msg-item${t.guest_id === activeGuestId ? ' active' : ''}`}
+                onClick={() => setActiveGuestId(t.guest_id)}
               >
-                <div className="ad-msg-avatar">{avatar(c.guest_name)}</div>
-                <div className="ad-msg-body">
-                  <div className="ad-msg-top">
-                    <span className="ad-msg-name">{c.guest_name || 'Guest'}</span>
-                    <span className="ad-msg-time">
-                      {c.last_message_at
-                        ? formatDistanceToNow(new Date(c.last_message_at), { addSuffix: false })
-                        : ''}
+                <div className="mgmt-msg-avatar">{avatar(t.guest_name)}</div>
+                <div className="mgmt-msg-body">
+                  <div className="mgmt-msg-top">
+                    <span className="mgmt-msg-name">{t.guest_name}</span>
+                    <span className="mgmt-msg-time">
+                      {formatDistanceToNow(new Date(t.lastAt), { addSuffix: false })}
                     </span>
                   </div>
-                  <div className="ad-msg-sub">{c.apartment || 'General'}</div>
+                  <div className="mgmt-msg-sub">{t.apartment || 'General'}</div>
+                  <div className="mgmt-msg-preview">
+                    {t.messages[t.messages.length - 1]?.body}
+                  </div>
                 </div>
-                {c.unread_by_admin > 0 && (
-                  <span className="ad-msg-unread">{c.unread_by_admin}</span>
+                {t.unread > 0 && (
+                  <span className="mgmt-msg-unread">{t.unread}</span>
                 )}
               </button>
             ))}
           </aside>
 
           {/* Right: thread */}
-          <section className="ad-msg-thread-wrap">
+          <section className="mgmt-msg-thread-wrap">
             {!active ? (
-              <div className="ad-empty"><p>Select a conversation.</p></div>
+              <div className="mgmt-empty"><p>Select a conversation.</p></div>
             ) : (
               <>
-                <div className="ad-msg-thread-head">
-                  <div className="ad-msg-avatar">{avatar(active.guest_name)}</div>
+                <div className="mgmt-msg-thread-head">
+                  <div className="mgmt-msg-avatar">{avatar(active.guest_name)}</div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div className="ad-msg-name">{active.guest_name || 'Guest'}</div>
-                    <div className="ad-msg-sub">
+                    <div className="mgmt-msg-name">{active.guest_name}</div>
+                    <div className="mgmt-msg-sub">
                       {active.apartment}
                       {active.guest_email ? ` · ${active.guest_email}` : ''}
                     </div>
                   </div>
-                  <div className="ad-msg-head-actions">
+                  <div className="mgmt-msg-head-actions">
                     {active.guest_email && (
                       <a
                         href={`mailto:${active.guest_email}?subject=${encodeURIComponent('Re: Your stay — Home-Office Apartments')}`}
-                        className="ad-btn ad-btn-outline ad-btn-sm"
+                        className="mgmt-btn mgmt-btn-outline mgmt-btn-sm"
                       >
                         <Mail size={13} /> Email
+                      </a>
+                    )}
+                    {active.guest_phone && (
+                      <a href={`tel:${active.guest_phone}`} className="mgmt-btn mgmt-btn-outline mgmt-btn-sm">
+                        <Phone size={13} /> Call
                       </a>
                     )}
                   </div>
                 </div>
 
-                <div className="ad-msg-thread" ref={threadRef}>
-                  {messages.length === 0 && (
-                    <div className="ad-empty"><p>No messages yet.</p></div>
-                  )}
-                  {messages.map(m => (
+                <div className="mgmt-msg-thread" ref={threadRef}>
+                  {active.messages.map(m => (
                     <div
                       key={m.id}
-                      className={`ad-msg-bubble ${m.from_admin ? 'me' : 'them'}`}
+                      className={`mgmt-msg-bubble ${m.from_admin ? 'me' : 'them'}`}
                     >
                       <div>{m.body}</div>
-                      <div className="ad-msg-at">
-                        {m.from_admin ? 'You' : (active.guest_name?.split(' ')[0] || 'Guest')}
+                      <div className="mgmt-msg-at">
+                        {m.from_admin ? 'You' : active.guest_name.split(' ')[0]}
                         {' · '}
                         {formatDistanceToNow(new Date(m.created_at), { addSuffix: true })}
                       </div>
@@ -292,10 +277,10 @@ export default function AdminMessages() {
                   ))}
                 </div>
 
-                <form className="ad-msg-composer" onSubmit={send}>
+                <form className="mgmt-msg-composer" onSubmit={send}>
                   <input
                     type="text"
-                    placeholder={`Reply to ${active.guest_name?.split(' ')[0] || 'guest'}…`}
+                    placeholder={`Reply to ${active.guest_name.split(' ')[0]}…`}
                     value={draft}
                     onChange={e => setDraft(e.target.value)}
                     disabled={sending}
