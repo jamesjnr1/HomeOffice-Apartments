@@ -36,7 +36,7 @@ export default function DashboardLayout() {
     return (
       <div className="dash-loading">
         <div className="dash-loading-brand">
-          Home-Office <span style={{ color: '#2d6a4f' }}>Appartments</span>
+          Home-Office <span style={{ color: '#2d6a4f' }}>Apartments</span>
         </div>
         <p>Loading your dashboard…</p>
       </div>
@@ -52,7 +52,7 @@ export default function DashboardLayout() {
       {/* Mobile top bar */}
       <div className="dash-mobile-bar">
         <a href="/" className="dash-brand">
-          <span className="dash-brand-primary">Home-Office Appartments</span>
+          <span className="dash-brand-primary">Home-Office Apartments</span>
           <span className="dash-brand-sub">
             and Living<span className="dash-brand-accent">Spring</span> Gardens
           </span>
@@ -66,7 +66,7 @@ export default function DashboardLayout() {
       <aside className={`dash-sidebar ${mobileNavOpen ? 'open' : ''}`}>
         <div className="dash-sidebar-head">
           <a href="/" className="dash-brand">
-            <span className="dash-brand-primary">Home-Office Appartments</span>
+            <span className="dash-brand-primary">Home-Office Apartments</span>
             <span className="dash-brand-sub">
               and Living<span className="dash-brand-accent">Spring</span> Gardens
             </span>
