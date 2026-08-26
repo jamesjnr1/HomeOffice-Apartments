@@ -1308,3 +1308,19 @@ body:has(.dash-shell) main { padding: 0 !important; }
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* Fix empty space below sign out in guest dashboard sidebar */
+.dash-shell {
+  overflow: hidden;
+}
+.dash-sidebar {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+.dash-sidebar-foot {
+  margin-top: auto !important;
+  padding-bottom: 24px !important;
+  flex-shrink: 0 !important;
+}
