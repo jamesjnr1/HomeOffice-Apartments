@@ -66,7 +66,7 @@ body:has(.ad-shell) main { padding: 0 !important; }
   display: flex; align-items: center; justify-content: space-between;
   padding: 18px 14px 14px; border-bottom: 1px solid var(--line-2); flex-shrink: 0;
 }
-.ad-close-btn { display: none; }
+.ad-close-btn { display: flex; }
 
 /* ── NAV ── */
 .ad-nav-block { padding: 10px 8px 4px; }
@@ -149,7 +149,7 @@ body:has(.ad-shell) main { padding: 0 !important; }
 
 /* ── MAIN ── */
 .ad-main {
-  overflow-y: auto; height: 100vh; padding: 0;
+  overflow-y: auto; height: 100vh; padding: 0; padding-top: 0;
   background: var(--bg-soft);
 }
 .ad-page {
@@ -386,3 +386,16 @@ body:has(.ad-shell) main { padding: 0 !important; }
 /* ── EMPTY ── */
 .ad-empty { padding: 48px 20px; text-align: center; color: var(--muted-2); }
 .ad-empty p { margin: 0; font-size: 14px; }
+
+/* ── spacing fixes ── */
+.ad-main {
+  padding-top: 0;
+}
+.ad-back-btn {
+  margin-top: 24px;
+  margin-left: 32px;
+  margin-bottom: 0;
+}
+.ad-page {
+  padding: 20px 32px 40px;
+}
