@@ -1,5 +1,12 @@
 import { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import Lenis from 'lenis';
+
+// Routes with their own fixed-sidebar + independently-scrolling-pane layout.
+// Lenis hijacks the window's scroll, which fights that layout (dragging the
+// sidebar along with the content instead of letting only the content pane
+// scroll), so it's disabled entirely on these routes.
+const LENIS_EXCLUDED_PREFIXES = ['/dashboard', '/admin'];
 
 /**
  * SmoothScroll
@@ -8,7 +15,14 @@ import Lenis from 'lenis';
  * it on mobile (below 768px) and let the browser handle touch scrolling natively.
  */
 export default function SmoothScroll({ children }) {
+  const { pathname } = useLocation();
+
   useEffect(() => {
+    const isExcludedRoute = LENIS_EXCLUDED_PREFIXES.some(
+      (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+    );
+    if (isExcludedRoute) return; // App-style dashboards manage their own scroll
+
     // On mobile, native scroll is better — Lenis can block touch events
     const isMobile = window.matchMedia('(max-width: 768px)').matches ||
       /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -35,7 +49,7 @@ export default function SmoothScroll({ children }) {
       cancelAnimationFrame(rafId);
       lenis.destroy();
     };
-  }, []);
+  }, [pathname]);
 
   return children;
 }
