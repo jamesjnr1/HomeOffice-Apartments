@@ -25,36 +25,36 @@ export default function AdminBookings() {
   });
 
   return (
-    <div className="ad-page">
-      <header className="ad-page-head">
-        <span className="ad-eyebrow">BOOKINGS</span>
+    <div className="mgmt-page">
+      <header className="mgmt-page-head">
+        <span className="mgmt-eyebrow">BOOKINGS</span>
         <h1>Bookings</h1>
-        <p className="ad-lead">All stays across both apartments.</p>
+        <p className="mgmt-lead">All stays across both apartments.</p>
       </header>
 
-      <div className="ad-view-toggle">
+      <div className="mgmt-view-toggle">
         <button className={view === 'list' ? 'active' : ''} onClick={() => setView('list')}><List size={16}/> List</button>
         <button className={view === 'cal' ? 'active' : ''} onClick={() => setView('cal')}><CalendarDays size={16}/> Calendar</button>
       </div>
 
       {view === 'list' && (
-        <div className="ad-card ad-card-flush">
-          <div className="ad-table-wrap">
-            <table className="ad-table">
+        <div className="mgmt-card mgmt-card-flush">
+          <div className="mgmt-table-wrap">
+            <table className="mgmt-table">
               <thead>
                 <tr><th>Ref</th><th>Guest</th><th>Apartment</th><th>Check-in</th><th>Check-out</th><th>Nights</th><th>Total</th><th>Status</th></tr>
               </thead>
               <tbody>
                 {BOOKINGS.map(b => (
                   <tr key={b.id}>
-                    <td className="ad-td-mono">{b.ref}</td>
-                    <td><div className="ad-td-primary">{b.guest}</div><div className="ad-td-sub">{b.email}</div></td>
-                    <td><span className="ad-apt-dot" style={{ background: APT_COLOR[b.apt] }}/>{b.apt}</td>
+                    <td className="mgmt-td-mono">{b.ref}</td>
+                    <td><div className="mgmt-td-primary">{b.guest}</div><div className="mgmt-td-sub">{b.email}</div></td>
+                    <td><span className="mgmt-apt-dot" style={{ background: APT_COLOR[b.apt] }}/>{b.apt}</td>
                     <td>{b.checkIn}</td>
                     <td>{b.checkOut}</td>
                     <td>{b.nights}</td>
                     <td>GHS {b.total.toLocaleString()}</td>
-                    <td><span className={`ad-status ${b.status}`}>{b.status}</span></td>
+                    <td><span className={`mgmt-status ${b.status}`}>{b.status}</span></td>
                   </tr>
                 ))}
               </tbody>
@@ -64,29 +64,29 @@ export default function AdminBookings() {
       )}
 
       {view === 'cal' && (
-        <div className="ad-card">
-          <div className="ad-cal-head">
+        <div className="mgmt-card">
+          <div className="mgmt-cal-head">
             <button onClick={() => setMonth(m => new Date(m.getFullYear(), m.getMonth()-1))}><ChevronLeft size={18}/></button>
             <h2>{format(month, 'MMMM yyyy')}</h2>
             <button onClick={() => setMonth(m => new Date(m.getFullYear(), m.getMonth()+1))}><ChevronRight size={18}/></button>
           </div>
-          <div className="ad-cal-legend">
+          <div className="mgmt-cal-legend">
             {Object.entries(APT_COLOR).map(([apt, color]) => (
-              <span key={apt}><span className="ad-apt-dot" style={{ background: color }}/>{apt}</span>
+              <span key={apt}><span className="mgmt-apt-dot" style={{ background: color }}/>{apt}</span>
             ))}
           </div>
-          <div className="ad-cal-grid">
+          <div className="mgmt-cal-grid">
             {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d => (
-              <div key={d} className="ad-cal-dow">{d}</div>
+              <div key={d} className="mgmt-cal-dow">{d}</div>
             ))}
             {Array.from({ length: startPad }, (_, i) => <div key={`p${i}`} />)}
             {days.map(day => {
               const bks = bookingsOnDay(day);
               return (
-                <div key={day.toISOString()} className={`ad-cal-day ${bks.length ? 'has-booking' : ''}`}>
-                  <span className="ad-cal-num">{format(day, 'd')}</span>
+                <div key={day.toISOString()} className={`mgmt-cal-day ${bks.length ? 'has-booking' : ''}`}>
+                  <span className="mgmt-cal-num">{format(day, 'd')}</span>
                   {bks.map(b => (
-                    <span key={b.id} className="ad-cal-event" style={{ background: APT_COLOR[b.apt] }}>
+                    <span key={b.id} className="mgmt-cal-event" style={{ background: APT_COLOR[b.apt] }}>
                       {b.apt[0]} · {b.guest.split(' ')[0]}
                     </span>
                   ))}

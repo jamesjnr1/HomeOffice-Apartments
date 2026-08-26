@@ -23,40 +23,40 @@ const UPCOMING = [
 export default function AdminOverview() {
   const { displayName, isOwner } = useOutletContext();
   return (
-    <div className="ad-page">
-      <header className="ad-page-head">
-        <span className="ad-eyebrow">OVERVIEW</span>
+    <div className="mgmt-page">
+      <header className="mgmt-page-head">
+        <span className="mgmt-eyebrow">OVERVIEW</span>
         <h1>Good morning, {displayName}.</h1>
-        <p className="ad-lead">Here's what needs your attention today.</p>
+        <p className="mgmt-lead">Here's what needs your attention today.</p>
       </header>
 
-      <div className="ad-stat-grid">
+      <div className="mgmt-stat-grid">
         {STATS.filter(s => s.label !== 'Revenue (Sep)' || isOwner).map(s => (
-          <Link to={s.link} key={s.label} className={`ad-stat ad-stat-${s.color}`}>
-            <s.icon size={22} className="ad-stat-icon"/>
-            <div className="ad-stat-value">{s.value}</div>
-            <div className="ad-stat-label">{s.label}</div>
+          <Link to={s.link} key={s.label} className={`mgmt-stat mgmt-stat-${s.color}`}>
+            <s.icon size={22} className="mgmt-stat-icon"/>
+            <div className="mgmt-stat-value">{s.value}</div>
+            <div className="mgmt-stat-label">{s.label}</div>
           </Link>
         ))}
       </div>
 
-      <div className="ad-two-col">
-        <section className="ad-card">
-          <div className="ad-card-head">
+      <div className="mgmt-two-col">
+        <section className="mgmt-card">
+          <div className="mgmt-card-head">
             <h2>Recent enquiries</h2>
-            <Link to="/admin/enquiries" className="ad-linky">View all <ArrowRight size={14}/></Link>
+            <Link to="/admin/enquiries" className="mgmt-linky">View all <ArrowRight size={14}/></Link>
           </div>
-          <div className="ad-table-wrap">
-            <table className="ad-table">
+          <div className="mgmt-table-wrap">
+            <table className="mgmt-table">
               <thead><tr><th>Guest</th><th>Dates</th><th>Apt</th><th>Status</th><th>Received</th></tr></thead>
               <tbody>
                 {RECENT_ENQUIRIES.map(e => (
                   <tr key={e.id}>
-                    <td><div className="ad-td-primary">{e.name}</div><div className="ad-td-sub">{e.email}</div></td>
+                    <td><div className="mgmt-td-primary">{e.name}</div><div className="mgmt-td-sub">{e.email}</div></td>
                     <td>{e.dates}</td>
                     <td>{e.apt}</td>
-                    <td><span className={`ad-status ${e.status}`}>{e.status}</span></td>
-                    <td className="ad-td-muted">{e.at}</td>
+                    <td><span className={`mgmt-status ${e.status}`}>{e.status}</span></td>
+                    <td className="mgmt-td-muted">{e.at}</td>
                   </tr>
                 ))}
               </tbody>
@@ -64,18 +64,18 @@ export default function AdminOverview() {
           </div>
         </section>
 
-        <section className="ad-card">
-          <div className="ad-card-head">
+        <section className="mgmt-card">
+          <div className="mgmt-card-head">
             <h2>Upcoming check-ins</h2>
-            <Link to="/admin/bookings" className="ad-linky">View all <ArrowRight size={14}/></Link>
+            <Link to="/admin/bookings" className="mgmt-linky">View all <ArrowRight size={14}/></Link>
           </div>
-          <div className="ad-booking-list">
+          <div className="mgmt-booking-list">
             {UPCOMING.map(b => (
-              <div key={b.id} className="ad-booking-row">
-                <div className="ad-booking-apt">{b.apt}</div>
+              <div key={b.id} className="mgmt-booking-row">
+                <div className="mgmt-booking-apt">{b.apt}</div>
                 <div>
-                  <div className="ad-td-primary">{b.name}</div>
-                  <div className="ad-td-sub">{b.checkIn} → {b.checkOut} · {b.nights} nights</div>
+                  <div className="mgmt-td-primary">{b.name}</div>
+                  <div className="mgmt-td-sub">{b.checkIn} → {b.checkOut} · {b.nights} nights</div>
                 </div>
               </div>
             ))}

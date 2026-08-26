@@ -20,21 +20,21 @@ export default function AdminGuests() {
   );
 
   return (
-    <div className="ad-page">
-      <header className="ad-page-head">
-        <span className="ad-eyebrow">GUESTS</span>
+    <div className="mgmt-page">
+      <header className="mgmt-page-head">
+        <span className="mgmt-eyebrow">GUESTS</span>
         <h1>Guests</h1>
-        <p className="ad-lead">Everyone who has signed up on the site.</p>
+        <p className="mgmt-lead">Everyone who has signed up on the site.</p>
       </header>
 
-      <div className="ad-search-bar">
+      <div className="mgmt-search-bar">
         <Search size={15}/>
         <input type="text" placeholder="Search by name or email…" value={q} onChange={e => setQ(e.target.value)}/>
       </div>
 
-      <div className="ad-card ad-card-flush">
-        <div className="ad-table-wrap">
-          <table className="ad-table">
+      <div className="mgmt-card mgmt-card-flush">
+        <div className="mgmt-table-wrap">
+          <table className="mgmt-table">
             <thead>
               <tr><th>Name</th><th>Email</th><th>Joined</th><th>Bookings</th><th>Total spent</th></tr>
             </thead>
@@ -42,13 +42,13 @@ export default function AdminGuests() {
               {filtered.map(g => (
                 <tr key={g.id}>
                   <td>
-                    <div className="ad-guest-row">
-                      <div className="ad-guest-av">{g.name.charAt(0)}</div>
-                      <div className="ad-td-primary">{g.name}</div>
+                    <div className="mgmt-guest-row">
+                      <div className="mgmt-guest-av">{g.name.charAt(0)}</div>
+                      <div className="mgmt-td-primary">{g.name}</div>
                     </div>
                   </td>
-                  <td className="ad-td-sub">{g.email}</td>
-                  <td className="ad-td-muted">{g.joined}</td>
+                  <td className="mgmt-td-sub">{g.email}</td>
+                  <td className="mgmt-td-muted">{g.joined}</td>
                   <td>{g.bookings}</td>
                   <td>{g.spent > 0 ? `GHS ${g.spent.toLocaleString()}` : '—'}</td>
                 </tr>
