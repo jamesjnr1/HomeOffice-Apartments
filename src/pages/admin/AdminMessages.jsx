@@ -1,64 +1,135 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Search, Mail, Phone } from 'lucide-react';
+import { Send, Search, Mail, Phone, RefreshCw } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
 import { formatDistanceToNow } from 'date-fns';
 
 /**
  * AdminMessages
- * Two-pane inbox. Admin (green bubbles right) replies to guests (white left).
- * Click Send to fire a real email via mailto: link + record in thread.
  *
- * TODO(supabase): replace MOCK_CONVOS with real data:
- *   supabase.from('conversations').select('*, messages(*)').order('last_message_at', { ascending: false })
+ * Uses Supabase `messages` table. Schema (run once in SQL Editor):
+ *
+ *   create table if not exists public.messages (
+ *     id           uuid primary key default gen_random_uuid(),
+ *     guest_id     uuid references auth.users(id) on delete cascade,
+ *     guest_name   text,
+ *     guest_email  text,
+ *     apartment    text,
+ *     from_admin   boolean default false,
+ *     body         text not null,
+ *     created_at   timestamptz default now()
+ *   );
+ *
+ *   alter table public.messages enable row level security;
+ *
+ *   -- Guests can see their own messages + admin replies:
+ *   create policy "guests read own" on public.messages
+ *     for select using (guest_id = auth.uid() or from_admin = true);
+ *
+ *   -- Anyone authenticated can insert:
+ *   create policy "authenticated insert" on public.messages
+ *     for insert with check (auth.role() = 'authenticated');
+ *
+ * Falls back to mock data if Supabase table doesn't exist yet.
  */
 
-const MOCK_CONVOS = [
+const MOCK = [
   {
     id: 'c1',
-    guest: 'Abena Mensah', avatar: 'AM', email: 'abena@example.com',
-    phone: '+233 24 000 0001', apt: 'Verandah Apartment',
-    unread: 1, lastAt: new Date(Date.now() - 30 * 60000),
+    guest_id: 'mock-1',
+    guest: 'Abena Mensah',
+    avatar: 'AM',
+    email: 'abena@example.com',
+    phone: '+233 24 000 0001',
+    apartment: 'Verandah Apartment',
+    unread: 1,
+    lastAt: new Date(Date.now() - 30 * 60000),
     messages: [
-      { id: 1, from: 'guest', body: 'Hi, I submitted an enquiry for 10–15 Oct. Just checking if the dates are available?', at: new Date(Date.now() - 30 * 60000) },
+      { id: 'm1', from_admin: false, body: 'Hi, just checking if 10–15 Oct is available?', created_at: new Date(Date.now() - 30 * 60000) },
     ],
   },
   {
     id: 'c2',
-    guest: 'Kofi Asante', avatar: 'KA', email: 'kofi@example.com',
-    phone: '+233 20 000 0002', apt: 'Garden Apartment',
-    unread: 1, lastAt: new Date(Date.now() - 2 * 3600000),
+    guest_id: 'mock-2',
+    guest: 'Kofi Asante',
+    avatar: 'KA',
+    email: 'kofi@example.com',
+    phone: '+233 20 000 0002',
+    apartment: 'Garden Apartment',
+    unread: 1,
+    lastAt: new Date(Date.now() - 2 * 3600000),
     messages: [
-      { id: 1, from: 'admin', body: 'Hi Kofi, your booking is confirmed for 20–24 Oct. See you soon!', at: new Date(Date.now() - 3 * 3600000) },
-      { id: 2, from: 'guest', body: 'Thank you! Will there be parking available?', at: new Date(Date.now() - 2 * 3600000) },
-    ],
-  },
-  {
-    id: 'c3',
-    guest: 'Jonathan Duah', avatar: 'JD', email: 'james@example.com',
-    phone: '+233 27 000 0003', apt: 'Verandah Apartment',
-    unread: 0, lastAt: new Date(Date.now() - 2 * 86400000),
-    messages: [
-      { id: 1, from: 'guest', body: 'Just wanted to confirm check-in is still 3 PM on the 31st?', at: new Date(Date.now() - 2 * 86400000 + 3600000) },
-      { id: 2, from: 'admin', body: 'Yes, 3 PM is perfect. We\'ll have everything ready for you.', at: new Date(Date.now() - 2 * 86400000) },
+      { id: 'm2', from_admin: true, body: 'Hi Kofi, confirmed for 20–24 Oct!', created_at: new Date(Date.now() - 3 * 3600000) },
+      { id: 'm3', from_admin: false, body: 'Will there be parking?', created_at: new Date(Date.now() - 2 * 3600000) },
     ],
   },
 ];
 
 export default function AdminMessages() {
-  const [convos, setConvos] = useState(MOCK_CONVOS);
+  const [convos, setConvos] = useState(MOCK);
   const [activeId, setActiveId] = useState('c1');
   const [draft, setDraft] = useState('');
   const [q, setQ] = useState('');
+  const [sending, setSending] = useState(false);
+  const [usingSupabase, setUsingSupabase] = useState(false);
   const threadRef = useRef(null);
 
+  // Try to load from Supabase on mount
   useEffect(() => {
-    threadRef.current?.scrollTo({ top: 99999, behavior: 'smooth' });
+    loadFromSupabase();
+  }, []);
+
+  const loadFromSupabase = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+      if (error || !data) return; // Fall back to mock
+
+      // Group into conversations by guest_id
+      const grouped = {};
+      data.forEach(msg => {
+        const key = msg.guest_id;
+        if (!grouped[key]) {
+          grouped[key] = {
+            id: key,
+            guest_id: key,
+            guest: msg.guest_name || msg.guest_email?.split('@')[0] || 'Guest',
+            avatar: (msg.guest_name || 'G').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2),
+            email: msg.guest_email || '',
+            phone: msg.guest_phone || '',
+            apartment: msg.apartment || '',
+            unread: 0,
+            lastAt: new Date(msg.created_at),
+            messages: [],
+          };
+        }
+        grouped[key].messages.push(msg);
+        grouped[key].lastAt = new Date(msg.created_at);
+        if (!msg.from_admin) grouped[key].unread++;
+      });
+
+      const list = Object.values(grouped).sort((a, b) => b.lastAt - a.lastAt);
+      if (list.length > 0) {
+        setConvos(list);
+        setActiveId(list[0].id);
+        setUsingSupabase(true);
+      }
+    } catch {
+      // Table doesn't exist yet — keep mock data
+    }
+  };
+
+  useEffect(() => {
+    if (!threadRef.current) return;
+    threadRef.current.scrollTo({ top: 99999, behavior: 'smooth' });
   }, [activeId, convos]);
 
   const active = convos.find(c => c.id === activeId);
-
   const filtered = convos.filter(c =>
     c.guest.toLowerCase().includes(q.toLowerCase()) ||
-    c.apt.toLowerCase().includes(q.toLowerCase())
+    c.apartment.toLowerCase().includes(q.toLowerCase())
   );
 
   const selectConvo = (id) => {
@@ -66,111 +137,158 @@ export default function AdminMessages() {
     setConvos(prev => prev.map(c => c.id === id ? { ...c, unread: 0 } : c));
   };
 
-  const send = (e) => {
+  const send = async (e) => {
     e.preventDefault();
-    if (!draft.trim() || !active) return;
-    const msg = { id: Date.now(), from: 'admin', body: draft.trim(), at: new Date() };
+    if (!draft.trim() || !active || sending) return;
+
+    const newMsg = {
+      id: `local-${Date.now()}`,
+      from_admin: true,
+      body: draft.trim(),
+      created_at: new Date(),
+    };
+
+    // Optimistic update
     setConvos(prev => prev.map(c =>
       c.id === activeId
-        ? { ...c, messages: [...c.messages, msg], lastAt: new Date(), unread: 0 }
+        ? { ...c, messages: [...c.messages, newMsg], lastAt: new Date() }
         : c
     ));
     setDraft('');
-    // TODO(supabase): insert message into DB and trigger email notification
-  };
 
-  const mailtoReply = () => {
-    if (!active) return;
-    const subject = encodeURIComponent(`Re: Your stay at ${active.apt} — Home-Office Apartments`);
-    const body = encodeURIComponent(`Hi ${active.guest.split(' ')[0]},\n\n`);
-    window.location.href = `mailto:${active.email}?subject=${subject}&body=${body}`;
+    if (usingSupabase) {
+      setSending(true);
+      try {
+        await supabase.from('messages').insert({
+          guest_id: active.guest_id,
+          guest_name: active.guest,
+          guest_email: active.email,
+          apartment: active.apartment,
+          from_admin: true,
+          body: newMsg.body,
+        });
+      } catch {
+        // Already shown optimistically — fine
+      } finally {
+        setSending(false);
+      }
+    }
   };
 
   return (
-    <div className="mgmt-messages-page">
-      <header className="mgmt-page-head">
-        <span className="mgmt-eyebrow">MESSAGES</span>
-        <h1>Messages</h1>
-        <p className="mgmt-lead">Reply to guest enquiries and booking questions.</p>
+    <div className="ad-messages-page">
+      <header className="ad-page-head">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+          <div>
+            <span className="ad-eyebrow">MESSAGES</span>
+            <h1 style={{ margin: 0 }}>Messages</h1>
+            <p className="ad-lead">Reply to guest enquiries. Guests see your replies instantly.</p>
+          </div>
+          {!usingSupabase && (
+            <div className="ad-setup-notice">
+              <strong>Set up the messages table</strong> to enable real guest ↔ admin messaging.{' '}
+              <a href="https://supabase.com/dashboard" target="_blank" rel="noopener noreferrer">
+                Open Supabase →
+              </a>
+              <div style={{ marginTop: 6, fontSize: 12 }}>
+                Run the SQL in <code>src/pages/admin/AdminMessages.jsx</code> (top of file) in your SQL Editor.
+              </div>
+            </div>
+          )}
+        </div>
       </header>
 
-      <div className="mgmt-messages">
-        {/* Left: conversation list */}
-        <aside className="mgmt-msg-list">
-          <div className="mgmt-msg-search">
-            <Search size={13}/>
+      <div className="ad-messages">
+        {/* Left: list */}
+        <aside className="ad-msg-list">
+          <div className="ad-msg-search">
+            <Search size={13} />
             <input
               type="text" placeholder="Search guests…"
               value={q} onChange={e => setQ(e.target.value)}
             />
+            <button
+              title="Refresh"
+              onClick={loadFromSupabase}
+              style={{ background: 'none', border: 0, cursor: 'pointer', color: '#9aa19d', display: 'flex' }}
+            >
+              <RefreshCw size={13} />
+            </button>
           </div>
 
-          {filtered.length === 0 && (
-            <div className="mgmt-empty"><p>No conversations found.</p></div>
-          )}
+          {filtered.length === 0 && <div className="ad-empty"><p>No conversations.</p></div>}
 
           {filtered.map(c => (
-            <button key={c.id}
-              className={`mgmt-msg-item ${c.id === activeId ? 'active' : ''}`}
-              onClick={() => selectConvo(c.id)}>
-              <div className="mgmt-msg-avatar">{c.avatar}</div>
-              <div className="mgmt-msg-body">
-                <div className="mgmt-msg-top">
-                  <span className="mgmt-msg-name">{c.guest}</span>
-                  <span className="mgmt-msg-time">{formatDistanceToNow(c.lastAt, { addSuffix: false })}</span>
+            <button
+              key={c.id}
+              className={`ad-msg-item${c.id === activeId ? ' active' : ''}`}
+              onClick={() => selectConvo(c.id)}
+            >
+              <div className="ad-msg-avatar">{c.avatar}</div>
+              <div className="ad-msg-body">
+                <div className="ad-msg-top">
+                  <span className="ad-msg-name">{c.guest}</span>
+                  <span className="ad-msg-time">{formatDistanceToNow(c.lastAt, { addSuffix: false })}</span>
                 </div>
-                <div className="mgmt-msg-sub">{c.apt}</div>
-                <div className="mgmt-msg-preview">{c.messages[c.messages.length - 1]?.body}</div>
+                <div className="ad-msg-sub">{c.apartment}</div>
+                <div className="ad-msg-preview">{c.messages[c.messages.length - 1]?.body}</div>
               </div>
-              {c.unread > 0 && <span className="mgmt-msg-unread">{c.unread}</span>}
+              {c.unread > 0 && <span className="ad-msg-unread">{c.unread}</span>}
             </button>
           ))}
         </aside>
 
         {/* Right: thread */}
-        <section className="mgmt-msg-thread-wrap">
+        <section className="ad-msg-thread-wrap">
           {!active ? (
-            <div className="mgmt-empty"><p>Select a conversation.</p></div>
+            <div className="ad-empty"><p>Select a conversation.</p></div>
           ) : (
             <>
-              <div className="mgmt-msg-thread-head">
-                <div className="mgmt-msg-avatar">{active.avatar}</div>
+              <div className="ad-msg-thread-head">
+                <div className="ad-msg-avatar">{active.avatar}</div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div className="mgmt-msg-name">{active.guest}</div>
-                  <div className="mgmt-msg-sub">{active.apt}</div>
+                  <div className="ad-msg-name">{active.guest}</div>
+                  <div className="ad-msg-sub">{active.apartment}{active.email ? ` · ${active.email}` : ''}</div>
                 </div>
-                <div className="mgmt-msg-head-actions">
-                  <a href={`mailto:${active.email}?subject=${encodeURIComponent('Re: Your stay — Home-Office Apartments')}`}
-                    className="mgmt-btn mgmt-btn-outline mgmt-btn-sm" title={active.email}>
-                    <Mail size={13}/> Email
-                  </a>
+                <div className="ad-msg-head-actions">
+                  {active.email && (
+                    <a
+                      href={`mailto:${active.email}?subject=${encodeURIComponent('Re: Your stay — Home-Office Apartments')}`}
+                      className="ad-btn ad-btn-outline ad-btn-sm"
+                    >
+                      <Mail size={13} /> Email
+                    </a>
+                  )}
                   {active.phone && (
-                    <a href={`tel:${active.phone}`}
-                      className="mgmt-btn mgmt-btn-outline mgmt-btn-sm" title={active.phone}>
-                      <Phone size={13}/> Call
+                    <a href={`tel:${active.phone}`} className="ad-btn ad-btn-outline ad-btn-sm">
+                      <Phone size={13} /> Call
                     </a>
                   )}
                 </div>
               </div>
 
-              <div className="mgmt-msg-thread" ref={threadRef}>
-                {active.messages.map(m => (
-                  <div key={m.id} className={`mgmt-msg-bubble ${m.from === 'admin' ? 'me' : 'them'}`}>
+              <div className="ad-msg-thread" ref={threadRef}>
+                {active.messages.map((m, i) => (
+                  <div key={m.id || i} className={`ad-msg-bubble ${m.from_admin ? 'me' : 'them'}`}>
                     <div>{m.body}</div>
-                    <div className="mgmt-msg-at">{formatDistanceToNow(m.at, { addSuffix: true })}</div>
+                    <div className="ad-msg-at">
+                      {m.from_admin ? 'You · ' : `${active.guest.split(' ')[0]} · `}
+                      {formatDistanceToNow(new Date(m.created_at), { addSuffix: true })}
+                    </div>
                   </div>
                 ))}
               </div>
 
-              <form className="mgmt-msg-composer" onSubmit={send}>
+              <form className="ad-msg-composer" onSubmit={send}>
                 <input
                   type="text"
                   placeholder={`Reply to ${active.guest.split(' ')[0]}…`}
                   value={draft}
                   onChange={e => setDraft(e.target.value)}
+                  disabled={sending}
                 />
-                <button type="submit" disabled={!draft.trim()} title="Send reply">
-                  <Send size={15}/>
+                <button type="submit" disabled={!draft.trim() || sending}>
+                  <Send size={15} />
                 </button>
               </form>
             </>

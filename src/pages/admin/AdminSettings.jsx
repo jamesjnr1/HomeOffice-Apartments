@@ -1,173 +1,145 @@
-import { useState } from 'react';
 import { useOutletContext, Navigate } from 'react-router-dom';
-import { Upload, Image, Check, ExternalLink } from 'lucide-react';
-
-/**
- * AdminSettings (owner only)
- * - Role management (SQL instructions)
- * - Site photo management (swap Unsplash placeholders for real photos)
- * - Admin sign-in URL
- */
+import { ExternalLink, Upload } from 'lucide-react';
 
 const PHOTO_SLOTS = [
-  { id: 'hero', label: 'Homepage Hero', desc: 'Full-bleed photo on the homepage', file: 'src/pages/Home.jsx', currentUrl: 'photo-1616486338812-3dadae4b4ace' },
-  { id: 'verandah', label: 'Verandah Apartment', desc: 'Main photo for The Verandah Apartment', file: 'src/pages/dashboard/Overview.jsx', currentUrl: 'photo-1522708323590-d24dbb6b0267' },
-  { id: 'garden', label: 'Garden Apartment', desc: 'Main photo for The Garden Apartment', file: 'src/pages/dashboard/Overview.jsx', currentUrl: 'photo-1560448204-e02f11c3d0e2' },
-  { id: 'signin', label: 'Sign In page photo', desc: 'Left panel of the guest sign-in page', file: 'src/pages/SignIn.jsx', currentUrl: 'photo-1600585154340-be6161a56a0c' },
-  { id: 'gardens-page', label: 'LivingSpring Gardens page', desc: 'Main photo on the Gardens page', file: 'src/pages/Gardens.jsx', currentUrl: 'photo-1600607687939-ce8a6c25118c' },
-  { id: 'book-side', label: 'Booking page sidebar', desc: 'Photo in the enquiry form sidebar', file: 'src/pages/Book.jsx', currentUrl: 'photo-1600585154340-be6161a56a0c' },
+  {
+    id: 'hero',
+    label: 'Homepage Hero',
+    desc: 'Full-bleed photo on the homepage',
+    file: 'src/pages/Home.jsx',
+    url: 'photo-1616486338812-3dadae4b4ace',
+  },
+  {
+    id: 'verandah',
+    label: 'Verandah Apartment',
+    desc: 'Main photo for The Verandah Apartment',
+    file: 'src/pages/dashboard/Overview.jsx',
+    url: 'photo-1522708323590-d24dbb6b0267',
+  },
+  {
+    id: 'garden',
+    label: 'Garden Apartment',
+    desc: 'Main photo for The Garden Apartment',
+    file: 'src/pages/dashboard/Overview.jsx',
+    url: 'photo-1560448204-e02f11c3d0e2',
+  },
+  {
+    id: 'signin',
+    label: 'Sign In page photo',
+    desc: 'Left panel of the guest sign-in page',
+    file: 'src/pages/SignIn.jsx',
+    url: 'photo-1600585154340-be6161a56a0c',
+  },
+  {
+    id: 'gardens-page',
+    label: 'LivingSpring Gardens page',
+    desc: 'Main photo on the Gardens page',
+    file: 'src/pages/Gardens.jsx',
+    url: 'photo-1600607687939-ce8a6c25118c',
+  },
+  {
+    id: 'book-side',
+    label: 'Booking page sidebar',
+    desc: 'Photo in the enquiry form sidebar',
+    file: 'src/pages/Book.jsx',
+    url: 'photo-1600585154340-be6161a56a0c',
+  },
 ];
 
 export default function AdminSettings() {
   const { isOwner } = useOutletContext();
-  if (!isOwner) return <Navigate to="/admin" replace/>;
-
-  const [saved, setSaved] = useState({});
-
-  const saveUrl = (id, url) => {
-    setSaved(prev => ({ ...prev, [id]: url }));
-  };
+  if (!isOwner) return <Navigate to="/admin" replace />;
 
   return (
     <div>
-      <header className="mgmt-page-head">
-        <span className="mgmt-eyebrow">SETTINGS</span>
+      <header className="ad-page-head">
+        <span className="ad-eyebrow">SETTINGS</span>
         <h1>Settings</h1>
-        <p className="mgmt-lead">Manage admin roles, site photos, and configuration.</p>
+        <p className="ad-lead">Update site photos and manage admin access.</p>
       </header>
 
       {/* ── PHOTO MANAGEMENT ── */}
-      <section className="mgmt-card" style={{ marginBottom: 20 }}>
-        <div className="mgmt-card-head">
-          <div>
-            <h2 className="mgmt-card-h">Site photos</h2>
-            <p className="mgmt-card-sub">
-              The site currently uses placeholder photos. Replace them by uploading to a free CDN
-              (Cloudinary or Unsplash) and pasting the URL below, then update the src in the
-              relevant file in your code editor.
-            </p>
-          </div>
-        </div>
+      <section className="ad-card" style={{ marginBottom: 24 }}>
+        <h2 className="ad-card-h">Site photos</h2>
+        <p className="ad-card-sub">
+          The site uses placeholder photos from Unsplash. To use real photos of the property,
+          upload them to <a href="https://cloudinary.com/users/register/free" target="_blank" rel="noopener noreferrer" style={{ color: '#2d6a4f', fontWeight: 500 }}>Cloudinary</a> (free),
+          copy the URL, then replace the src in the file listed under each photo.
+        </p>
 
-        <div className="mgmt-photo-grid">
+        <div className="ad-photo-grid">
           {PHOTO_SLOTS.map(slot => (
-            <div key={slot.id} className="mgmt-photo-slot">
-              <div className="mgmt-photo-preview">
+            <div key={slot.id} className="ad-photo-slot">
+              <div className="ad-photo-preview">
                 <img
-                  src={`https://images.unsplash.com/${slot.currentUrl}?auto=format&fit=crop&w=400&q=60`}
+                  src={`https://images.unsplash.com/${slot.url}?auto=format&fit=crop&w=400&q=60`}
                   alt={slot.label}
                 />
-                <div className="mgmt-photo-overlay">
-                  <Image size={20}/>
-                  <span>Current photo</span>
-                </div>
               </div>
-              <div className="mgmt-photo-info">
-                <div className="mgmt-photo-label">{slot.label}</div>
-                <div className="mgmt-photo-desc">{slot.desc}</div>
-                <div className="mgmt-photo-file">
-                  <code>{slot.file}</code>
-                </div>
+              <div className="ad-photo-info">
+                <div className="ad-photo-label">{slot.label}</div>
+                <div className="ad-photo-desc">{slot.desc}</div>
+                <div className="ad-photo-file"><code>{slot.file}</code></div>
               </div>
-              <div className="mgmt-photo-actions">
+              <div className="ad-photo-actions">
                 <a
                   href="https://cloudinary.com/users/register/free"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mgmt-btn mgmt-btn-outline mgmt-btn-sm"
+                  className="ad-btn ad-btn-primary ad-btn-sm"
                 >
-                  <Upload size={13}/> Upload to Cloudinary
-                  <ExternalLink size={11}/>
+                  <Upload size={12} /> Upload photo
                 </a>
                 <a
-                  href={`https://images.unsplash.com/${slot.currentUrl}?auto=format&fit=crop&w=2400&q=90`}
+                  href={`https://images.unsplash.com/${slot.url}?auto=format&fit=crop&w=2400&q=90`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mgmt-btn mgmt-btn-outline mgmt-btn-sm"
+                  className="ad-btn ad-btn-outline ad-btn-sm"
                 >
-                  View current <ExternalLink size={11}/>
+                  View current <ExternalLink size={11} />
                 </a>
               </div>
             </div>
           ))}
         </div>
 
-        <div className="mgmt-photo-note">
-          <strong>How to swap a photo:</strong>
+        <div className="ad-photo-note">
+          <strong>How to swap a photo in 3 steps</strong>
           <ol>
-            <li>Upload your photo to <a href="https://cloudinary.com" target="_blank" rel="noopener noreferrer">Cloudinary</a> (free) or any image host</li>
-            <li>Copy the direct image URL (ends in .jpg, .png, or /upload/...)</li>
-            <li>Open the file shown above in VS Code or your editor</li>
-            <li>Search for the Unsplash URL and replace it with your photo URL</li>
-            <li>Commit and push — Vercel will redeploy automatically</li>
+            <li>Click "Upload photo" → sign up for Cloudinary free → upload your image → copy the URL it gives you</li>
+            <li>Open the file shown (e.g. <code>src/pages/Home.jsx</code>) in VS Code, press ⌘F, search for the Unsplash URL and replace it with your Cloudinary URL</li>
+            <li>Save → <code>git add . && git commit -m "Update photos" && git push</code> — Vercel deploys automatically in ~30 seconds</li>
           </ol>
         </div>
       </section>
 
-      {/* ── ROLE MANAGEMENT ── */}
-      <section className="mgmt-card" style={{ marginBottom: 20, maxWidth: 720 }}>
-        <h2 className="mgmt-card-h">Admin roles</h2>
-        <p className="mgmt-card-sub">
-          Roles are stored in Supabase on each user's <code>user_metadata</code>.
-          Run the SQL below in your Supabase project's SQL Editor to assign roles.
+      {/* ── ADMIN ACCESS ── */}
+      <section className="ad-card" style={{ maxWidth: 680 }}>
+        <h2 className="ad-card-h">Admin access</h2>
+        <p className="ad-card-sub">
+          To give someone admin access, run this SQL in your{' '}
+          <a href="https://supabase.com/dashboard" target="_blank" rel="noopener noreferrer" style={{ color: '#2d6a4f', fontWeight: 500 }}>
+            Supabase SQL Editor <ExternalLink size={11} style={{ verticalAlign: 'middle' }} />
+          </a>
         </p>
 
-        <div className="mgmt-code-block">
-          <pre>{`-- Make someone an owner (full access):
+        <div className="ad-code-block" style={{ marginBottom: 16 }}>
+          <pre>{`-- Owner (full access including revenue + settings):
 UPDATE auth.users
 SET raw_user_meta_data = raw_user_meta_data || '{"role":"owner"}'::jsonb
 WHERE email = 'james@example.com';
 
--- Make someone a manager (no revenue/settings):
+-- Manager (no revenue or settings):
 UPDATE auth.users
 SET raw_user_meta_data = raw_user_meta_data || '{"role":"manager"}'::jsonb
-WHERE email = 'dad@example.com';
-
--- Remove admin access:
-UPDATE auth.users
-SET raw_user_meta_data = raw_user_meta_data - 'role'
-WHERE email = 'someone@example.com';`}</pre>
+WHERE email = 'dad@example.com';`}</pre>
         </div>
 
-        <div className="mgmt-role-table">
-          <table className="mgmt-table" style={{ marginTop: 20 }}>
-            <thead>
-              <tr>
-                <th>Feature</th>
-                <th>Owner</th>
-                <th>Manager</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                ['Overview', true, true],
-                ['Enquiries', true, true],
-                ['Bookings + calendar', true, true],
-                ['Guests', true, true],
-                ['Messages', true, true],
-                ['Rates (view)', true, true],
-                ['Rates (edit)', true, false],
-                ['Revenue stats', true, false],
-                ['Settings', true, false],
-              ].map(([f, o, m]) => (
-                <tr key={f}>
-                  <td>{f}</td>
-                  <td>{o ? '✅' : '—'}</td>
-                  <td>{m ? '✅' : '—'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      {/* ── ADMIN URL ── */}
-      <section className="mgmt-card" style={{ maxWidth: 720 }}>
-        <h2 className="mgmt-card-h">Admin sign-in URL</h2>
-        <p className="mgmt-card-sub">Share this with anyone who needs admin access:</p>
-        <div className="mgmt-url-chip">
-          {typeof window !== 'undefined' ? window.location.origin : 'https://home-office-apartments.vercel.app'}/admin/signin
-        </div>
+        <p className="ad-card-sub" style={{ margin: 0 }}>
+          Admin sign-in URL: <code style={{ background: '#f4f5f3', padding: '2px 8px', borderRadius: 5, fontSize: 13, color: '#2d6a4f' }}>
+            {typeof window !== 'undefined' ? window.location.origin : 'https://home-office-apartments.vercel.app'}/admin/signin
+          </code>
+        </p>
       </section>
     </div>
   );
