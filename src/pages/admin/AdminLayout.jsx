@@ -140,9 +140,7 @@ export default function AdminLayout() {
             <ArrowLeft size={16}/> Back
           </button>
         )}
-        <div className="ad-page">
-          <Outlet context={{ user, role, isOwner, displayName: name }}/>
-        </div>
+        <Outlet context={{ user, role, isOwner, displayName: name }}/>
       </main>
     </div>
   );
