@@ -476,3 +476,142 @@ body:has(.ad-shell) main { padding: 0 !important; }
 .ad-stat {
   padding: 22px 20px !important;
 }
+/* =====================================================================
+   APPEND TO src/pages/admin/admin.css
+   Definitive spacing + messages layout fix
+   ===================================================================== */
+
+/* ── .mgmt-page wrapper — proper padding for every admin page ── */
+.mgmt-page {
+  padding: 40px 8px 60px !important;
+  min-height: 100%;
+}
+
+/* ── PAGE HEAD — huge margin below so nothing sits on top of the tabs ── */
+.mgmt-page .ad-page-head,
+.ad-main .ad-page-head {
+  margin-bottom: 44px !important;
+  padding-bottom: 0 !important;
+}
+.ad-page-head h1 {
+  margin: 6px 0 10px !important;
+  line-height: 1.2 !important;
+}
+.ad-page-head .ad-eyebrow {
+  margin-bottom: 12px !important;
+  display: inline-block !important;
+}
+.ad-page-head .ad-lead {
+  margin-top: 4px !important;
+  font-size: 14px !important;
+  color: #6a706d !important;
+}
+
+/* ── Back button spacing ── */
+.ad-back-btn {
+  margin-bottom: 32px !important;
+}
+
+/* ── Tabs & search bars — space above so they don't hug the title ── */
+.ad-tabs {
+  margin-top: 8px !important;
+  margin-bottom: 24px !important;
+}
+.ad-search-bar {
+  margin-top: 8px !important;
+  margin-bottom: 20px !important;
+}
+.ad-view-toggle {
+  margin-top: 8px !important;
+  margin-bottom: 24px !important;
+}
+
+/* ── MESSAGES PAGE — proper layout, no broken heights ── */
+.ad-messages-page {
+  display: flex;
+  flex-direction: column;
+}
+.ad-messages {
+  display: grid !important;
+  grid-template-columns: 320px 1fr !important;
+  background: #fff !important;
+  border: 1px solid #e8ebe8 !important;
+  border-radius: 14px !important;
+  overflow: hidden !important;
+  height: calc(100vh - 260px) !important;
+  min-height: 520px !important;
+  max-height: 720px !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,.04) !important;
+}
+@media (max-width: 900px) {
+  .ad-messages {
+    grid-template-columns: 1fr !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+}
+
+/* Message list left column */
+.ad-msg-list {
+  border-right: 1px solid #e8ebe8 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow-y: auto !important;
+  min-height: 0;
+}
+
+/* Thread right column */
+.ad-msg-thread-wrap {
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+.ad-msg-thread {
+  flex: 1 !important;
+  overflow-y: auto !important;
+  min-height: 0 !important;
+}
+
+/* Ensure empty states in messages don't collapse the layout */
+.ad-messages .ad-empty {
+  padding: 40px 20px !important;
+  text-align: center !important;
+  color: #9aa19d !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 200px !important;
+}
+
+/* ── STAT GRID — more space above ── */
+.ad-stat-grid {
+  margin-top: 8px !important;
+  margin-bottom: 36px !important;
+  gap: 16px !important;
+}
+
+/* ── TWO-COL layouts ── */
+.ad-two-col {
+  gap: 20px !important;
+}
+
+/* ── Cards — comfortable padding ── */
+.ad-card {
+  padding: 26px !important;
+}
+.ad-card-flush {
+  padding: 0 !important;
+}
+
+/* ── Kill any stray page-head 3-line wrapping ── */
+.ad-page-head h1 {
+  max-width: 900px !important;
+}
+
+/* Photo grid spacing */
+.ad-photo-grid {
+  gap: 20px !important;
+  margin-top: 20px !important;
+}
