@@ -87,17 +87,17 @@ export default function AdminMessages() {
   };
 
   return (
-    <div className="ad-messages-page">
-      <header className="ad-page-head">
-        <span className="ad-eyebrow">MESSAGES</span>
+    <div className="mgmt-messages-page">
+      <header className="mgmt-page-head">
+        <span className="mgmt-eyebrow">MESSAGES</span>
         <h1>Messages</h1>
-        <p className="ad-lead">Reply to guest enquiries and booking questions.</p>
+        <p className="mgmt-lead">Reply to guest enquiries and booking questions.</p>
       </header>
 
-      <div className="ad-messages">
+      <div className="mgmt-messages">
         {/* Left: conversation list */}
-        <aside className="ad-msg-list">
-          <div className="ad-msg-search">
+        <aside className="mgmt-msg-list">
+          <div className="mgmt-msg-search">
             <Search size={13}/>
             <input
               type="text" placeholder="Search guests…"
@@ -106,63 +106,63 @@ export default function AdminMessages() {
           </div>
 
           {filtered.length === 0 && (
-            <div className="ad-empty"><p>No conversations found.</p></div>
+            <div className="mgmt-empty"><p>No conversations found.</p></div>
           )}
 
           {filtered.map(c => (
             <button key={c.id}
-              className={`ad-msg-item ${c.id === activeId ? 'active' : ''}`}
+              className={`mgmt-msg-item ${c.id === activeId ? 'active' : ''}`}
               onClick={() => selectConvo(c.id)}>
-              <div className="ad-msg-avatar">{c.avatar}</div>
-              <div className="ad-msg-body">
-                <div className="ad-msg-top">
-                  <span className="ad-msg-name">{c.guest}</span>
-                  <span className="ad-msg-time">{formatDistanceToNow(c.lastAt, { addSuffix: false })}</span>
+              <div className="mgmt-msg-avatar">{c.avatar}</div>
+              <div className="mgmt-msg-body">
+                <div className="mgmt-msg-top">
+                  <span className="mgmt-msg-name">{c.guest}</span>
+                  <span className="mgmt-msg-time">{formatDistanceToNow(c.lastAt, { addSuffix: false })}</span>
                 </div>
-                <div className="ad-msg-sub">{c.apt}</div>
-                <div className="ad-msg-preview">{c.messages[c.messages.length - 1]?.body}</div>
+                <div className="mgmt-msg-sub">{c.apt}</div>
+                <div className="mgmt-msg-preview">{c.messages[c.messages.length - 1]?.body}</div>
               </div>
-              {c.unread > 0 && <span className="ad-msg-unread">{c.unread}</span>}
+              {c.unread > 0 && <span className="mgmt-msg-unread">{c.unread}</span>}
             </button>
           ))}
         </aside>
 
         {/* Right: thread */}
-        <section className="ad-msg-thread-wrap">
+        <section className="mgmt-msg-thread-wrap">
           {!active ? (
-            <div className="ad-empty"><p>Select a conversation.</p></div>
+            <div className="mgmt-empty"><p>Select a conversation.</p></div>
           ) : (
             <>
-              <div className="ad-msg-thread-head">
-                <div className="ad-msg-avatar">{active.avatar}</div>
+              <div className="mgmt-msg-thread-head">
+                <div className="mgmt-msg-avatar">{active.avatar}</div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div className="ad-msg-name">{active.guest}</div>
-                  <div className="ad-msg-sub">{active.apt}</div>
+                  <div className="mgmt-msg-name">{active.guest}</div>
+                  <div className="mgmt-msg-sub">{active.apt}</div>
                 </div>
-                <div className="ad-msg-head-actions">
+                <div className="mgmt-msg-head-actions">
                   <a href={`mailto:${active.email}?subject=${encodeURIComponent('Re: Your stay — Home-Office Apartments')}`}
-                    className="ad-btn ad-btn-outline ad-btn-sm" title={active.email}>
+                    className="mgmt-btn mgmt-btn-outline mgmt-btn-sm" title={active.email}>
                     <Mail size={13}/> Email
                   </a>
                   {active.phone && (
                     <a href={`tel:${active.phone}`}
-                      className="ad-btn ad-btn-outline ad-btn-sm" title={active.phone}>
+                      className="mgmt-btn mgmt-btn-outline mgmt-btn-sm" title={active.phone}>
                       <Phone size={13}/> Call
                     </a>
                   )}
                 </div>
               </div>
 
-              <div className="ad-msg-thread" ref={threadRef}>
+              <div className="mgmt-msg-thread" ref={threadRef}>
                 {active.messages.map(m => (
-                  <div key={m.id} className={`ad-msg-bubble ${m.from === 'admin' ? 'me' : 'them'}`}>
+                  <div key={m.id} className={`mgmt-msg-bubble ${m.from === 'admin' ? 'me' : 'them'}`}>
                     <div>{m.body}</div>
-                    <div className="ad-msg-at">{formatDistanceToNow(m.at, { addSuffix: true })}</div>
+                    <div className="mgmt-msg-at">{formatDistanceToNow(m.at, { addSuffix: true })}</div>
                   </div>
                 ))}
               </div>
 
-              <form className="ad-msg-composer" onSubmit={send}>
+              <form className="mgmt-msg-composer" onSubmit={send}>
                 <input
                   type="text"
                   placeholder={`Reply to ${active.guest.split(' ')[0]}…`}

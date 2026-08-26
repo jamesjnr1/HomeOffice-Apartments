@@ -21,59 +21,59 @@ export default function AdminRevenue() {
   const totalNights = BY_APT.reduce((a, b) => a + b.nights, 0);
 
   return (
-    <div className="ad-page">
-      <header className="ad-page-head">
-        <span className="ad-eyebrow">REVENUE</span>
+    <div className="mgmt-page">
+      <header className="mgmt-page-head">
+        <span className="mgmt-eyebrow">REVENUE</span>
         <h1>Revenue overview</h1>
-        <p className="ad-lead">Year-to-date earnings and occupancy for both apartments.</p>
+        <p className="mgmt-lead">Year-to-date earnings and occupancy for both apartments.</p>
       </header>
 
-      <div className="ad-stat-grid">
-        <div className="ad-stat ad-stat-green">
-          <div className="ad-stat-value">GHS {ytd.toLocaleString()}</div>
-          <div className="ad-stat-label">Year-to-date revenue</div>
+      <div className="mgmt-stat-grid">
+        <div className="mgmt-stat mgmt-stat-green">
+          <div className="mgmt-stat-value">GHS {ytd.toLocaleString()}</div>
+          <div className="mgmt-stat-label">Year-to-date revenue</div>
         </div>
-        <div className="ad-stat ad-stat-blue">
-          <div className="ad-stat-value">{totalNights}</div>
-          <div className="ad-stat-label">Total nights booked</div>
+        <div className="mgmt-stat mgmt-stat-blue">
+          <div className="mgmt-stat-value">{totalNights}</div>
+          <div className="mgmt-stat-label">Total nights booked</div>
         </div>
-        <div className="ad-stat ad-stat-purple">
-          <div className="ad-stat-value">54%</div>
-          <div className="ad-stat-label">Avg occupancy (YTD)</div>
+        <div className="mgmt-stat mgmt-stat-purple">
+          <div className="mgmt-stat-value">54%</div>
+          <div className="mgmt-stat-label">Avg occupancy (YTD)</div>
         </div>
       </div>
 
-      <div className="ad-card">
-        <h2 className="ad-card-h">Monthly revenue 2026</h2>
-        <div className="ad-bar-chart">
+      <div className="mgmt-card">
+        <h2 className="mgmt-card-h">Monthly revenue 2026</h2>
+        <div className="mgmt-bar-chart">
           {MONTHS.map(m => (
-            <div key={m.m} className="ad-bar-col">
-              <div className="ad-bar-wrap">
+            <div key={m.m} className="mgmt-bar-col">
+              <div className="mgmt-bar-wrap">
                 <div
-                  className="ad-bar"
+                  className="mgmt-bar"
                   style={{ height: MAX > 0 ? `${(m.v / MAX) * 100}%` : '0%' }}
                   title={`GHS ${m.v.toLocaleString()}`}
                 />
               </div>
-              <div className="ad-bar-label">{m.m}</div>
-              {m.v > 0 && <div className="ad-bar-val">{(m.v/1000).toFixed(1)}k</div>}
+              <div className="mgmt-bar-label">{m.m}</div>
+              {m.v > 0 && <div className="mgmt-bar-val">{(m.v/1000).toFixed(1)}k</div>}
             </div>
           ))}
         </div>
       </div>
 
-      <div className="ad-card" style={{ marginTop: 20 }}>
-        <h2 className="ad-card-h">Per apartment</h2>
-        <div className="ad-table-wrap">
-          <table className="ad-table">
+      <div className="mgmt-card" style={{ marginTop: 20 }}>
+        <h2 className="mgmt-card-h">Per apartment</h2>
+        <div className="mgmt-table-wrap">
+          <table className="mgmt-table">
             <thead><tr><th>Apartment</th><th>Nights booked</th><th>Revenue</th><th>Occupancy</th></tr></thead>
             <tbody>
               {BY_APT.map(a => (
                 <tr key={a.apt}>
-                  <td className="ad-td-primary">{a.apt}</td>
+                  <td className="mgmt-td-primary">{a.apt}</td>
                   <td>{a.nights}</td>
                   <td>GHS {a.revenue.toLocaleString()}</td>
-                  <td><span className="ad-occ-pill">{a.occupancy}</span></td>
+                  <td><span className="mgmt-occ-pill">{a.occupancy}</span></td>
                 </tr>
               ))}
             </tbody>

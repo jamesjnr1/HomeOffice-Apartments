@@ -30,18 +30,18 @@ export default function AdminSettings() {
 
   return (
     <div>
-      <header className="ad-page-head">
-        <span className="ad-eyebrow">SETTINGS</span>
+      <header className="mgmt-page-head">
+        <span className="mgmt-eyebrow">SETTINGS</span>
         <h1>Settings</h1>
-        <p className="ad-lead">Manage admin roles, site photos, and configuration.</p>
+        <p className="mgmt-lead">Manage admin roles, site photos, and configuration.</p>
       </header>
 
       {/* ── PHOTO MANAGEMENT ── */}
-      <section className="ad-card" style={{ marginBottom: 20 }}>
-        <div className="ad-card-head">
+      <section className="mgmt-card" style={{ marginBottom: 20 }}>
+        <div className="mgmt-card-head">
           <div>
-            <h2 className="ad-card-h">Site photos</h2>
-            <p className="ad-card-sub">
+            <h2 className="mgmt-card-h">Site photos</h2>
+            <p className="mgmt-card-sub">
               The site currently uses placeholder photos. Replace them by uploading to a free CDN
               (Cloudinary or Unsplash) and pasting the URL below, then update the src in the
               relevant file in your code editor.
@@ -49,32 +49,32 @@ export default function AdminSettings() {
           </div>
         </div>
 
-        <div className="ad-photo-grid">
+        <div className="mgmt-photo-grid">
           {PHOTO_SLOTS.map(slot => (
-            <div key={slot.id} className="ad-photo-slot">
-              <div className="ad-photo-preview">
+            <div key={slot.id} className="mgmt-photo-slot">
+              <div className="mgmt-photo-preview">
                 <img
                   src={`https://images.unsplash.com/${slot.currentUrl}?auto=format&fit=crop&w=400&q=60`}
                   alt={slot.label}
                 />
-                <div className="ad-photo-overlay">
+                <div className="mgmt-photo-overlay">
                   <Image size={20}/>
                   <span>Current photo</span>
                 </div>
               </div>
-              <div className="ad-photo-info">
-                <div className="ad-photo-label">{slot.label}</div>
-                <div className="ad-photo-desc">{slot.desc}</div>
-                <div className="ad-photo-file">
+              <div className="mgmt-photo-info">
+                <div className="mgmt-photo-label">{slot.label}</div>
+                <div className="mgmt-photo-desc">{slot.desc}</div>
+                <div className="mgmt-photo-file">
                   <code>{slot.file}</code>
                 </div>
               </div>
-              <div className="ad-photo-actions">
+              <div className="mgmt-photo-actions">
                 <a
                   href="https://cloudinary.com/users/register/free"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="ad-btn ad-btn-outline ad-btn-sm"
+                  className="mgmt-btn mgmt-btn-outline mgmt-btn-sm"
                 >
                   <Upload size={13}/> Upload to Cloudinary
                   <ExternalLink size={11}/>
@@ -83,7 +83,7 @@ export default function AdminSettings() {
                   href={`https://images.unsplash.com/${slot.currentUrl}?auto=format&fit=crop&w=2400&q=90`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="ad-btn ad-btn-outline ad-btn-sm"
+                  className="mgmt-btn mgmt-btn-outline mgmt-btn-sm"
                 >
                   View current <ExternalLink size={11}/>
                 </a>
@@ -92,7 +92,7 @@ export default function AdminSettings() {
           ))}
         </div>
 
-        <div className="ad-photo-note">
+        <div className="mgmt-photo-note">
           <strong>How to swap a photo:</strong>
           <ol>
             <li>Upload your photo to <a href="https://cloudinary.com" target="_blank" rel="noopener noreferrer">Cloudinary</a> (free) or any image host</li>
@@ -105,14 +105,14 @@ export default function AdminSettings() {
       </section>
 
       {/* ── ROLE MANAGEMENT ── */}
-      <section className="ad-card" style={{ marginBottom: 20, maxWidth: 720 }}>
-        <h2 className="ad-card-h">Admin roles</h2>
-        <p className="ad-card-sub">
+      <section className="mgmt-card" style={{ marginBottom: 20, maxWidth: 720 }}>
+        <h2 className="mgmt-card-h">Admin roles</h2>
+        <p className="mgmt-card-sub">
           Roles are stored in Supabase on each user's <code>user_metadata</code>.
           Run the SQL below in your Supabase project's SQL Editor to assign roles.
         </p>
 
-        <div className="ad-code-block">
+        <div className="mgmt-code-block">
           <pre>{`-- Make someone an owner (full access):
 UPDATE auth.users
 SET raw_user_meta_data = raw_user_meta_data || '{"role":"owner"}'::jsonb
@@ -129,8 +129,8 @@ SET raw_user_meta_data = raw_user_meta_data - 'role'
 WHERE email = 'someone@example.com';`}</pre>
         </div>
 
-        <div className="ad-role-table">
-          <table className="ad-table" style={{ marginTop: 20 }}>
+        <div className="mgmt-role-table">
+          <table className="mgmt-table" style={{ marginTop: 20 }}>
             <thead>
               <tr>
                 <th>Feature</th>
@@ -162,10 +162,10 @@ WHERE email = 'someone@example.com';`}</pre>
       </section>
 
       {/* ── ADMIN URL ── */}
-      <section className="ad-card" style={{ maxWidth: 720 }}>
-        <h2 className="ad-card-h">Admin sign-in URL</h2>
-        <p className="ad-card-sub">Share this with anyone who needs admin access:</p>
-        <div className="ad-url-chip">
+      <section className="mgmt-card" style={{ maxWidth: 720 }}>
+        <h2 className="mgmt-card-h">Admin sign-in URL</h2>
+        <p className="mgmt-card-sub">Share this with anyone who needs admin access:</p>
+        <div className="mgmt-url-chip">
           {typeof window !== 'undefined' ? window.location.origin : 'https://home-office-apartments.vercel.app'}/admin/signin
         </div>
       </section>

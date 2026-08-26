@@ -35,10 +35,10 @@ export default function AdminLayout() {
   const signOut = async () => { await supabase.auth.signOut(); navigate('/'); };
 
   if (loading) return (
-    <div className="ad-loading">
-      <div className="ad-brand-link">
-        <span className="ad-brand-mark"><Shield size={15}/></span>
-        <span className="ad-brand-title">Admin</span>
+    <div className="mgmt-loading">
+      <div className="mgmt-brand-link">
+        <span className="mgmt-brand-mark"><Shield size={15}/></span>
+        <span className="mgmt-brand-title">Admin</span>
       </div>
       <p>Verifying access…</p>
     </div>
@@ -63,52 +63,52 @@ export default function AdminLayout() {
   ];
 
   return (
-    <div className="ad-shell">
-      <div className="ad-mobile-bar">
-        <a href="/admin" className="ad-brand-link">
-          <span className="ad-brand-mark"><Shield size={14}/></span>
-          <span className="ad-brand-title">Admin</span>
+    <div className="mgmt-shell">
+      <div className="mgmt-mobile-bar">
+        <a href="/admin" className="mgmt-brand-link">
+          <span className="mgmt-brand-mark"><Shield size={14}/></span>
+          <span className="mgmt-brand-title">Admin</span>
         </a>
-        <button className="ad-icon-btn" onClick={() => setOpen(true)} aria-label="Open menu">
+        <button className="mgmt-icon-btn" onClick={() => setOpen(true)} aria-label="Open menu">
           <Menu size={20}/>
         </button>
       </div>
 
-      <aside className={`ad-sidebar${open ? ' open' : ''}`}>
-        <div className="ad-sidebar-top">
-          <a href="/admin" className="ad-brand-link">
-            <span className="ad-brand-mark"><Shield size={14}/></span>
-            <div className="ad-brand-text">
-              <span className="ad-brand-title">Admin</span>
-              <span className="ad-brand-sub">HomeOffice · LivingSpring</span>
+      <aside className={`mgmt-sidebar${open ? ' open' : ''}`}>
+        <div className="mgmt-sidebar-top">
+          <a href="/admin" className="mgmt-brand-link">
+            <span className="mgmt-brand-mark"><Shield size={14}/></span>
+            <div className="mgmt-brand-text">
+              <span className="mgmt-brand-title">Admin</span>
+              <span className="mgmt-brand-sub">HomeOffice · LivingSpring</span>
             </div>
           </a>
-          <button className="ad-icon-btn ad-close-btn" onClick={() => setOpen(false)} aria-label="Close">
+          <button className="mgmt-icon-btn mgmt-close-btn" onClick={() => setOpen(false)} aria-label="Close">
             <X size={20}/>
           </button>
         </div>
 
-        <div className="ad-nav-block">
-          <p className="ad-nav-label">MANAGE</p>
+        <div className="mgmt-nav-block">
+          <p className="mgmt-nav-label">MANAGE</p>
           <nav>
             {NAV.map(({ to, icon: Icon, label, badge, end }) => (
               <NavLink key={to} to={to} end={!!end}
-                className={({ isActive }) => `ad-nav-link${isActive ? ' active' : ''}`}
+                className={({ isActive }) => `mgmt-nav-link${isActive ? ' active' : ''}`}
                 onClick={() => setOpen(false)}>
                 <Icon size={16}/> <span>{label}</span>
-                {badge && <span className="ad-badge">{badge}</span>}
+                {badge && <span className="mgmt-badge">{badge}</span>}
               </NavLink>
             ))}
           </nav>
         </div>
 
         {isOwner && (
-          <div className="ad-nav-block">
-            <p className="ad-nav-label">OWNER ONLY</p>
+          <div className="mgmt-nav-block">
+            <p className="mgmt-nav-label">OWNER ONLY</p>
             <nav>
               {OWNER_NAV.map(({ to, icon: Icon, label }) => (
                 <NavLink key={to} to={to}
-                  className={({ isActive }) => `ad-nav-link${isActive ? ' active' : ''}`}
+                  className={({ isActive }) => `mgmt-nav-link${isActive ? ' active' : ''}`}
                   onClick={() => setOpen(false)}>
                   <Icon size={16}/> <span>{label}</span>
                 </NavLink>
@@ -117,26 +117,26 @@ export default function AdminLayout() {
           </div>
         )}
 
-        <div className="ad-sidebar-foot">
-          <div className="ad-user-row">
-            <div className="ad-avatar-sm">{initial}</div>
-            <div className="ad-user-info">
-              <span className="ad-user-name">{name}</span>
-              <span className={`ad-role-pill ${role}`}>{role}</span>
+        <div className="mgmt-sidebar-foot">
+          <div className="mgmt-user-row">
+            <div className="mgmt-avatar-sm">{initial}</div>
+            <div className="mgmt-user-info">
+              <span className="mgmt-user-name">{name}</span>
+              <span className={`mgmt-role-pill ${role}`}>{role}</span>
             </div>
           </div>
-          <button className="ad-signout-btn" onClick={signOut}>
+          <button className="mgmt-signout-btn" onClick={signOut}>
             <LogOut size={14}/> Sign out
           </button>
         </div>
       </aside>
 
-      {open && <div className="ad-backdrop" onClick={() => setOpen(false)}/>}
+      {open && <div className="mgmt-backdrop" onClick={() => setOpen(false)}/>}
 
-      <main className="ad-main">
+      <main className="mgmt-main">
         {/* Back button — shows on every page except the root overview */}
         {!isRoot && (
-          <button className="ad-back-btn" onClick={() => navigate(-1)}>
+          <button className="mgmt-back-btn" onClick={() => navigate(-1)}>
             <ArrowLeft size={16}/> Back
           </button>
         )}

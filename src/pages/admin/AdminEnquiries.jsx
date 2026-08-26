@@ -23,61 +23,61 @@ export default function AdminEnquiries() {
   const remove = (id) => setEnquiries(prev => prev.filter(e => e.id !== id));
 
   return (
-    <div className="ad-page">
-      <header className="ad-page-head">
-        <span className="ad-eyebrow">ENQUIRIES</span>
+    <div className="mgmt-page">
+      <header className="mgmt-page-head">
+        <span className="mgmt-eyebrow">ENQUIRIES</span>
         <h1>Enquiries inbox</h1>
-        <p className="ad-lead">Every booking request submitted through the site.</p>
+        <p className="mgmt-lead">Every booking request submitted through the site.</p>
       </header>
 
-      <div className="ad-tabs">
+      <div className="mgmt-tabs">
         {TABS.map(t => (
-          <button key={t} className={`ad-tab ${tab === t ? 'active' : ''}`} onClick={() => setTab(t)}>
+          <button key={t} className={`mgmt-tab ${tab === t ? 'active' : ''}`} onClick={() => setTab(t)}>
             {t.charAt(0).toUpperCase() + t.slice(1)}
-            <span className="ad-tab-count">{counts[t]}</span>
+            <span className="mgmt-tab-count">{counts[t]}</span>
           </button>
         ))}
       </div>
 
-      <div className="ad-card ad-card-flush">
+      <div className="mgmt-card mgmt-card-flush">
         {filtered.length === 0 ? (
-          <div className="ad-empty"><p>No enquiries in this category.</p></div>
+          <div className="mgmt-empty"><p>No enquiries in this category.</p></div>
         ) : (
-          <div className="ad-table-wrap">
-            <table className="ad-table">
+          <div className="mgmt-table-wrap">
+            <table className="mgmt-table">
               <thead>
                 <tr><th>Guest</th><th>Apartment</th><th>Dates</th><th>Guests</th><th>Status</th><th>Received</th><th></th></tr>
               </thead>
               <tbody>
                 {filtered.map(e => (
                   <>
-                    <tr key={e.id} className={`ad-tr-click ${expanded === e.id ? 'expanded' : ''}`} onClick={() => setExpanded(expanded === e.id ? null : e.id)}>
-                      <td><div className="ad-td-primary">{e.name}</div><div className="ad-td-sub">{e.email}</div></td>
+                    <tr key={e.id} className={`mgmt-tr-click ${expanded === e.id ? 'expanded' : ''}`} onClick={() => setExpanded(expanded === e.id ? null : e.id)}>
+                      <td><div className="mgmt-td-primary">{e.name}</div><div className="mgmt-td-sub">{e.email}</div></td>
                       <td>{e.apt}</td>
                       <td>{e.checkIn} → {e.checkOut}</td>
                       <td>{e.guests}</td>
-                      <td><span className={`ad-status ${e.status}`}>{e.status}</span></td>
-                      <td className="ad-td-muted">{e.at}</td>
+                      <td><span className={`mgmt-status ${e.status}`}>{e.status}</span></td>
+                      <td className="mgmt-td-muted">{e.at}</td>
                       <td>
-                        <div className="ad-row-actions" onClick={ev => ev.stopPropagation()}>
+                        <div className="mgmt-row-actions" onClick={ev => ev.stopPropagation()}>
                           <button title="Mark replied" onClick={() => act(e.id,'replied')}><Check size={14}/></button>
                           <button title="Archive" onClick={() => act(e.id,'archived')}><Archive size={14}/></button>
-                          <button title="Delete" onClick={() => remove(e.id)} className="ad-action-danger"><Trash2 size={14}/></button>
+                          <button title="Delete" onClick={() => remove(e.id)} className="mgmt-action-danger"><Trash2 size={14}/></button>
                         </div>
                       </td>
                     </tr>
                     {expanded === e.id && (
-                      <tr key={`${e.id}-exp`} className="ad-tr-expanded">
+                      <tr key={`${e.id}-exp`} className="mgmt-tr-expanded">
                         <td colSpan={7}>
-                          <div className="ad-expanded-body">
+                          <div className="mgmt-expanded-body">
                             {e.message && <p><strong>Message:</strong> {e.message}</p>}
                             {e.phone && <p><strong>Phone:</strong> {e.phone}</p>}
-                            <div className="ad-expanded-actions">
-                              <a className="ad-btn ad-btn-primary" href={`mailto:${e.email}?subject=Re: Your enquiry for ${e.apt} Apartment`}>
+                            <div className="mgmt-expanded-actions">
+                              <a className="mgmt-btn mgmt-btn-primary" href={`mailto:${e.email}?subject=Re: Your enquiry for ${e.apt} Apartment`}>
                                 <Reply size={14}/> Reply by email
                               </a>
                               {e.phone && (
-                                <a className="ad-btn ad-btn-outline" href={`tel:${e.phone}`}>
+                                <a className="mgmt-btn mgmt-btn-outline" href={`tel:${e.phone}`}>
                                   Call
                                 </a>
                               )}
