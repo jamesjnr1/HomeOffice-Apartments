@@ -1,17 +1,16 @@
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import {
   LayoutDashboard, Inbox, CalendarDays, Users,
   MessageSquare, Tag, TrendingUp, Settings as Cog,
-  LogOut, Menu, X, Shield,
+  LogOut, Menu, X, Shield, ArrowLeft,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-
-// Inline all admin styles so globals.css cannot interfere
 import './admin.css';
 
 export default function AdminLayout() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [user, setUser] = useState(null);
   const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -37,8 +36,8 @@ export default function AdminLayout() {
 
   if (loading) return (
     <div className="ad-loading">
-      <div className="ad-brand-loading">
-        <span className="ad-brand-mark"><Shield size={15} /></span>
+      <div className="ad-brand-link">
+        <span className="ad-brand-mark"><Shield size={15}/></span>
         <span className="ad-brand-title">Admin</span>
       </div>
       <p>Verifying access…</p>
@@ -48,6 +47,7 @@ export default function AdminLayout() {
   const name = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Admin';
   const isOwner = role === 'owner';
   const initial = name.charAt(0).toUpperCase();
+  const isRoot = location.pathname === '/admin';
 
   const NAV = [
     { to: '/admin', icon: LayoutDashboard, label: 'Overview', end: true },
@@ -64,29 +64,27 @@ export default function AdminLayout() {
 
   return (
     <div className="ad-shell">
-      {/* Mobile bar - only shows on small screens */}
       <div className="ad-mobile-bar">
         <a href="/admin" className="ad-brand-link">
-          <span className="ad-brand-mark"><Shield size={14} /></span>
+          <span className="ad-brand-mark"><Shield size={14}/></span>
           <span className="ad-brand-title">Admin</span>
         </a>
         <button className="ad-icon-btn" onClick={() => setOpen(true)} aria-label="Open menu">
-          <Menu size={20} />
+          <Menu size={20}/>
         </button>
       </div>
 
-      {/* Sidebar */}
       <aside className={`ad-sidebar${open ? ' open' : ''}`}>
         <div className="ad-sidebar-top">
           <a href="/admin" className="ad-brand-link">
-            <span className="ad-brand-mark"><Shield size={14} /></span>
+            <span className="ad-brand-mark"><Shield size={14}/></span>
             <div className="ad-brand-text">
               <span className="ad-brand-title">Admin</span>
               <span className="ad-brand-sub">HomeOffice · LivingSpring</span>
             </div>
           </a>
           <button className="ad-icon-btn ad-close-btn" onClick={() => setOpen(false)} aria-label="Close">
-            <X size={20} />
+            <X size={20}/>
           </button>
         </div>
 
@@ -94,9 +92,10 @@ export default function AdminLayout() {
           <p className="ad-nav-label">MANAGE</p>
           <nav>
             {NAV.map(({ to, icon: Icon, label, badge, end }) => (
-              <NavLink key={to} to={to} end={!!end} className={({ isActive }) => `ad-nav-link${isActive ? ' active' : ''}`} onClick={() => setOpen(false)}>
-                <Icon size={16} />
-                <span>{label}</span>
+              <NavLink key={to} to={to} end={!!end}
+                className={({ isActive }) => `ad-nav-link${isActive ? ' active' : ''}`}
+                onClick={() => setOpen(false)}>
+                <Icon size={16}/> <span>{label}</span>
                 {badge && <span className="ad-badge">{badge}</span>}
               </NavLink>
             ))}
@@ -108,9 +107,10 @@ export default function AdminLayout() {
             <p className="ad-nav-label">OWNER ONLY</p>
             <nav>
               {OWNER_NAV.map(({ to, icon: Icon, label }) => (
-                <NavLink key={to} to={to} className={({ isActive }) => `ad-nav-link${isActive ? ' active' : ''}`} onClick={() => setOpen(false)}>
-                  <Icon size={16} />
-                  <span>{label}</span>
+                <NavLink key={to} to={to}
+                  className={({ isActive }) => `ad-nav-link${isActive ? ' active' : ''}`}
+                  onClick={() => setOpen(false)}>
+                  <Icon size={16}/> <span>{label}</span>
                 </NavLink>
               ))}
             </nav>
@@ -126,15 +126,23 @@ export default function AdminLayout() {
             </div>
           </div>
           <button className="ad-signout-btn" onClick={signOut}>
-            <LogOut size={14} /> Sign out
+            <LogOut size={14}/> Sign out
           </button>
         </div>
       </aside>
 
-      {open && <div className="ad-backdrop" onClick={() => setOpen(false)} />}
+      {open && <div className="ad-backdrop" onClick={() => setOpen(false)}/>}
 
       <main className="ad-main">
-        <Outlet context={{ user, role, isOwner, displayName: name }} />
+        {/* Back button — shows on every page except the root overview */}
+        {!isRoot && (
+          <button className="ad-back-btn" onClick={() => navigate(-1)}>
+            <ArrowLeft size={16}/> Back
+          </button>
+        )}
+        <div className="ad-page">
+          <Outlet context={{ user, role, isOwner, displayName: name }}/>
+        </div>
       </main>
     </div>
   );
