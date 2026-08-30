@@ -31,13 +31,6 @@ const PHOTO_SLOTS = [
     url: 'photo-1600585154340-be6161a56a0c',
   },
   {
-    id: 'gardens-page',
-    label: 'LivingSpring Gardens page',
-    desc: 'Main photo on the Gardens page',
-    file: 'src/pages/Gardens.jsx',
-    url: 'photo-1600607687939-ce8a6c25118c',
-  },
-  {
     id: 'book-side',
     label: 'Booking page sidebar',
     desc: 'Photo in the enquiry form sidebar',

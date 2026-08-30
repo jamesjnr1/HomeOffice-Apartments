@@ -41,8 +41,11 @@ export default function Home() {
             <span className="eyebrow">A HOME AWAY FROM HOME</span>
             <h2>Warm timber. Cool tile. A shaded verandah for morning coffee.</h2>
             <p className="prose">
-              A self-contained apartment in a peaceful compound in Sunyani, built for the way you
-              work from home and the way you rest. It opens onto the gardens.
+              Warm timber and cool tile welcome you into a space of comfort, while a shaded
+              verandah invites you to savor your morning coffee. Beyond the walls, serene,
+              well‑hewn lawns stretch across LivingSpring Gardens, offering a refreshing escape
+              into nature. Here, convenience meets tranquility—perfect for relaxation, reflection,
+              rest, and memorable holidays.
             </p>
             <Link to="/apartments" className="link-arrow">
               Explore the apartments <ArrowRight size={14} />
@@ -70,18 +73,18 @@ export default function Home() {
               </div>
             </Link>
 
-            <Link to="/gardens" className="teaser-card reveal">
+            <Link to="/gallery" className="teaser-card reveal">
               <div className="teaser-img">
                 <img
-                  src="/images/hero-property.jpg"
-                  alt="LivingSpring Gardens"
+                  src="/images/dining-kitchenette.jpg"
+                  alt="Inside Home-Office Apartments"
                 />
               </div>
               <div className="teaser-body">
-                <span className="eyebrow">LIVINGSPRING GARDENS</span>
-                <h3>The garden they open onto.</h3>
-                <p className="prose">A private, landscaped garden inside the compound — mature trees, lit stone paths, and a small pavilion.</p>
-                <span className="link-arrow">Walk the gardens <ArrowRight size={14} /></span>
+                <span className="eyebrow">TAKE A LOOK INSIDE</span>
+                <h3>Every room, well considered.</h3>
+                <p className="prose">Four bedrooms, a full kitchen, and living spaces built for a proper stay.</p>
+                <span className="link-arrow">See the gallery <ArrowRight size={14} /></span>
               </div>
             </Link>
           </div>

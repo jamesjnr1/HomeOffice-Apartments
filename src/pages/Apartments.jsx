@@ -34,7 +34,7 @@ export default function Apartments() {
             </div>
             <div className="reveal">
               <img
-                src="/images/lounge.jpg"
+                src="/images/kitchen.jpg"
                 alt="Dedicated workspace"
                 className="rounded-img"
               />
