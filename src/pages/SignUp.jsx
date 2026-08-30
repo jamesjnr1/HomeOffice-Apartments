@@ -67,9 +67,9 @@ export default function SignUp() {
           <Link to="/" className="auth-mono" aria-label="Home">
             <span className="auth-mono-dot">H</span>
             <span className="auth-mono-name">
-              Home-Office
+              Home-Office Apartments
               <span className="auth-mono-sub">
-                Living<span className="brand-accent">Spring</span> Gardens
+                and Living<span className="brand-accent">Spring</span> Gardens
               </span>
             </span>
           </Link>
