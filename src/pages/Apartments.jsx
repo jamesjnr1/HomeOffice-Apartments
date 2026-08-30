@@ -17,28 +17,19 @@ export default function Apartments() {
         </div>
       </section>
 
-      <section className="section">
+      <section className="section section-narrow">
         <div className="container">
-          <div className="two-col">
-            <div className="reveal">
-              <span className="eyebrow">DESIGNED FOR REMOTE WORK</span>
-              <h2>Everything you need to focus.</h2>
-              <p className="prose">
-                Fast fibre Wi-Fi, a dedicated desk with a comfortable chair, and quiet corners
-                for calls. The apartment is set back from the road, so noise stays where it belongs.
-              </p>
-              <p className="prose">
-                When the workday ends, the kitchen is stocked with the basics, the shower is powerful,
-                and the verandah is the best seat in the house.
-              </p>
-            </div>
-            <div className="reveal">
-              <img
-                src="/images/kitchen.jpg"
-                alt="Dedicated workspace"
-                className="rounded-img"
-              />
-            </div>
+          <div className="intro-v2 reveal">
+            <span className="eyebrow">DESIGNED FOR REMOTE WORK</span>
+            <h2>Everything you need to focus.</h2>
+            <p className="prose">
+              Fast fibre Wi-Fi, a dedicated desk with a comfortable chair, and quiet corners
+              for calls. The apartment is set back from the road, so noise stays where it belongs.
+            </p>
+            <p className="prose">
+              When the workday ends, the kitchen is stocked with the basics, the shower is powerful,
+              and the verandah is the best seat in the house.
+            </p>
           </div>
         </div>
       </section>
@@ -81,10 +72,26 @@ export default function Apartments() {
             <h2>Simple pricing, better for longer stays.</h2>
           </div>
 
-          <div className="features-grid">
-            <Feature icon={<Wifi />} title="$41 / night">Base rate per flat, all-inclusive of the amenities above.</Feature>
-            <Feature icon={<Coffee />} title="$10 off">Book a 5-night stay and save $10 off the total.</Feature>
-            <Feature icon={<Trees />} title="20% off">Book 28–30 nights and save 20% off the total.</Feature>
+          <div className="rate-cards">
+            <RateCard
+              eyebrow="Standard"
+              price="$41"
+              unit="/ night"
+              desc="The base rate per flat, all-inclusive of the amenities above."
+            />
+            <RateCard
+              eyebrow="5-night stays"
+              price="$10"
+              unit="off"
+              desc="Book 5 nights or more and save $10 off your total."
+            />
+            <RateCard
+              eyebrow="28–30 night stays"
+              price="20%"
+              unit="off"
+              desc="Book a full month and save 20% off your total."
+              featured
+            />
           </div>
         </div>
       </section>
@@ -110,6 +117,20 @@ function Feature({ icon, title, children }) {
       <div className="feature-icon">{icon}</div>
       <h3>{title}</h3>
       <p>{children}</p>
+    </div>
+  );
+}
+
+function RateCard({ eyebrow, price, unit, desc, featured }) {
+  return (
+    <div className={`rate-card reveal${featured ? ' featured' : ''}`}>
+      {featured && <span className="rate-badge">Best for long stays</span>}
+      <span className="rate-card-eyebrow">{eyebrow}</span>
+      <div className="rate-card-price">
+        {price}
+        <span className="rate-card-unit">{unit}</span>
+      </div>
+      <p className="rate-card-desc">{desc}</p>
     </div>
   );
 }
