@@ -8,7 +8,7 @@ export default function Home() {
       <section className="hero-v2">
         <div className="hero-v2-bg" aria-hidden="true">
           <img
-            src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=2400&q=90"
+            src="/images/hero-property.jpg"
             alt="Home-Office Apartments — a considered stay"
           />
           <div className="hero-v2-scrim" />
