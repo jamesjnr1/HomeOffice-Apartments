@@ -1,22 +1,39 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Search } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
 
-const GUESTS = [
-  { id:1, name:'Jonathan Duah', email:'james@example.com', joined:'2026-08-10', bookings:2, spent:5260 },
-  { id:2, name:'Esi Boateng', email:'esi@example.com', joined:'2026-08-20', bookings:1, spent:960 },
-  { id:3, name:'Nana Adjei', email:'nana@example.com', joined:'2026-08-22', bookings:1, spent:2480 },
-  { id:4, name:'Abena Mensah', email:'abena@example.com', joined:'2026-07-05', bookings:3, spent:7680 },
-  { id:5, name:'Kofi Asante', email:'kofi@example.com', joined:'2026-08-24', bookings:0, spent:0 },
-  { id:6, name:'Ama Darko', email:'ama@example.com', joined:'2026-08-24', bookings:0, spent:0 },
-  { id:7, name:'Emmanuel Owusu', email:'eo@example.com', joined:'2026-09-01', bookings:1, spent:2160 },
-  { id:8, name:'Grace Ofori', email:'grace@example.com', joined:'2026-09-03', bookings:1, spent:1440 },
-];
+/**
+ * AdminGuests — real registered guests, from the `profiles` table.
+ * `profiles` is kept in sync with `auth.users` by a database trigger
+ * (see supabase/migrations/20260830120000_guest_profiles_directory.sql).
+ *
+ * Booking counts / total spent aren't shown yet — there's no real
+ * `bookings` table wired up on the live schema, and showing fake
+ * numbers next to real guest data would be misleading.
+ */
 
 export default function AdminGuests() {
+  const [guests, setGuests] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [q, setQ] = useState('');
-  const filtered = GUESTS.filter(g =>
-    g.name.toLowerCase().includes(q.toLowerCase()) ||
-    g.email.toLowerCase().includes(q.toLowerCase())
+
+  useEffect(() => {
+    loadGuests();
+  }, []);
+
+  const loadGuests = async () => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (!error && data) setGuests(data);
+    setLoading(false);
+  };
+
+  const filtered = guests.filter((g) =>
+    (g.full_name || '').toLowerCase().includes(q.toLowerCase()) ||
+    (g.email || '').toLowerCase().includes(q.toLowerCase())
   );
 
   return (
@@ -28,34 +45,47 @@ export default function AdminGuests() {
       </header>
 
       <div className="mgmt-search-bar">
-        <Search size={15}/>
-        <input type="text" placeholder="Search by name or email…" value={q} onChange={e => setQ(e.target.value)}/>
+        <Search size={15} />
+        <input
+          type="text"
+          placeholder="Search by name or email…"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+        />
       </div>
 
       <div className="mgmt-card mgmt-card-flush">
-        <div className="mgmt-table-wrap">
-          <table className="mgmt-table">
-            <thead>
-              <tr><th>Name</th><th>Email</th><th>Joined</th><th>Bookings</th><th>Total spent</th></tr>
-            </thead>
-            <tbody>
-              {filtered.map(g => (
-                <tr key={g.id}>
-                  <td>
-                    <div className="mgmt-guest-row">
-                      <div className="mgmt-guest-av">{g.name.charAt(0)}</div>
-                      <div className="mgmt-td-primary">{g.name}</div>
-                    </div>
-                  </td>
-                  <td className="mgmt-td-sub">{g.email}</td>
-                  <td className="mgmt-td-muted">{g.joined}</td>
-                  <td>{g.bookings}</td>
-                  <td>{g.spent > 0 ? `GHS ${g.spent.toLocaleString()}` : '—'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        {loading ? (
+          <div className="mgmt-empty"><p>Loading guests…</p></div>
+        ) : filtered.length === 0 ? (
+          <div className="mgmt-empty"><p>No guests yet.</p></div>
+        ) : (
+          <div className="mgmt-table-wrap">
+            <table className="mgmt-table">
+              <thead>
+                <tr><th>Name</th><th>Email</th><th>Joined</th></tr>
+              </thead>
+              <tbody>
+                {filtered.map((g) => (
+                  <tr key={g.id}>
+                    <td>
+                      <div className="mgmt-guest-row">
+                        <div className="mgmt-guest-av">
+                          {(g.full_name || g.email || '?').charAt(0).toUpperCase()}
+                        </div>
+                        <div className="mgmt-td-primary">{g.full_name || 'Guest'}</div>
+                      </div>
+                    </td>
+                    <td className="mgmt-td-sub">{g.email || '—'}</td>
+                    <td className="mgmt-td-muted">
+                      {g.created_at ? new Date(g.created_at).toLocaleDateString() : '—'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );
