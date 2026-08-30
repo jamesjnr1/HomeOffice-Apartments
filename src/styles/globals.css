@@ -868,7 +868,7 @@ body:has(.auth-split) main { padding: 0; }
   overflow: hidden;
 }
 .auth-photo-signup {
-  background-image: url('/images/living-room-2.jpg');
+  background-image: url('/images/hero-property.jpg');
 }
 .auth-photo-tint {
   position: absolute;
