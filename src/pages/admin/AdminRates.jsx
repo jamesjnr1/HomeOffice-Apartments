@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { Save, Check } from 'lucide-react';
 
-const INIT = { nightly: 620, weekly: 3600, monthly: 12000, minNights: 2 };
+const INIT = { nightly: 41, fiveNightDiscount: 10, longStayDiscountPercent: 20, minNights: 1 };
 
 const BLOCKED = [
   { id:1, from:'2026-09-20', to:'2026-09-25', reason:'Family use' },
@@ -42,7 +42,12 @@ export default function AdminRates() {
       <div className="mgmt-card" style={{ maxWidth: 420 }}>
         <h2 className="mgmt-card-h">Home-Office Apartments</h2>
         <div className="mgmt-rates-grid">
-          {[['nightly','Per night (GHS)'],['weekly','Per week (GHS)'],['monthly','Per month (GHS)'],['minNights','Minimum nights']].map(([field, lbl]) => (
+          {[
+            ['nightly', 'Per night ($)'],
+            ['fiveNightDiscount', '5-night stay discount ($ off total)'],
+            ['longStayDiscountPercent', '28–30 night stay discount (%)'],
+            ['minNights', 'Minimum nights'],
+          ].map(([field, lbl]) => (
             <label key={field} className="mgmt-rate-field">
               <span>{lbl}</span>
               <input
@@ -55,6 +60,11 @@ export default function AdminRates() {
             </label>
           ))}
         </div>
+        <p className="mgmt-card-sub" style={{ marginTop: 12 }}>
+          Example: 5 nights = ${rates.nightly * 5} − ${rates.fiveNightDiscount} = $
+          {rates.nightly * 5 - rates.fiveNightDiscount}. 30 nights = $
+          {Math.round(rates.nightly * 30 * (1 - rates.longStayDiscountPercent / 100))} after the {rates.longStayDiscountPercent}% discount.
+        </p>
       </div>
 
       {isOwner && (
