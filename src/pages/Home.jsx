@@ -41,11 +41,19 @@ export default function Home() {
             <span className="eyebrow">A HOME AWAY FROM HOME</span>
             <h2>Warm timber. Cool tile. A shaded verandah for morning coffee.</h2>
             <p className="prose">
-              Warm timber and cool tile welcome you into a space of comfort, while a shaded
-              verandah invites you to savor your morning coffee. Beyond the walls, serene,
-              well‑hewn lawns stretch across LivingSpring Gardens, offering a refreshing escape
-              into nature. Here, convenience meets tranquility—perfect for relaxation, reflection,
-              rest, and memorable holidays.
+              Discover self‑contained apartments in a peaceful compound, thoughtfully designed
+              for the way you work from home and the way you rest.
+            </p>
+            <p className="prose" style={{ marginBottom: 12 }}>Each apartment features:</p>
+            <ul className="prose-list">
+              <li>A spacious, fully furnished hall with TV</li>
+              <li>A modern kitchen equipped for convenience</li>
+              <li>Two comfortable bedrooms with King, Queen, and Standard beds</li>
+            </ul>
+            <p className="prose">
+              Step outside and your apartment opens directly onto the serene LivingSpring Gardens,
+              where well‑kept lawns and tranquil surroundings create the perfect setting for
+              relaxation, reflection, and holidays.
             </p>
             <Link to="/apartments" className="link-arrow">
               Explore the apartments <ArrowRight size={14} />

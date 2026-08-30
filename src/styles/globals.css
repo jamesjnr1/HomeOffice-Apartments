@@ -1536,6 +1536,31 @@ body:has(.auth-split) main { padding: 0; }
   margin: 0 0 20px;
   max-width: 620px;
 }
+.intro-v2 .prose-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px;
+  max-width: 620px;
+  display: grid;
+  gap: 10px;
+}
+.intro-v2 .prose-list li {
+  font-size: 17px;
+  color: var(--muted);
+  line-height: 1.5;
+  padding-left: 22px;
+  position: relative;
+}
+.intro-v2 .prose-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 9px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
 
 /* Narrow section variant */
 .section-narrow { padding: 100px 0; }
