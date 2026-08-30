@@ -9,10 +9,18 @@ export default function Apartments() {
       <section className="page-header page-header-v2">
         <div className="container">
           <span className="eyebrow">THE APARTMENT</span>
-          <h1>Built for how you work.</h1>
+          <h1>Built for how you want it.</h1>
+          <p className="lead">Each separate apartment offers:</p>
+          <ul className="lead-list">
+            <li>Two spacious bedrooms with comfortable furnishings</li>
+            <li>A large, well‑furnished hall designed as a multi‑purpose space for relaxation, work, or family gatherings</li>
+            <li>A modern kitchen equipped for convenience</li>
+            <li>A private outdoor spot perfect for enjoying a book or a plate of food</li>
+          </ul>
           <p className="lead">
-            One self-contained apartment with four bedrooms, a proper kitchen, a real workspace,
-            and a private outdoor spot to sit with a book or a plate of food.
+            Set within a peaceful compound, the apartments open directly onto the serene
+            LivingSpring Gardens, where well‑kept lawns and tranquil surroundings create the
+            ideal atmosphere for rest, reflection, and holidays.
           </p>
         </div>
       </section>
