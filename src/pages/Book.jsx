@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Mail, Phone, MessageCircle, Check, AlertCircle } from 'lucide-react';
+import { Mail, Phone, MessageCircle, Check, AlertCircle, ShieldCheck, Clock, BadgeCheck } from 'lucide-react';
 
 /**
  * Book — enquiry form that actually sends.
@@ -201,6 +201,12 @@ export default function Book() {
               <p className="fine-print">
                 By sending this enquiry, you'll receive a reply at the email above. We don't share your details.
               </p>
+
+              <div className="trust-row">
+                <span><ShieldCheck size={15} /> Secure enquiry</span>
+                <span><Clock size={15} /> Reply within a day</span>
+                <span><BadgeCheck size={15} /> No booking fees</span>
+              </div>
             </form>
 
             {/* Sidebar */}
