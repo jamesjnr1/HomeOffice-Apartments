@@ -1613,6 +1613,12 @@ body:has(.auth-split) main { padding: 0; }
   max-width: 780px;
   text-align: left;
 }
+.intro-v2-centered {
+  max-width: 640px;
+  margin: 0 auto;
+  text-align: center;
+}
+.intro-v2-centered .prose { margin-left: auto; margin-right: auto; }
 .intro-v2 h2 {
   font-size: clamp(28px, 3.4vw, 44px);
   font-weight: 500;

@@ -27,7 +27,7 @@ export default function Apartments() {
 
       <section className="section section-narrow">
         <div className="container">
-          <div className="intro-v2 reveal">
+          <div className="intro-v2 intro-v2-centered reveal">
             <span className="eyebrow">DESIGNED FOR REMOTE WORK</span>
             <h2>Everything you need to focus.</h2>
             <p className="prose">
