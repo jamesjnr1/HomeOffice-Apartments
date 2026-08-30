@@ -17,28 +17,19 @@ export default function Apartments() {
         </div>
       </section>
 
-      <section className="section">
+      <section className="section section-narrow">
         <div className="container">
-          <div className="two-col">
-            <div className="reveal">
-              <span className="eyebrow">DESIGNED FOR REMOTE WORK</span>
-              <h2>Everything you need to focus.</h2>
-              <p className="prose">
-                Fast fibre Wi-Fi, a dedicated desk with a comfortable chair, and quiet corners
-                for calls. The apartment is set back from the road, so noise stays where it belongs.
-              </p>
-              <p className="prose">
-                When the workday ends, the kitchen is stocked with the basics, the shower is powerful,
-                and the verandah is the best seat in the house.
-              </p>
-            </div>
-            <div className="reveal">
-              <img
-                src="/images/kitchen.jpg"
-                alt="Dedicated workspace"
-                className="rounded-img"
-              />
-            </div>
+          <div className="intro-v2 reveal">
+            <span className="eyebrow">DESIGNED FOR REMOTE WORK</span>
+            <h2>Everything you need to focus.</h2>
+            <p className="prose">
+              Fast fibre Wi-Fi, a dedicated desk with a comfortable chair, and quiet corners
+              for calls. The apartment is set back from the road, so noise stays where it belongs.
+            </p>
+            <p className="prose">
+              When the workday ends, the kitchen is stocked with the basics, the shower is powerful,
+              and the verandah is the best seat in the house.
+            </p>
           </div>
         </div>
       </section>
