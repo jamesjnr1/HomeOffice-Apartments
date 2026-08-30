@@ -8,10 +8,10 @@ export default function Apartments() {
     <>
       <section className="page-header page-header-v2">
         <div className="container">
-          <span className="eyebrow">THE APARTMENTS</span>
+          <span className="eyebrow">THE APARTMENT</span>
           <h1>Built for how you work.</h1>
           <p className="lead">
-            Two self-contained apartments, each with a proper kitchen, a real workspace,
+            One self-contained apartment with four bedrooms, a proper kitchen, a real workspace,
             and a private outdoor spot to sit with a book or a plate of food.
           </p>
         </div>
@@ -25,7 +25,7 @@ export default function Apartments() {
               <h2>Everything you need to focus.</h2>
               <p className="prose">
                 Fast fibre Wi-Fi, a dedicated desk with a comfortable chair, and quiet corners
-                for calls. The apartments are set back from the road, so noise stays where it belongs.
+                for calls. The apartment is set back from the road, so noise stays where it belongs.
               </p>
               <p className="prose">
                 When the workday ends, the kitchen is stocked with the basics, the shower is powerful,
@@ -34,7 +34,7 @@ export default function Apartments() {
             </div>
             <div className="reveal">
               <img
-                src="https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=1400&q=85"
+                src="/images/lounge.jpg"
                 alt="Dedicated workspace"
                 className="rounded-img"
               />
@@ -66,10 +66,10 @@ export default function Apartments() {
       <section className="section">
         <div className="container">
           <div className="stat-band reveal">
-            <StatCard label="Apartments" value="2" />
-            <StatCard label="Sleeps up to" value="4" suffix="per apartment" />
-            <StatCard label="Bedrooms" value="1–2" suffix="per apartment" />
-            <StatCard label="Wi-Fi" value="Fibre" suffix="dedicated" />
+            <StatCard label="Sleeps up to" value="4" suffix="guests" />
+            <StatCard label="Bedrooms" value="4" />
+            <StatCard label="Beds" value="5" />
+            <StatCard label="Bathrooms" value="4" />
           </div>
         </div>
       </section>

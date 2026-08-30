@@ -41,8 +41,8 @@ export default function Home() {
             <span className="eyebrow">A HOME AWAY FROM HOME</span>
             <h2>Warm timber. Cool tile. A shaded verandah for morning coffee.</h2>
             <p className="prose">
-              Two self-contained apartments in a peaceful compound in Sunyani, built for the way you
-              work from home and the way you rest. Every one opens onto the gardens.
+              A self-contained apartment in a peaceful compound in Sunyani, built for the way you
+              work from home and the way you rest. It opens onto the gardens.
             </p>
             <Link to="/apartments" className="link-arrow">
               Explore the apartments <ArrowRight size={14} />
@@ -58,22 +58,22 @@ export default function Home() {
             <Link to="/apartments" className="teaser-card reveal">
               <div className="teaser-img">
                 <img
-                  src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1400&q=80"
+                  src="/images/living-room-1.jpg"
                   alt="Interior of Home-Office Apartments"
                 />
               </div>
               <div className="teaser-body">
-                <span className="eyebrow">THE APARTMENTS</span>
+                <span className="eyebrow">THE APARTMENT</span>
                 <h3>Built for how you work.</h3>
                 <p className="prose">Fast Wi-Fi, dedicated desk, and a well-considered kitchen.</p>
-                <span className="link-arrow">See the apartments <ArrowRight size={14} /></span>
+                <span className="link-arrow">See the apartment <ArrowRight size={14} /></span>
               </div>
             </Link>
 
             <Link to="/gardens" className="teaser-card reveal">
               <div className="teaser-img">
                 <img
-                  src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1400&q=80"
+                  src="/images/hero-property.jpg"
                   alt="LivingSpring Gardens"
                 />
               </div>
