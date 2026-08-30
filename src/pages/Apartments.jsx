@@ -81,10 +81,26 @@ export default function Apartments() {
             <h2>Simple pricing, better for longer stays.</h2>
           </div>
 
-          <div className="features-grid">
-            <Feature icon={<Wifi />} title="$41 / night">Base rate per flat, all-inclusive of the amenities above.</Feature>
-            <Feature icon={<Coffee />} title="$10 off">Book a 5-night stay and save $10 off the total.</Feature>
-            <Feature icon={<Trees />} title="20% off">Book 28–30 nights and save 20% off the total.</Feature>
+          <div className="rate-cards">
+            <RateCard
+              eyebrow="Standard"
+              price="$41"
+              unit="/ night"
+              desc="The base rate per flat, all-inclusive of the amenities above."
+            />
+            <RateCard
+              eyebrow="5-night stays"
+              price="$10"
+              unit="off"
+              desc="Book 5 nights or more and save $10 off your total."
+            />
+            <RateCard
+              eyebrow="28–30 night stays"
+              price="20%"
+              unit="off"
+              desc="Book a full month and save 20% off your total."
+              featured
+            />
           </div>
         </div>
       </section>
@@ -110,6 +126,20 @@ function Feature({ icon, title, children }) {
       <div className="feature-icon">{icon}</div>
       <h3>{title}</h3>
       <p>{children}</p>
+    </div>
+  );
+}
+
+function RateCard({ eyebrow, price, unit, desc, featured }) {
+  return (
+    <div className={`rate-card reveal${featured ? ' featured' : ''}`}>
+      {featured && <span className="rate-badge">Best for long stays</span>}
+      <span className="rate-card-eyebrow">{eyebrow}</span>
+      <div className="rate-card-price">
+        {price}
+        <span className="rate-card-unit">{unit}</span>
+      </div>
+      <p className="rate-card-desc">{desc}</p>
     </div>
   );
 }
