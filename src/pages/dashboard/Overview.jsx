@@ -23,7 +23,7 @@ const APARTMENT = {
   id: 'home-office',
   name: 'Home-Office Apartments',
   location: 'Sunyani, Ghana',
-  coverImage: '/images/living-room-1.jpg',
+  coverImage: '/images/hero-property.jpg',
   highlights: ['Sleeps 4', '4 bedrooms · 5 beds · 4 baths', 'Fibre Wi-Fi'],
 };
 

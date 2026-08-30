@@ -12,7 +12,7 @@ const APARTMENT = {
   id: 'home-office',
   name: 'Home-Office Apartments',
   location: 'Sunyani, Ghana',
-  coverImage: '/images/living-room-1.jpg',
+  coverImage: '/images/hero-property.jpg',
 };
 
 export default function Wishlist() {

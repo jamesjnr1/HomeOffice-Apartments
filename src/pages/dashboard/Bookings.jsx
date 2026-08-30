@@ -11,7 +11,7 @@ import { Download, MessageSquare, ArrowRight, MapPin } from 'lucide-react';
 const APARTMENT = {
   name: 'Home-Office Apartments',
   location: 'Sunyani, Ghana',
-  coverImage: '/images/living-room-1.jpg',
+  coverImage: '/images/hero-property.jpg',
 };
 
 const MOCK_BOOKINGS = [
