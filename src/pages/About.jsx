@@ -43,20 +43,12 @@ export default function About() {
         </div>
       </section>
 
-      <figure className="photo-band reveal">
-        <img src="/images/living-room-2-tv.jpg" alt="" />
-        <div className="photo-band-scrim" />
-        <blockquote className="photo-band-quote">
-          "The kind of place we'd want to stay ourselves."
-        </blockquote>
-      </figure>
-
       <section className="section section-cream">
         <div className="container">
           <div className="two-col">
             <div className="reveal">
               <img
-                src="/images/lounge.jpg"
+                src="/images/living-room-2.jpg"
                 alt="Sunyani surroundings"
                 className="rounded-img"
               />
