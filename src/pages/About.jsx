@@ -28,13 +28,13 @@ export default function About() {
                 could we make part of it a place other people would want to stay?
               </p>
               <p className="prose">
-                So we built two apartments on the edge of the compound. Small, well-considered,
-                and quiet — the kind of place we'd want to stay ourselves.
+                So we built an apartment on the edge of the compound — four bedrooms, well-considered,
+                and quiet, the kind of place we'd want to stay ourselves.
               </p>
             </div>
             <div className="reveal">
               <img
-                src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1400&q=85"
+                src="/images/hero-property.jpg"
                 alt="LivingSpring Gardens"
                 className="rounded-img"
               />
@@ -48,7 +48,7 @@ export default function About() {
           <div className="two-col">
             <div className="reveal">
               <img
-                src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1400&q=85"
+                src="/images/living-room-2.jpg"
                 alt="Sunyani surroundings"
                 className="rounded-img"
               />

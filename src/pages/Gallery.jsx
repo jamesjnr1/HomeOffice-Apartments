@@ -7,16 +7,19 @@
  */
 
 const IMAGES = [
-  { src: 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=2000&q=90', span: 12, ratio: '21/9' },
-  { src: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=85', span: 7,  ratio: '4/3' },
-  { src: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=1200&q=85', span: 5,  ratio: '4/3' },
-  { src: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=85', span: 5,  ratio: '4/5' },
-  { src: 'https://images.unsplash.com/photo-1600566753086-00f18fe6ba7d?auto=format&fit=crop&w=1600&q=85', span: 7,  ratio: '4/5' },
-  { src: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=2000&q=85', span: 12, ratio: '21/9' },
-  { src: 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=1200&q=85', span: 4,  ratio: '1/1' },
-  { src: 'https://images.unsplash.com/photo-1600585152220-90363fe7e115?auto=format&fit=crop&w=1200&q=85', span: 4,  ratio: '1/1' },
-  { src: 'https://images.unsplash.com/photo-1600607687644-c7171b42498f?auto=format&fit=crop&w=1200&q=85', span: 4,  ratio: '1/1' },
-  { src: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=2000&q=90', span: 12, ratio: '21/9' },
+  { src: '/images/hero-property.jpg', span: 12, ratio: '21/9' },
+  { src: '/images/living-room-1.jpg', span: 7,  ratio: '4/3' },
+  { src: '/images/bedroom-1.jpg', span: 5,  ratio: '4/3' },
+  { src: '/images/bathroom.jpg', span: 5,  ratio: '4/5' },
+  { src: '/images/kitchen.jpg', span: 7,  ratio: '4/5' },
+  { src: '/images/living-room-2.jpg', span: 12, ratio: '21/9' },
+  { src: '/images/bedroom-2.jpg', span: 4,  ratio: '1/1' },
+  { src: '/images/dining-kitchenette.jpg', span: 4,  ratio: '1/1' },
+  { src: '/images/wardrobe-hallway.jpg', span: 4,  ratio: '1/1' },
+  { src: '/images/lounge.jpg', span: 6,  ratio: '4/3' },
+  { src: '/images/bedroom-3.jpg', span: 6,  ratio: '4/3' },
+  { src: '/images/living-room-2-tv.jpg', span: 6,  ratio: '4/3' },
+  { src: '/images/bedroom-4.jpg', span: 6,  ratio: '4/3' },
 ];
 
 export default function Gallery() {

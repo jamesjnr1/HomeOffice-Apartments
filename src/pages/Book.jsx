@@ -18,7 +18,7 @@ const CONTACT_PHONE = '+233 00 000 0000';
 export default function Book() {
   const [form, setForm] = useState({
     name: '', email: '', phone: '', checkIn: '', checkOut: '',
-    guests: '2', apartment: 'either', message: '',
+    guests: '2', message: '',
   });
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -62,7 +62,6 @@ export default function Book() {
           checkIn: form.checkIn,
           checkOut: form.checkOut,
           guests: form.guests,
-          apartment: form.apartment,
           message: form.message || '(no message)',
           _subject: `New enquiry from ${form.name} — ${form.checkIn} to ${form.checkOut}`,
           _replyto: form.email,
@@ -77,7 +76,7 @@ export default function Book() {
       setSent(true);
       setForm({
         name: '', email: '', phone: '', checkIn: '', checkOut: '',
-        guests: '2', apartment: 'either', message: '',
+        guests: '2', message: '',
       });
     } catch (err) {
       setError(
@@ -171,26 +170,14 @@ export default function Book() {
                 </div>
               </div>
 
-              <div className="field-row">
-                <div className="field">
-                  <label>Guests</label>
-                  <select value={form.guests} onChange={update('guests')} disabled={loading}>
-                    <option value="1">1 guest</option>
-                    <option value="2">2 guests</option>
-                    <option value="3">3 guests</option>
-                    <option value="4">4 guests</option>
-                    <option value="5">5+ guests</option>
-                  </select>
-                </div>
-                <div className="field">
-                  <label>Which apartment?</label>
-                  <select value={form.apartment} onChange={update('apartment')} disabled={loading}>
-                    <option value="either">Either / no preference</option>
-                    <option value="verandah">The Verandah Apartment</option>
-                    <option value="garden">The Garden Apartment</option>
-                    <option value="both">Both (for a group)</option>
-                  </select>
-                </div>
+              <div className="field">
+                <label>Guests</label>
+                <select value={form.guests} onChange={update('guests')} disabled={loading}>
+                  <option value="1">1 guest</option>
+                  <option value="2">2 guests</option>
+                  <option value="3">3 guests</option>
+                  <option value="4">4 guests</option>
+                </select>
               </div>
 
               <div className="field">
@@ -220,7 +207,7 @@ export default function Book() {
             <aside className="book-side">
               <div className="side-card">
                 <img
-                  src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80"
+                  src="/images/hero-property.jpg"
                   alt="Home-Office Apartments"
                 />
                 <div className="side-body">
@@ -229,8 +216,8 @@ export default function Book() {
                   <div className="side-divider" />
 
                   <ul className="side-list">
-                    <li><strong>Two apartments</strong><span>Each fully self-contained</span></li>
-                    <li><strong>Sleeps up to 4</strong><span>Per apartment</span></li>
+                    <li><strong>Sleeps up to 4</strong><span>4 bedrooms · 5 beds · 4 baths</span></li>
+                    <li><strong>Fully self-contained</strong><span>Kitchen, workspace &amp; private verandah</span></li>
                     <li><strong>Central Sunyani</strong><span>Minutes from market &amp; cafés</span></li>
                     <li><strong>Long stays welcome</strong><span>Weekly &amp; monthly rates on request</span></li>
                   </ul>

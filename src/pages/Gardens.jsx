@@ -21,7 +21,7 @@ export default function Gardens() {
           <div className="two-col">
             <div className="reveal">
               <img
-                src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1400&q=85"
+                src="/images/hero-property.jpg"
                 alt="LivingSpring Gardens"
                 className="rounded-img"
               />
@@ -35,7 +35,7 @@ export default function Gardens() {
                 sit with a book in the afternoon, and gather with people in the evening.
               </p>
               <p className="prose">
-                Every apartment opens onto it. It's part of every stay.
+                The apartment opens onto it. It's part of every stay.
               </p>
             </div>
           </div>
@@ -90,7 +90,7 @@ export default function Gardens() {
             </div>
             <div className="reveal">
               <img
-                src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1400&q=85"
+                src="/images/dining-kitchenette.jpg"
                 alt="Sunyani greenery"
                 className="rounded-img"
               />

@@ -793,7 +793,7 @@ body:has(.auth-split) main { padding: 0; }
 /* ---------- Left: photo panel ---------- */
 .auth-photo {
   position: relative;
-  background-image: url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=85');
+  background-image: url('/images/hero-property.jpg');
   background-size: cover;
   background-position: center;
   display: flex;
@@ -803,7 +803,7 @@ body:has(.auth-split) main { padding: 0; }
   overflow: hidden;
 }
 .auth-photo-signup {
-  background-image: url('https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1600&q=85');
+  background-image: url('/images/living-room-2.jpg');
 }
 .auth-photo-tint {
   position: absolute;

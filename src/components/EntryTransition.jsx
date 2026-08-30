@@ -38,7 +38,7 @@ export default function EntryTransition({ destination, onComplete, image }) {
   return createPortal(
     <div className="entry-transition" aria-hidden="true">
       <img
-        src={image || 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=2400&q=90'}
+        src={image || '/images/hero-property.jpg'}
         alt=""
         className="entry-transition-image"
       />
