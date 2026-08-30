@@ -17,33 +17,19 @@ export default function Apartments() {
         </div>
       </section>
 
-      <section className="section">
+      <section className="section section-narrow">
         <div className="container">
-          <div className="two-col">
-            <div className="reveal">
-              <span className="eyebrow">DESIGNED FOR REMOTE WORK</span>
-              <h2>Everything you need to focus.</h2>
-              <p className="prose">
-                Fast fibre Wi-Fi, a dedicated desk with a comfortable chair, and quiet corners
-                for calls. The apartment is set back from the road, so noise stays where it belongs.
-              </p>
-              <p className="prose">
-                When the workday ends, the kitchen is stocked with the basics, the shower is powerful,
-                and the verandah is the best seat in the house.
-              </p>
-            </div>
-            <div className="hero-visual reveal">
-              <div className="hero-photo hero-photo-main">
-                <img src="/images/living-room-1.jpg" alt="Living room" />
-              </div>
-              <div className="hero-photo hero-photo-inset">
-                <img src="/images/bedroom-1.jpg" alt="Bedroom" />
-              </div>
-              <div className="hero-badge">
-                <span className="hero-badge-dot" />
-                Available now
-              </div>
-            </div>
+          <div className="intro-v2 reveal">
+            <span className="eyebrow">DESIGNED FOR REMOTE WORK</span>
+            <h2>Everything you need to focus.</h2>
+            <p className="prose">
+              Fast fibre Wi-Fi, a dedicated desk with a comfortable chair, and quiet corners
+              for calls. The apartment is set back from the road, so noise stays where it belongs.
+            </p>
+            <p className="prose">
+              When the workday ends, the kitchen is stocked with the basics, the shower is powerful,
+              and the verandah is the best seat in the house.
+            </p>
           </div>
         </div>
       </section>
@@ -107,26 +93,6 @@ export default function Apartments() {
               featured
             />
           </div>
-        </div>
-      </section>
-
-      <section className="section">
-        <div className="container">
-          <div className="section-head-left reveal">
-            <span className="eyebrow">MORE PHOTOS</span>
-            <h2>Take a closer look.</h2>
-          </div>
-
-          <div className="photo-strip">
-            <img src="/images/kitchen.jpg" alt="Kitchen" className="reveal" />
-            <img src="/images/living-room-2.jpg" alt="Living room" className="reveal" />
-            <img src="/images/bedroom-3.jpg" alt="Bedroom" className="reveal" />
-            <img src="/images/bathroom.jpg" alt="Bathroom" className="reveal" />
-          </div>
-
-          <Link to="/gallery" className="link-arrow" style={{ marginTop: 24 }}>
-            See the full gallery <ArrowRight size={14} />
-          </Link>
         </div>
       </section>
 
