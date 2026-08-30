@@ -12,37 +12,24 @@ import {
  * Overview
  * Landing screen after login.
  *
- * Scope: this site represents ONLY Home-Office Apartments at LivingSpring Gardens.
- * There are 2 apartments — no external listings, no "recommendations" from elsewhere.
+ * Scope: this site represents ONLY Home-Office Apartments, a single
+ * 4-bedroom self-contained property — no other listings.
  *
  * TODO(supabase): replace MOCK_* data with:
- *   supabase.from('bookings').select('*, apartments(*)').eq('guest_id', user.id)
- *   supabase.from('apartments').select('*').eq('published', true)
+ *   supabase.from('bookings').select('*').eq('guest_id', user.id)
  */
 
-// The only two apartments on the site
-const APARTMENTS = [
-  {
-    id: 'verandah',
-    name: 'The Verandah Apartment',
-    location: 'LivingSpring Gardens · Sunyani',
-    coverImage:
-      'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1400&q=85',
-    highlights: ['Sleeps 4', 'Fibre Wi-Fi', 'Private verandah'],
-  },
-  {
-    id: 'garden',
-    name: 'The Garden Apartment',
-    location: 'LivingSpring Gardens · Sunyani',
-    coverImage:
-      'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1400&q=85',
-    highlights: ['Sleeps 2', 'Fibre Wi-Fi', 'Garden-side'],
-  },
-];
+const APARTMENT = {
+  id: 'home-office',
+  name: 'Home-Office Apartments',
+  location: 'Sunyani, Ghana',
+  coverImage: '/images/living-room-1.jpg',
+  highlights: ['Sleeps 4', '4 bedrooms · 5 beds · 4 baths', 'Fibre Wi-Fi'],
+};
 
 const MOCK_NEXT_STAY = {
   reference: 'HO-8FQ2P',
-  apartment: APARTMENTS[0],
+  apartment: APARTMENT,
   checkIn: new Date(Date.now() + 6 * 86400000),
   checkOut: new Date(Date.now() + 10 * 86400000),
   nights: 4,
@@ -146,35 +133,33 @@ export default function Overview() {
         <StatCard label="Nights with us" value={stats.nightsWithUs} suffix="total" />
       </section>
 
-      {/* Our apartments — the only two on the site */}
+      {/* The apartment */}
       <section>
         <div className="dash-section-head">
-          <h2>Our apartments</h2>
+          <h2>The apartment</h2>
           <Link to="/apartments" className="dash-linky">
-            More about the apartments <ArrowRight size={14} />
+            More about the apartment <ArrowRight size={14} />
           </Link>
         </div>
 
-        <div className="dash-rec-grid">
-          {APARTMENTS.map((a) => (
-            <Link key={a.id} to="/apartments" className="dash-rec-card">
-              <div className="dash-rec-img">
-                <img src={a.coverImage} alt={a.name} />
+        <div className="dash-rec-grid" style={{ gridTemplateColumns: '1fr', maxWidth: 420 }}>
+          <Link to="/apartments" className="dash-rec-card">
+            <div className="dash-rec-img">
+              <img src={APARTMENT.coverImage} alt={APARTMENT.name} />
+            </div>
+            <div className="dash-rec-body">
+              <h3>{APARTMENT.name}</h3>
+              <div className="dash-loc">
+                <MapPin size={12} />
+                {APARTMENT.location}
               </div>
-              <div className="dash-rec-body">
-                <h3>{a.name}</h3>
-                <div className="dash-loc">
-                  <MapPin size={12} />
-                  {a.location}
-                </div>
-                <div className="dash-rec-tags">
-                  {a.highlights.map((h) => (
-                    <span key={h} className="dash-tag">{h}</span>
-                  ))}
-                </div>
+              <div className="dash-rec-tags">
+                {APARTMENT.highlights.map((h) => (
+                  <span key={h} className="dash-tag">{h}</span>
+                ))}
               </div>
-            </Link>
-          ))}
+            </div>
+          </Link>
         </div>
       </section>
     </div>

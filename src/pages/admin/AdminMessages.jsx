@@ -152,7 +152,6 @@ export default function AdminMessages() {
   const active = threads.find(t => t.guest_id === activeGuestId);
   const filtered = threads.filter(t =>
     t.guest_name.toLowerCase().includes(q.toLowerCase()) ||
-    t.apartment.toLowerCase().includes(q.toLowerCase()) ||
     t.guest_email.toLowerCase().includes(q.toLowerCase())
   );
 
@@ -217,7 +216,6 @@ export default function AdminMessages() {
                       {formatDistanceToNow(new Date(t.lastAt), { addSuffix: false })}
                     </span>
                   </div>
-                  <div className="mgmt-msg-sub">{t.apartment || 'General'}</div>
                   <div className="mgmt-msg-preview">
                     {t.messages[t.messages.length - 1]?.body}
                   </div>
@@ -240,8 +238,7 @@ export default function AdminMessages() {
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div className="mgmt-msg-name">{active.guest_name}</div>
                     <div className="mgmt-msg-sub">
-                      {active.apartment}
-                      {active.guest_email ? ` · ${active.guest_email}` : ''}
+                      {active.guest_email || ''}
                     </div>
                   </div>
                   <div className="mgmt-msg-head-actions">

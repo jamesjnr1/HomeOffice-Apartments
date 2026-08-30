@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { Check, Reply, Archive, Trash2 } from 'lucide-react';
 
 const MOCK = [
-  { id:1, name:'Abena Mensah', email:'abena@example.com', phone:'+233 24 000 0001', checkIn:'2026-10-10', checkOut:'2026-10-15', guests:2, apt:'Verandah', message:'Visiting for work. Will need reliable Wi-Fi.', status:'new', at:'2h ago' },
-  { id:2, name:'Kofi Asante', email:'kofi@example.com', phone:'+233 20 000 0002', checkIn:'2026-10-20', checkOut:'2026-10-24', guests:1, apt:'Garden', message:'Solo trip. Quiet space preferred.', status:'new', at:'4h ago' },
-  { id:3, name:'Ama Darko', email:'ama@example.com', phone:'', checkIn:'2026-11-01', checkOut:'2026-11-08', guests:3, apt:'Either', message:'Family visit from Accra.', status:'new', at:'1d ago' },
-  { id:4, name:'Emmanuel Owusu', email:'eo@example.com', phone:'+233 27 000 0004', checkIn:'2026-09-12', checkOut:'2026-09-15', guests:2, apt:'Verandah', message:'', status:'replied', at:'3d ago' },
-  { id:5, name:'Grace Ofori', email:'grace@example.com', phone:'', checkIn:'2026-09-05', checkOut:'2026-09-08', guests:2, apt:'Garden', message:'Short break.', status:'archived', at:'1wk ago' },
+  { id:1, name:'Abena Mensah', email:'abena@example.com', phone:'+233 24 000 0001', checkIn:'2026-10-10', checkOut:'2026-10-15', guests:2, message:'Visiting for work. Will need reliable Wi-Fi.', status:'new', at:'2h ago' },
+  { id:2, name:'Kofi Asante', email:'kofi@example.com', phone:'+233 20 000 0002', checkIn:'2026-10-20', checkOut:'2026-10-24', guests:1, message:'Solo trip. Quiet space preferred.', status:'new', at:'4h ago' },
+  { id:3, name:'Ama Darko', email:'ama@example.com', phone:'', checkIn:'2026-11-01', checkOut:'2026-11-08', guests:3, message:'Family visit from Accra.', status:'new', at:'1d ago' },
+  { id:4, name:'Emmanuel Owusu', email:'eo@example.com', phone:'+233 27 000 0004', checkIn:'2026-09-12', checkOut:'2026-09-15', guests:2, message:'', status:'replied', at:'3d ago' },
+  { id:5, name:'Grace Ofori', email:'grace@example.com', phone:'', checkIn:'2026-09-05', checkOut:'2026-09-08', guests:2, message:'Short break.', status:'archived', at:'1wk ago' },
 ];
 
 const TABS = ['all','new','replied','archived'];
@@ -46,14 +46,13 @@ export default function AdminEnquiries() {
           <div className="mgmt-table-wrap">
             <table className="mgmt-table">
               <thead>
-                <tr><th>Guest</th><th>Apartment</th><th>Dates</th><th>Guests</th><th>Status</th><th>Received</th><th></th></tr>
+                <tr><th>Guest</th><th>Dates</th><th>Guests</th><th>Status</th><th>Received</th><th></th></tr>
               </thead>
               <tbody>
                 {filtered.map(e => (
                   <>
                     <tr key={e.id} className={`mgmt-tr-click ${expanded === e.id ? 'expanded' : ''}`} onClick={() => setExpanded(expanded === e.id ? null : e.id)}>
                       <td><div className="mgmt-td-primary">{e.name}</div><div className="mgmt-td-sub">{e.email}</div></td>
-                      <td>{e.apt}</td>
                       <td>{e.checkIn} → {e.checkOut}</td>
                       <td>{e.guests}</td>
                       <td><span className={`mgmt-status ${e.status}`}>{e.status}</span></td>
@@ -68,12 +67,12 @@ export default function AdminEnquiries() {
                     </tr>
                     {expanded === e.id && (
                       <tr key={`${e.id}-exp`} className="mgmt-tr-expanded">
-                        <td colSpan={7}>
+                        <td colSpan={6}>
                           <div className="mgmt-expanded-body">
                             {e.message && <p><strong>Message:</strong> {e.message}</p>}
                             {e.phone && <p><strong>Phone:</strong> {e.phone}</p>}
                             <div className="mgmt-expanded-actions">
-                              <a className="mgmt-btn mgmt-btn-primary" href={`mailto:${e.email}?subject=Re: Your enquiry for ${e.apt} Apartment`}>
+                              <a className="mgmt-btn mgmt-btn-primary" href={`mailto:${e.email}?subject=Re: Your enquiry — Home-Office Apartments`}>
                                 <Reply size={14}/> Reply by email
                               </a>
                               {e.phone && (

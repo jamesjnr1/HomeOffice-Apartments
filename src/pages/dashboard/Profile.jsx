@@ -117,7 +117,7 @@ export default function Profile() {
         <section className="dash-card">
           <h2 className="dash-card-h">Workspace preferences</h2>
           <p className="dash-text-muted dash-card-sub">
-            Help us match you to the right apartment for how you work.
+            Help us set up the apartment to suit how you work.
           </p>
 
           <div className="dash-form-grid">
@@ -155,7 +155,7 @@ export default function Profile() {
               checked={form.quietHours}
               onChange={update('quietHours')}
             />
-            <span>Prefer apartments with quiet-hours policy after 10 PM</span>
+            <span>Prefer a quiet-hours policy after 10 PM</span>
           </label>
         </section>
 
