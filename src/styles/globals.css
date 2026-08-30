@@ -1573,6 +1573,32 @@ body:has(.auth-split) main { padding: 0; }
   max-width: 640px;
   margin: 0;
 }
+.page-header-v2 .lead + .lead { margin-top: 16px; }
+.page-header-v2 .lead-list {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 16px;
+  max-width: 640px;
+  display: grid;
+  gap: 8px;
+}
+.page-header-v2 .lead-list li {
+  font-size: 17px;
+  color: var(--muted);
+  line-height: 1.5;
+  padding-left: 22px;
+  position: relative;
+}
+.page-header-v2 .lead-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 9px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
 
 /* ============ TYPOGRAPHY BALANCE (site-wide) ============ */
 
