@@ -10,18 +10,11 @@ const PHOTO_SLOTS = [
     url: 'photo-1616486338812-3dadae4b4ace',
   },
   {
-    id: 'verandah',
-    label: 'Verandah Apartment',
-    desc: 'Main photo for The Verandah Apartment',
+    id: 'apartment',
+    label: 'Apartment photo',
+    desc: 'Main photo for Home-Office Apartments on the guest dashboard',
     file: 'src/pages/dashboard/Overview.jsx',
     url: 'photo-1522708323590-d24dbb6b0267',
-  },
-  {
-    id: 'garden',
-    label: 'Garden Apartment',
-    desc: 'Main photo for The Garden Apartment',
-    file: 'src/pages/dashboard/Overview.jsx',
-    url: 'photo-1560448204-e02f11c3d0e2',
   },
   {
     id: 'signin',
@@ -29,13 +22,6 @@ const PHOTO_SLOTS = [
     desc: 'Left panel of the guest sign-in page',
     file: 'src/pages/SignIn.jsx',
     url: 'photo-1600585154340-be6161a56a0c',
-  },
-  {
-    id: 'gardens-page',
-    label: 'LivingSpring Gardens page',
-    desc: 'Main photo on the Gardens page',
-    file: 'src/pages/Gardens.jsx',
-    url: 'photo-1600607687939-ce8a6c25118c',
   },
   {
     id: 'book-side',

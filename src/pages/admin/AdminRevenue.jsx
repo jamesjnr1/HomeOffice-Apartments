@@ -8,24 +8,19 @@ const MONTHS = [
 ];
 const MAX = Math.max(...MONTHS.map(m => m.v));
 
-const BY_APT = [
-  { apt:'The Verandah Apartment', nights:38, revenue:23560, occupancy:'62%' },
-  { apt:'The Garden Apartment', nights:29, revenue:13920, occupancy:'47%' },
-];
-
 export default function AdminRevenue() {
   const { isOwner } = useOutletContext();
   if (!isOwner) return <Navigate to="/admin" replace/>;
 
   const ytd = MONTHS.reduce((a, m) => a + m.v, 0);
-  const totalNights = BY_APT.reduce((a, b) => a + b.nights, 0);
+  const totalNights = 67;
 
   return (
     <div className="mgmt-page">
       <header className="mgmt-page-head">
         <span className="mgmt-eyebrow">REVENUE</span>
         <h1>Revenue overview</h1>
-        <p className="mgmt-lead">Year-to-date earnings and occupancy for both apartments.</p>
+        <p className="mgmt-lead">Year-to-date earnings and occupancy for the apartment.</p>
       </header>
 
       <div className="mgmt-stat-grid">
@@ -62,24 +57,6 @@ export default function AdminRevenue() {
         </div>
       </div>
 
-      <div className="mgmt-card" style={{ marginTop: 20 }}>
-        <h2 className="mgmt-card-h">Per apartment</h2>
-        <div className="mgmt-table-wrap">
-          <table className="mgmt-table">
-            <thead><tr><th>Apartment</th><th>Nights booked</th><th>Revenue</th><th>Occupancy</th></tr></thead>
-            <tbody>
-              {BY_APT.map(a => (
-                <tr key={a.apt}>
-                  <td className="mgmt-td-primary">{a.apt}</td>
-                  <td>{a.nights}</td>
-                  <td>GHS {a.revenue.toLocaleString()}</td>
-                  <td><span className="mgmt-occ-pill">{a.occupancy}</span></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
     </div>
   );
 }

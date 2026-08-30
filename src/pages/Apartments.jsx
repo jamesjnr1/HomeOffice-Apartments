@@ -34,7 +34,7 @@ export default function Apartments() {
             </div>
             <div className="reveal">
               <img
-                src="/images/lounge.jpg"
+                src="/images/kitchen.jpg"
                 alt="Dedicated workspace"
                 className="rounded-img"
               />
@@ -70,6 +70,21 @@ export default function Apartments() {
             <StatCard label="Bedrooms" value="4" />
             <StatCard label="Beds" value="5" />
             <StatCard label="Bathrooms" value="4" />
+          </div>
+        </div>
+      </section>
+
+      <section className="section section-cream">
+        <div className="container">
+          <div className="section-head-left reveal">
+            <span className="eyebrow">RATES</span>
+            <h2>Simple pricing, better for longer stays.</h2>
+          </div>
+
+          <div className="features-grid">
+            <Feature icon={<Wifi />} title="$41 / night">Base rate per flat, all-inclusive of the amenities above.</Feature>
+            <Feature icon={<Coffee />} title="$10 off">Book a 5-night stay and save $10 off the total.</Feature>
+            <Feature icon={<Trees />} title="20% off">Book 28–30 nights and save 20% off the total.</Feature>
           </div>
         </div>
       </section>

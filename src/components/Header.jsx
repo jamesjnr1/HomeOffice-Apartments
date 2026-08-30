@@ -52,7 +52,6 @@ export default function Header() {
           <nav className="nav-primary" aria-label="Primary">
             <NavLink to="/" end className="nav-link">Home</NavLink>
             <NavLink to="/apartments" className="nav-link">Apartments</NavLink>
-            <NavLink to="/gardens" className="nav-link">Gardens</NavLink>
             <NavLink to="/gallery" className="nav-link">Gallery</NavLink>
             <NavLink to="/about" className="nav-link">About</NavLink>
 
@@ -104,7 +103,6 @@ export default function Header() {
         <nav>
           <NavLink to="/" end>Home</NavLink>
           <NavLink to="/apartments">Apartments</NavLink>
-          <NavLink to="/gardens">Gardens</NavLink>
           <NavLink to="/gallery">Gallery</NavLink>
           <NavLink to="/about">About</NavLink>
 

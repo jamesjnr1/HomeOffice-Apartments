@@ -95,7 +95,7 @@ export default function AdminOverview() {
           <div className="mgmt-table-wrap">
             <table className="mgmt-table">
               <thead>
-                <tr><th>Guest</th><th>Apartment</th><th>Last message</th></tr>
+                <tr><th>Guest</th><th>Last message</th></tr>
               </thead>
               <tbody>
                 {recentThreads.map(m => (
@@ -104,7 +104,6 @@ export default function AdminOverview() {
                       <div className="mgmt-td-primary">{m.guest_name || 'Guest'}</div>
                       <div className="mgmt-td-sub">{m.guest_email || ''}</div>
                     </td>
-                    <td>{m.apartment || '—'}</td>
                     <td className="mgmt-td-muted" style={{ maxWidth: 320, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {m.body}
                     </td>

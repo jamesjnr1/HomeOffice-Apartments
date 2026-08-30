@@ -4,27 +4,20 @@ import { format } from 'date-fns';
 import { Download, MessageSquare, ArrowRight, MapPin } from 'lucide-react';
 
 /**
- * Bookings — all mocks are for The Verandah or The Garden Apartment.
+ * Bookings — all mocks are stays at Home-Office Apartments.
  * No other properties exist on this site.
  */
 
-const VERANDAH = {
-  name: 'The Verandah Apartment',
-  location: 'LivingSpring Gardens · Sunyani',
-  coverImage:
-    'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=85',
-};
-const GARDEN = {
-  name: 'The Garden Apartment',
-  location: 'LivingSpring Gardens · Sunyani',
-  coverImage:
-    'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=85',
+const APARTMENT = {
+  name: 'Home-Office Apartments',
+  location: 'Sunyani, Ghana',
+  coverImage: '/images/living-room-1.jpg',
 };
 
 const MOCK_BOOKINGS = [
   {
     reference: 'HO-8FQ2P',
-    apartment: VERANDAH,
+    apartment: APARTMENT,
     checkIn: new Date(Date.now() + 6 * 86400000),
     checkOut: new Date(Date.now() + 10 * 86400000),
     nights: 4,
@@ -34,7 +27,7 @@ const MOCK_BOOKINGS = [
   },
   {
     reference: 'HO-2XR7T',
-    apartment: GARDEN,
+    apartment: APARTMENT,
     checkIn: new Date(Date.now() - 30 * 86400000),
     checkOut: new Date(Date.now() - 26 * 86400000),
     nights: 4,
@@ -44,7 +37,7 @@ const MOCK_BOOKINGS = [
   },
   {
     reference: 'HO-YB4LN',
-    apartment: VERANDAH,
+    apartment: APARTMENT,
     checkIn: new Date(Date.now() - 90 * 86400000),
     checkOut: new Date(Date.now() - 83 * 86400000),
     nights: 7,
@@ -106,7 +99,7 @@ export default function Bookings() {
         <div className="dash-empty">
           <h3>Nothing here yet</h3>
           <p>
-            When you book a stay at The Verandah or The Garden Apartment, it'll show up here.
+            When you book a stay with us, it'll show up here.
           </p>
           <Link to="/book" className="dash-btn dash-btn-primary">
             Send an enquiry <ArrowRight size={16} />

@@ -8,7 +8,6 @@ import { useReveal } from './lib/useReveal';
 // Public pages
 import Home from './pages/Home';
 import Apartments from './pages/Apartments';
-import Gardens from './pages/Gardens';
 import Gallery from './pages/Gallery';
 import About from './pages/About';
 import Book from './pages/Book';
@@ -50,7 +49,6 @@ function AppContent() {
           {/* Public */}
           <Route path="/" element={<Home />} />
           <Route path="/apartments" element={<Apartments />} />
-          <Route path="/gardens" element={<Gardens />} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/about" element={<About />} />
           <Route path="/book" element={<Book />} />
