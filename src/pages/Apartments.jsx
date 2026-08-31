@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import {
-  Wifi, Monitor, Coffee, UtensilsCrossed, Snowflake, Bath, ShieldCheck, Trees, ArrowRight,
+  Wifi, UtensilsCrossed, Snowflake, Bath, ShieldCheck, Trees, ArrowRight,
 } from 'lucide-react';
 
 export default function Apartments() {
@@ -29,14 +29,19 @@ export default function Apartments() {
         <div className="container">
           <div className="intro-v2 intro-v2-centered reveal">
             <span className="eyebrow">DESIGNED FOR REMOTE WORK</span>
-            <h2>Everything you need to focus.</h2>
+            <h2>Everything you need to focus and unwind.</h2>
             <p className="prose">
-              Fast fibre Wi-Fi, a dedicated desk with a comfortable chair, and quiet corners
-              for calls. The apartment is set back from the road, so noise stays where it belongs.
+              Enjoy high-speed internet, comfortable sofas and chairs, and quiet corners that
+              make calls and work feel effortless.
             </p>
             <p className="prose">
-              When the workday ends, the kitchen is stocked with the basics, the shower is powerful,
-              and the verandah is the best seat in the house.
+              When the day slows down, the multi-purpose hall provides space for relaxation,
+              family gatherings, or reflection. Step outside to discover private outdoor spots
+              and many peaceful places across the apartment and compound where you can sit with
+              a book, share a meal, or simply breathe in the calm.
+            </p>
+            <p className="prose" style={{ fontWeight: 600, color: 'var(--ink)' }}>
+              Work Smart, Rest Easy at LivingSpring Gardens
             </p>
           </div>
         </div>
@@ -49,12 +54,10 @@ export default function Apartments() {
             <h2>Small comforts, well considered.</h2>
           </div>
 
-          <div className="features-grid">
-            <Feature icon={<Wifi />} title="Fibre Wi-Fi">Fast, reliable, dedicated. Suitable for video calls.</Feature>
-            <Feature icon={<Monitor />} title="Dedicated workspace">Desk, ergonomic chair, external monitor on request.</Feature>
-            <Feature icon={<UtensilsCrossed />} title="Full kitchen">Fridge, stove, cookware, and stocked basics on arrival.</Feature>
+          <div className="features-grid features-3">
+            <Feature icon={<Wifi />} title="High-Speed Wi-Fi">Fast, reliable, dedicated. Suitable for video calls.</Feature>
+            <Feature icon={<UtensilsCrossed />} title="Full kitchen">Fridge, stove, cookware.</Feature>
             <Feature icon={<Snowflake />} title="Air conditioning">Bedroom and living area, quiet at night.</Feature>
-            <Feature icon={<Coffee />} title="Morning coffee">Grinder, cafetière, and locally roasted beans.</Feature>
             <Feature icon={<Bath />} title="Hot shower">Instant hot water, generous pressure.</Feature>
             <Feature icon={<ShieldCheck />} title="Safe compound">Gated, quiet, with a caretaker on-site.</Feature>
             <Feature icon={<Trees />} title="Private verandah">Shaded outdoor space attached to each apartment.</Feature>
@@ -64,11 +67,15 @@ export default function Apartments() {
 
       <section className="section">
         <div className="container">
+          <div className="section-head-left reveal">
+            <span className="eyebrow">AT A GLANCE</span>
+            <h2>Each apartment</h2>
+          </div>
           <div className="stat-band reveal">
-            <StatCard label="Sleeps up to" value="4" suffix="guests" />
-            <StatCard label="Bedrooms" value="4" />
-            <StatCard label="Beds" value="5" />
-            <StatCard label="Bathrooms" value="4" />
+            <StatCard label="Sleeps up to" value="2–3" suffix="guests · up to 4 for couples" />
+            <StatCard label="Bedrooms" value="2" />
+            <StatCard label="Beds" value="2–3" suffix="3 in Apartment A · 2 in Apartment B" />
+            <StatCard label="Bathrooms" value="2" suffix="Apartment A has an extra guest washroom" />
           </div>
         </div>
       </section>
@@ -85,7 +92,7 @@ export default function Apartments() {
               eyebrow="Standard"
               price="$41"
               unit="/ night"
-              desc="The base rate per flat, all-inclusive of the amenities above."
+              desc="The base rate per apartment (2 bedrooms), all-inclusive of the amenities listed above."
             />
             <RateCard
               eyebrow="5-night stays"
