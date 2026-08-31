@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import {
-  Wifi, UtensilsCrossed, Snowflake, Bath, ShieldCheck, Trees, ArrowRight, BedDouble, Sofa,
+  Wifi, UtensilsCrossed, Snowflake, Bath, ShieldCheck, Trees, ArrowRight,
 } from 'lucide-react';
 
 export default function Apartments() {
@@ -11,34 +11,34 @@ export default function Apartments() {
           <span className="eyebrow">THE APARTMENT</span>
           <h1>Built for how you want it.</h1>
           <p className="lead">Each separate apartment offers:</p>
+          <ul className="lead-list">
+            <li>Two spacious bedrooms with comfortable furnishings</li>
+            <li>A large, well‑furnished hall for relaxation, work, or family gatherings</li>
+            <li>A modern kitchen equipped for convenience</li>
+            <li>A private outdoor spot perfect for a book or a plate of food</li>
+          </ul>
 
-          <div className="features-grid features-2">
-            <Feature icon={<BedDouble />} title="Two bedrooms">Comfortable furnishings throughout.</Feature>
-            <Feature icon={<Sofa />} title="Multi-purpose hall">A large, well-furnished space for relaxation, work, or family gatherings.</Feature>
-            <Feature icon={<UtensilsCrossed />} title="Modern kitchen">Equipped for everyday convenience.</Feature>
-            <Feature icon={<Trees />} title="Private outdoor spot">Perfect for a book or a plate of food.</Feature>
-          </div>
-
-          <p className="lead" style={{ marginTop: 32 }}>
+          <p className="lead">
             Set within a peaceful compound, the apartments open directly onto the serene
             LivingSpring Gardens, where well‑kept lawns and tranquil surroundings create the
             ideal atmosphere for rest, reflection, and holidays.
           </p>
 
-          <div className="page-header-callout reveal">
-            <h3>Everything you need to focus and unwind.</h3>
-            <p className="prose">
-              Enjoy high-speed internet, comfortable sofas and chairs, and quiet corners that
-              make calls and work feel effortless.
-            </p>
-            <p className="prose">
-              When the day slows down, the multi-purpose hall provides space for relaxation,
-              family gatherings, or reflection. Step outside to discover private outdoor spots
-              and many peaceful places across the apartment and compound where you can sit with
-              a book, share a meal, or simply breathe in the calm.
-            </p>
-            <p className="page-header-callout-tag">Work Smart, Rest Easy at LivingSpring Gardens</p>
-          </div>
+          <p className="lead">
+            Everything you need to focus and unwind: enjoy high-speed internet, comfortable
+            sofas and chairs, and quiet corners that make calls and work feel effortless.
+          </p>
+
+          <p className="lead">
+            When the day slows down, the multi-purpose hall provides space for relaxation,
+            family gatherings, or reflection. Step outside to discover private outdoor spots
+            and many peaceful places across the apartment and compound where you can sit with
+            a book, share a meal, or simply breathe in the calm.
+          </p>
+
+          <p className="lead" style={{ fontWeight: 600, color: 'var(--ink)' }}>
+            Work Smart, Rest Easy at LivingSpring Gardens.
+          </p>
         </div>
       </section>
 
