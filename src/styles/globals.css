@@ -1574,32 +1574,6 @@ body:has(.auth-split) main { padding: 0; }
   margin: 0;
 }
 .page-header-v2 .lead + .lead { margin-top: 16px; }
-.page-header-v2 .lead-list {
-  list-style: none;
-  padding: 0;
-  margin: 12px 0 16px;
-  max-width: 640px;
-  display: grid;
-  gap: 8px;
-}
-.page-header-v2 .lead-list li {
-  font-size: 17px;
-  color: var(--muted);
-  line-height: 1.5;
-  padding-left: 22px;
-  position: relative;
-}
-.page-header-v2 .lead-list li::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 9px;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--accent);
-}
-
 /* ============ TYPOGRAPHY BALANCE (site-wide) ============ */
 
 /* Left-align text by default — no more centered walls of prose */
@@ -1615,19 +1589,35 @@ body:has(.auth-split) main { padding: 0; }
 }
 /* Supporting intro copy folded into the page header, instead of a
    second competing hero-sized section */
-.page-header-extra {
-  max-width: 640px;
+/* Tinted callout box — a visual break instead of more plain paragraphs */
+.page-header-callout {
+  max-width: 680px;
   margin-top: 40px;
-  padding-top: 32px;
-  border-top: 1px solid var(--line);
+  padding: 32px 36px;
+  background: var(--bg-soft);
+  border-radius: var(--radius-lg);
 }
-.page-header-extra h3 {
+.page-header-callout h3 {
   font-size: 22px;
   font-weight: 600;
   letter-spacing: -.01em;
   margin: 0 0 14px;
 }
-.page-header-extra .prose:last-child { margin-bottom: 0; }
+.page-header-callout .prose:last-of-type { margin-bottom: 20px; }
+.page-header-callout-tag {
+  display: inline-block;
+  margin: 0;
+  padding: 8px 16px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 13.5px;
+  font-weight: 600;
+  border-radius: 999px;
+}
+
+/* 2-up variant of the features grid, used for the header's amenity cards */
+.features-2 { grid-template-columns: repeat(2, 1fr); margin-top: 24px; }
+@media (max-width: 620px) { .features-2 { grid-template-columns: 1fr; } }
 .intro-v2 h2 {
   font-size: clamp(28px, 3.4vw, 44px);
   font-weight: 500;
