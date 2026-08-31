@@ -217,14 +217,14 @@ export default function Book() {
 
                   <ul className="side-list">
                     <li><strong>Sleeps up to 4</strong><span>4 bedrooms · 5 beds · 4 baths</span></li>
-                    <li><strong>Fully self-contained</strong><span>Kitchen, workspace &amp; private verandah</span></li>
+                    <li><strong>Fully self-contained</strong><span>Kitchen &amp; private verandah</span></li>
                     <li><strong>Central Sunyani</strong><span>Minutes from market &amp; cafés</span></li>
                   </ul>
 
                   <div className="side-divider" />
                   <h4>Rates</h4>
                   <ul className="side-list">
-                    <li><strong>$41 / night</strong><span>Base rate per flat</span></li>
+                    <li><strong>$41 / night</strong><span>Base rate per apartment</span></li>
                     <li><strong>$10 off</strong><span>When booked for 5 nights</span></li>
                     <li><strong>20% off</strong><span>When booked for 28–30 nights</span></li>
                   </ul>
