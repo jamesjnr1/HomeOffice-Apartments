@@ -22,14 +22,9 @@ export default function Apartments() {
             LivingSpring Gardens, where well‑kept lawns and tranquil surroundings create the
             ideal atmosphere for rest, reflection, and holidays.
           </p>
-        </div>
-      </section>
 
-      <section className="section section-narrow">
-        <div className="container">
-          <div className="intro-v2 intro-v2-centered reveal">
-            <span className="eyebrow">DESIGNED FOR REMOTE WORK</span>
-            <h2>Everything you need to focus and unwind.</h2>
+          <div className="page-header-extra reveal">
+            <h3>Everything you need to focus and unwind.</h3>
             <p className="prose">
               Enjoy high-speed internet, comfortable sofas and chairs, and quiet corners that
               make calls and work feel effortless.
@@ -40,7 +35,7 @@ export default function Apartments() {
               and many peaceful places across the apartment and compound where you can sit with
               a book, share a meal, or simply breathe in the calm.
             </p>
-            <p className="prose" style={{ fontWeight: 600, color: 'var(--ink)' }}>
+            <p className="prose" style={{ fontWeight: 600, color: 'var(--ink)', marginBottom: 0 }}>
               Work Smart, Rest Easy at LivingSpring Gardens
             </p>
           </div>

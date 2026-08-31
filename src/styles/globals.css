@@ -1613,12 +1613,21 @@ body:has(.auth-split) main { padding: 0; }
   max-width: 780px;
   text-align: left;
 }
-.intro-v2-centered {
+/* Supporting intro copy folded into the page header, instead of a
+   second competing hero-sized section */
+.page-header-extra {
   max-width: 640px;
-  margin: 0 auto;
-  text-align: center;
+  margin-top: 40px;
+  padding-top: 32px;
+  border-top: 1px solid var(--line);
 }
-.intro-v2-centered .prose { margin-left: auto; margin-right: auto; }
+.page-header-extra h3 {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -.01em;
+  margin: 0 0 14px;
+}
+.page-header-extra .prose:last-child { margin-bottom: 0; }
 .intro-v2 h2 {
   font-size: clamp(28px, 3.4vw, 44px);
   font-weight: 500;
