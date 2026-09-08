@@ -40,25 +40,6 @@ export default function Apartments() {
 
       <section className="section">
         <div className="container">
-          <div className="page-header-callout reveal" style={{ marginTop: 0 }}>
-            <h3>Everything you need to focus and unwind.</h3>
-            <p className="prose">
-              Enjoy high-speed internet, comfortable sofas and chairs, and quiet corners that
-              make calls and work feel effortless.
-            </p>
-            <p className="prose">
-              When the day slows down, the multi-purpose hall provides space for relaxation,
-              family gatherings, or reflection. Step outside to discover private outdoor spots
-              and many peaceful places across the apartment and compound where you can sit with
-              a book, share a meal, or simply breathe in the calm.
-            </p>
-            <p className="page-header-callout-tag">Work Smart, Rest Easy at LivingSpring Gardens</p>
-          </div>
-        </div>
-      </section>
-
-      <section className="section section-cream">
-        <div className="container">
           <div className="section-head-left reveal">
             <span className="eyebrow">FEATURES</span>
             <h2>Small comforts, well considered.</h2>
@@ -75,7 +56,7 @@ export default function Apartments() {
         </div>
       </section>
 
-      <section className="section">
+      <section className="section section-cream">
         <div className="container">
           <div className="section-head-left reveal">
             <span className="eyebrow">AT A GLANCE</span>
@@ -90,7 +71,7 @@ export default function Apartments() {
         </div>
       </section>
 
-      <section className="section section-cream">
+      <section className="section">
         <div className="container">
           <div className="section-head-left reveal">
             <span className="eyebrow">RATES</span>
