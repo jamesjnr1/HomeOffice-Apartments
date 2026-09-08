@@ -6,11 +6,28 @@ import {
 export default function Apartments() {
   return (
     <>
+      {/* Header — one clear message, nothing crammed in */}
       <section className="page-header page-header-v2">
         <div className="container">
           <span className="eyebrow">THE APARTMENT</span>
           <h1>Built for how you want it.</h1>
-          <p className="lead">Each separate apartment offers:</p>
+          <p className="lead">
+            Two self-contained apartments, each opening directly onto the serene LivingSpring
+            Gardens — thoughtfully laid out for how you work, rest, and unwind.
+          </p>
+        </div>
+      </section>
+
+      {/* Layout — the 4-up feature grid gets its own section and room to breathe */}
+      <section className="section section-cream">
+        <div className="container">
+          <div className="section-head-left reveal">
+            <span className="eyebrow">LAYOUT</span>
+            <h2>Two bedrooms, thoughtfully arranged.</h2>
+            <p className="lead" style={{ marginTop: 16, marginBottom: 0 }}>
+              Each apartment includes:
+            </p>
+          </div>
 
           <div className="features-grid features-2">
             <Feature icon={<BedDouble />} title="Two bedrooms">Comfortable furnishings throughout.</Feature>
@@ -18,31 +35,10 @@ export default function Apartments() {
             <Feature icon={<UtensilsCrossed />} title="Modern kitchen">Equipped for everyday convenience.</Feature>
             <Feature icon={<Trees />} title="Private outdoor spot">Perfect for a book or a plate of food.</Feature>
           </div>
-
-          <p className="lead" style={{ marginTop: 32 }}>
-            Set within a peaceful compound, the apartments open directly onto the serene
-            LivingSpring Gardens, where well‑kept lawns and tranquil surroundings create the
-            ideal atmosphere for rest, reflection, and holidays.
-          </p>
-
-          <div className="page-header-callout reveal">
-            <h3>Everything you need to focus and unwind.</h3>
-            <p className="prose">
-              Enjoy high-speed internet, comfortable sofas and chairs, and quiet corners that
-              make calls and work feel effortless.
-            </p>
-            <p className="prose">
-              When the day slows down, the multi-purpose hall provides space for relaxation,
-              family gatherings, or reflection. Step outside to discover private outdoor spots
-              and many peaceful places across the apartment and compound where you can sit with
-              a book, share a meal, or simply breathe in the calm.
-            </p>
-            <p className="page-header-callout-tag">Work Smart, Rest Easy at LivingSpring Gardens</p>
-          </div>
         </div>
       </section>
 
-      <section className="section section-cream">
+      <section className="section">
         <div className="container">
           <div className="section-head-left reveal">
             <span className="eyebrow">FEATURES</span>
@@ -60,7 +56,7 @@ export default function Apartments() {
         </div>
       </section>
 
-      <section className="section">
+      <section className="section section-cream">
         <div className="container">
           <div className="section-head-left reveal">
             <span className="eyebrow">AT A GLANCE</span>
@@ -75,7 +71,7 @@ export default function Apartments() {
         </div>
       </section>
 
-      <section className="section section-cream">
+      <section className="section">
         <div className="container">
           <div className="section-head-left reveal">
             <span className="eyebrow">RATES</span>

@@ -43,27 +43,28 @@ export default function About() {
         </div>
       </section>
 
+      {/* Location — two-column text, no repeated photo */}
       <section className="section section-cream">
         <div className="container">
-          <div className="two-col">
-            <div className="reveal">
-              <img
-                src="/images/hero-property.jpg"
-                alt="Sunyani surroundings"
-                className="rounded-img"
-              />
-            </div>
-            <div className="reveal">
+          <div className="two-col two-col-text reveal">
+            <div>
               <span className="eyebrow">SUNYANI</span>
               <h2>The garden city of the Bono Region.</h2>
               <p className="prose">
                 Sunyani is smaller and calmer than the coastal cities — a good pace of life,
                 a beautiful hinterland, and enough going on for a proper week or a proper month.
               </p>
+            </div>
+            <div>
               <p className="prose">
-                A central location for exploring the Bono Region, from the Kintampo Waterfalls
-                to the Bui National Park.
+                A central location for exploring the Bono Region, with plenty worth the drive
+                just outside the city.
               </p>
+              <ul className="prose-list">
+                <li>Kintampo Waterfalls</li>
+                <li>Bui National Park</li>
+                <li>Sunyani's central market &amp; cafés</li>
+              </ul>
             </div>
           </div>
         </div>

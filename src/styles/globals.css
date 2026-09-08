@@ -2140,3 +2140,37 @@ html, body {
   .btn:hover,
   .teaser-card:hover { transform: none !important; }
 }
+
+/* ---------------- ABOUT / APARTMENTS — small shared helpers ---------------- */
+/* Plain bullet list, usable on its own (a tighter variant already exists
+   scoped to .intro-v2 on the Home page) */
+.prose-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px;
+  max-width: 560px;
+  display: grid;
+  gap: 10px;
+}
+.prose-list li {
+  font-size: 16px;
+  color: var(--muted);
+  line-height: 1.55;
+  padding-left: 22px;
+  position: relative;
+}
+.prose-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 9px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+/* Two-column text (no image) — top-align instead of centering two
+   asymmetric blocks of copy */
+.two-col-text { align-items: start; }
+
