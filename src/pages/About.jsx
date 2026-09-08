@@ -15,6 +15,7 @@ export default function About() {
         </div>
       </section>
 
+      {/* Story — the one place a photo earns its keep on this page */}
       <section className="section">
         <div className="container">
           <div className="two-col">
@@ -43,27 +44,45 @@ export default function About() {
         </div>
       </section>
 
+      {/* A slim facts band for rhythm — ties this page to the same visual
+          language as the Apartments "at a glance" section */}
       <section className="section section-cream">
         <div className="container">
-          <div className="two-col">
-            <div className="reveal">
-              <img
-                src="/images/hero-property.jpg"
-                alt="Sunyani surroundings"
-                className="rounded-img"
-              />
-            </div>
-            <div className="reveal">
+          <div className="section-head-left reveal">
+            <span className="eyebrow">AT A GLANCE</span>
+            <h2>The compound, in short.</h2>
+          </div>
+          <div className="stat-band reveal">
+            <StatCard label="Location" value="Sunyani" suffix="Bono Region, Ghana" />
+            <StatCard label="Bedrooms" value="4" suffix="Across two apartments" />
+            <StatCard label="Setting" value="Family-run" suffix="LivingSpring Gardens compound" />
+            <StatCard label="Reply time" value="~24h" suffix="Usual enquiry response" />
+          </div>
+        </div>
+      </section>
+
+      {/* Location — editorial two-column text, no repeated photo */}
+      <section className="section">
+        <div className="container">
+          <div className="two-col two-col-text reveal">
+            <div>
               <span className="eyebrow">SUNYANI</span>
               <h2>The garden city of the Bono Region.</h2>
               <p className="prose">
                 Sunyani is smaller and calmer than the coastal cities — a good pace of life,
                 a beautiful hinterland, and enough going on for a proper week or a proper month.
               </p>
+            </div>
+            <div>
               <p className="prose">
-                A central location for exploring the Bono Region, from the Kintampo Waterfalls
-                to the Bui National Park.
+                A central location for exploring the Bono Region, with plenty worth the drive
+                just outside the city.
               </p>
+              <ul className="prose-list">
+                <li>Kintampo Waterfalls</li>
+                <li>Bui National Park</li>
+                <li>Sunyani's central market &amp; cafés</li>
+              </ul>
             </div>
           </div>
         </div>
@@ -81,5 +100,15 @@ export default function About() {
         </div>
       </section>
     </>
+  );
+}
+
+function StatCard({ label, value, suffix }) {
+  return (
+    <div className="stat-card">
+      <div className="stat-value">{value}</div>
+      <div className="stat-label">{label}</div>
+      {suffix && <div className="stat-suffix">{suffix}</div>}
+    </div>
   );
 }
