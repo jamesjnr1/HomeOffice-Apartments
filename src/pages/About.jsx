@@ -48,7 +48,7 @@ export default function About() {
           <div className="two-col">
             <div className="reveal">
               <img
-                src="/images/living-room-2.jpg"
+                src="/images/hero-property.jpg"
                 alt="Sunyani surroundings"
                 className="rounded-img"
               />

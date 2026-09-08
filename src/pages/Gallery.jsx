@@ -6,20 +6,10 @@
  * genuine variety and rhythm — not a flat masonry.
  */
 
+// TODO: add higher-quality photos here — temporarily reduced to the one
+// picture used across the rest of the site while new photography is sourced.
 const IMAGES = [
   { src: '/images/hero-property.jpg', span: 12, ratio: '21/9' },
-  { src: '/images/living-room-1.jpg', span: 7,  ratio: '4/3' },
-  { src: '/images/bedroom-1.jpg', span: 5,  ratio: '4/3' },
-  { src: '/images/bathroom.jpg', span: 5,  ratio: '4/5' },
-  { src: '/images/kitchen.jpg', span: 7,  ratio: '4/5' },
-  { src: '/images/living-room-2.jpg', span: 12, ratio: '21/9' },
-  { src: '/images/bedroom-2.jpg', span: 4,  ratio: '1/1' },
-  { src: '/images/dining-kitchenette.jpg', span: 4,  ratio: '1/1' },
-  { src: '/images/wardrobe-hallway.jpg', span: 4,  ratio: '1/1' },
-  { src: '/images/lounge.jpg', span: 6,  ratio: '4/3' },
-  { src: '/images/bedroom-3.jpg', span: 6,  ratio: '4/3' },
-  { src: '/images/living-room-2-tv.jpg', span: 6,  ratio: '4/3' },
-  { src: '/images/bedroom-4.jpg', span: 6,  ratio: '4/3' },
 ];
 
 export default function Gallery() {

@@ -69,7 +69,7 @@ export default function Home() {
             <Link to="/apartments" className="teaser-card reveal">
               <div className="teaser-img">
                 <img
-                  src="/images/living-room-1.jpg"
+                  src="/images/hero-property.jpg"
                   alt="Interior of Home-Office Apartments"
                 />
               </div>
@@ -84,7 +84,7 @@ export default function Home() {
             <Link to="/gallery" className="teaser-card reveal">
               <div className="teaser-img">
                 <img
-                  src="/images/dining-kitchenette.jpg"
+                  src="/images/hero-property.jpg"
                   alt="Inside Home-Office Apartments"
                 />
               </div>
