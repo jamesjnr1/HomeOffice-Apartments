@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import {
-  Wifi, UtensilsCrossed, Snowflake, Bath, ShieldCheck, Trees, ArrowRight, BedDouble, Sofa,
+  Wifi, UtensilsCrossed, Snowflake, Bath, ShieldCheck, Trees, ArrowRight,
 } from 'lucide-react';
 
 export default function Apartments() {
@@ -18,27 +18,7 @@ export default function Apartments() {
         </div>
       </section>
 
-      {/* Layout — the 4-up feature grid gets its own section and room to breathe */}
       <section className="section section-cream">
-        <div className="container">
-          <div className="section-head-left reveal">
-            <span className="eyebrow">LAYOUT</span>
-            <h2>Two bedrooms, thoughtfully arranged.</h2>
-            <p className="lead" style={{ marginTop: 16, marginBottom: 0 }}>
-              Each apartment includes:
-            </p>
-          </div>
-
-          <div className="features-grid features-2">
-            <Feature icon={<BedDouble />} title="Two bedrooms">Comfortable furnishings throughout.</Feature>
-            <Feature icon={<Sofa />} title="Multi-purpose hall">A large, well-furnished space for relaxation, work, or family gatherings.</Feature>
-            <Feature icon={<UtensilsCrossed />} title="Modern kitchen">Equipped for everyday convenience.</Feature>
-            <Feature icon={<Trees />} title="Private outdoor spot">Perfect for a book or a plate of food.</Feature>
-          </div>
-        </div>
-      </section>
-
-      <section className="section">
         <div className="container">
           <div className="section-head-left reveal">
             <span className="eyebrow">FEATURES</span>
@@ -56,7 +36,7 @@ export default function Apartments() {
         </div>
       </section>
 
-      <section className="section section-cream">
+      <section className="section">
         <div className="container">
           <div className="section-head-left reveal">
             <span className="eyebrow">AT A GLANCE</span>
@@ -71,7 +51,7 @@ export default function Apartments() {
         </div>
       </section>
 
-      <section className="section">
+      <section className="section section-cream">
         <div className="container">
           <div className="section-head-left reveal">
             <span className="eyebrow">RATES</span>

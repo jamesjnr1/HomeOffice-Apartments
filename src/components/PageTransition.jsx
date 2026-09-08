@@ -36,7 +36,15 @@ export default function PageTransition() {
   if (!active) return null;
 
   return createPortal(
-    <div className="page-curtain" aria-hidden="true" />,
+    <div className="page-curtain" aria-hidden="true">
+      <div className="page-curtain-mark">
+        <span className="page-curtain-dot">H</span>
+        <span className="page-curtain-word">
+          Home-Office <em>Apartments</em>
+          <small>LivingSpring Gardens</small>
+        </span>
+      </div>
+    </div>,
     document.body
   );
 }
