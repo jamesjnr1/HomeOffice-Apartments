@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Waves, Trees, Coffee } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 export default function About() {
   return (
@@ -15,7 +15,6 @@ export default function About() {
         </div>
       </section>
 
-      {/* Story — the one place a photo earns its keep on this page */}
       <section className="section">
         <div className="container">
           <div className="two-col">
@@ -33,40 +32,19 @@ export default function About() {
                 and quiet, the kind of place we'd want to stay ourselves.
               </p>
             </div>
-            <div className="reveal photo-frame">
+            <div className="reveal">
               <img
                 src="/images/hero-property.jpg"
                 alt="LivingSpring Gardens"
                 className="rounded-img"
               />
-              <div className="photo-badge">
-                <span className="photo-badge-value">Est. family compound</span>
-                <span className="photo-badge-label">LivingSpring Gardens</span>
-              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* A dark, editorial facts strip — ties this page to the same
-          visual language as Apartments' "at a glance" section */}
+      {/* Location — two-column text, no repeated photo */}
       <section className="section section-cream">
-        <div className="container">
-          <div className="section-head-left reveal">
-            <span className="eyebrow">AT A GLANCE</span>
-            <h2>The compound, in short.</h2>
-          </div>
-          <div className="fact-band reveal">
-            <FactCard label="Location" value="Sunyani" suffix="Bono Region, Ghana" />
-            <FactCard label="Bedrooms" value="4" suffix="Across two apartments" />
-            <FactCard label="Setting" value="Family-run" suffix="LivingSpring Gardens compound" />
-            <FactCard label="Reply time" value="~24h" suffix="Usual enquiry response" />
-          </div>
-        </div>
-      </section>
-
-      {/* Location — editorial two-column text, no repeated photo */}
-      <section className="section">
         <div className="container">
           <div className="two-col two-col-text reveal">
             <div>
@@ -75,33 +53,17 @@ export default function About() {
               <p className="prose">
                 Sunyani is smaller and calmer than the coastal cities — a good pace of life,
                 a beautiful hinterland, and enough going on for a proper week or a proper month.
-                A central location for exploring the region, with plenty worth the drive just
-                outside the city.
               </p>
             </div>
             <div>
-              <ul className="locale-list">
-                <li className="locale-item">
-                  <span className="locale-icon"><Waves /></span>
-                  <div>
-                    <h4>Kintampo Waterfalls</h4>
-                    <p>A scenic drive from the compound — worth the full day.</p>
-                  </div>
-                </li>
-                <li className="locale-item">
-                  <span className="locale-icon"><Trees /></span>
-                  <div>
-                    <h4>Bui National Park</h4>
-                    <p>Forest, river, and wildlife across the Bono hinterland.</p>
-                  </div>
-                </li>
-                <li className="locale-item">
-                  <span className="locale-icon"><Coffee /></span>
-                  <div>
-                    <h4>Sunyani market &amp; cafés</h4>
-                    <p>Minutes from the compound, for everyday essentials.</p>
-                  </div>
-                </li>
+              <p className="prose">
+                A central location for exploring the Bono Region, with plenty worth the drive
+                just outside the city.
+              </p>
+              <ul className="prose-list">
+                <li>Kintampo Waterfalls</li>
+                <li>Bui National Park</li>
+                <li>Sunyani's central market &amp; cafés</li>
               </ul>
             </div>
           </div>
@@ -120,16 +82,5 @@ export default function About() {
         </div>
       </section>
     </>
-  );
-}
-
-function FactCard({ label, value, suffix }) {
-  return (
-    <div className="fact-item">
-      <div className="fact-rule" />
-      <div className="fact-value">{value}</div>
-      <div className="fact-label">{label}</div>
-      {suffix && <div className="fact-suffix">{suffix}</div>}
-    </div>
   );
 }

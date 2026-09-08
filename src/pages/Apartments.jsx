@@ -1,14 +1,7 @@
 import { Link } from 'react-router-dom';
 import {
-  Wifi, UtensilsCrossed, Snowflake, Bath, ShieldCheck, Trees, ArrowRight,
+  Wifi, UtensilsCrossed, Snowflake, Bath, ShieldCheck, Trees, ArrowRight, BedDouble, Sofa,
 } from 'lucide-react';
-
-const LAYOUT = [
-  { title: 'Two bedrooms', desc: 'Comfortable furnishings throughout.' },
-  { title: 'Multi-purpose hall', desc: 'A large, well-furnished space for relaxation, work, or family gatherings.' },
-  { title: 'Modern kitchen', desc: 'Equipped for everyday convenience.' },
-  { title: 'Private outdoor spot', desc: 'Perfect for a book or a plate of food.' },
-];
 
 export default function Apartments() {
   return (
@@ -25,48 +18,41 @@ export default function Apartments() {
         </div>
       </section>
 
-      {/* Layout — an editorial spec sheet instead of a boxed icon grid */}
+      {/* Layout — the 4-up feature grid gets its own section and room to breathe */}
       <section className="section section-cream">
         <div className="container">
           <div className="section-head-left reveal">
             <span className="eyebrow">LAYOUT</span>
             <h2>Two bedrooms, thoughtfully arranged.</h2>
+            <p className="lead" style={{ marginTop: 16, marginBottom: 0 }}>
+              Each apartment includes:
+            </p>
           </div>
 
-          <div className="numbered-list reveal">
-            {LAYOUT.map((item, i) => (
-              <div className="numbered-item" key={item.title}>
-                <span className="numbered-index">{String(i + 1).padStart(2, '0')}</span>
-                <div>
-                  <h3>{item.title}</h3>
-                  <p>{item.desc}</p>
-                </div>
-              </div>
-            ))}
+          <div className="features-grid features-2">
+            <Feature icon={<BedDouble />} title="Two bedrooms">Comfortable furnishings throughout.</Feature>
+            <Feature icon={<Sofa />} title="Multi-purpose hall">A large, well-furnished space for relaxation, work, or family gatherings.</Feature>
+            <Feature icon={<UtensilsCrossed />} title="Modern kitchen">Equipped for everyday convenience.</Feature>
+            <Feature icon={<Trees />} title="Private outdoor spot">Perfect for a book or a plate of food.</Feature>
           </div>
         </div>
       </section>
 
-      {/* Pull-quote — the apartment's ethos in one line, with room to breathe */}
       <section className="section">
         <div className="container">
-          <div className="pull-quote-block reveal">
-            <p className="pull-quote">
-              Work smart, rest easy at LivingSpring Gardens.
+          <div className="page-header-callout reveal" style={{ marginTop: 0 }}>
+            <h3>Everything you need to focus and unwind.</h3>
+            <p className="prose">
+              Enjoy high-speed internet, comfortable sofas and chairs, and quiet corners that
+              make calls and work feel effortless.
             </p>
-            <span className="pull-quote-cite">The apartment, in a sentence</span>
-            <div className="pull-quote-body">
-              <p className="prose">
-                Enjoy high-speed internet, comfortable sofas and chairs, and quiet corners that
-                make calls and work feel effortless.
-              </p>
-              <p className="prose">
-                When the day slows down, the multi-purpose hall provides space for relaxation,
-                family gatherings, or reflection. Step outside to discover private outdoor spots
-                and many peaceful places across the compound where you can sit with a book,
-                share a meal, or simply breathe in the calm.
-              </p>
-            </div>
+            <p className="prose">
+              When the day slows down, the multi-purpose hall provides space for relaxation,
+              family gatherings, or reflection. Step outside to discover private outdoor spots
+              and many peaceful places across the apartment and compound where you can sit with
+              a book, share a meal, or simply breathe in the calm.
+            </p>
+            <p className="page-header-callout-tag">Work Smart, Rest Easy at LivingSpring Gardens</p>
           </div>
         </div>
       </section>
@@ -95,11 +81,11 @@ export default function Apartments() {
             <span className="eyebrow">AT A GLANCE</span>
             <h2>Each apartment</h2>
           </div>
-          <div className="fact-band reveal">
-            <FactCard label="Sleeps up to" value="2–3" suffix="guests · up to 4 for couples" />
-            <FactCard label="Bedrooms" value="2" />
-            <FactCard label="Beds" value="2–3" suffix="3 in Apartment A · 2 in Apartment B" />
-            <FactCard label="Bathrooms" value="2" suffix="Apartment A has an extra guest washroom" />
+          <div className="stat-band reveal">
+            <StatCard label="Sleeps up to" value="2–3" suffix="guests · up to 4 for couples" />
+            <StatCard label="Bedrooms" value="2" />
+            <StatCard label="Beds" value="2–3" suffix="3 in Apartment A · 2 in Apartment B" />
+            <StatCard label="Bathrooms" value="2" suffix="Apartment A has an extra guest washroom" />
           </div>
         </div>
       </section>
@@ -174,13 +160,12 @@ function RateCard({ eyebrow, price, unit, desc, featured }) {
   );
 }
 
-function FactCard({ label, value, suffix }) {
+function StatCard({ label, value, suffix }) {
   return (
-    <div className="fact-item">
-      <div className="fact-rule" />
-      <div className="fact-value">{value}</div>
-      <div className="fact-label">{label}</div>
-      {suffix && <div className="fact-suffix">{suffix}</div>}
+    <div className="stat-card">
+      <div className="stat-value">{value}</div>
+      <div className="stat-label">{label}</div>
+      {suffix && <div className="stat-suffix">{suffix}</div>}
     </div>
   );
 }

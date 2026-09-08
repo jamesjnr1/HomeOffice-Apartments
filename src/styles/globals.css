@@ -2,7 +2,6 @@
    HOME-OFFICE APARTMENTS at LIVING SPRING GARDENS — Design System
    ===================================================================== */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&display=swap');
 
 :root {
   --ink:        #1f2b26;
@@ -2142,206 +2141,36 @@ html, body {
   .teaser-card:hover { transform: none !important; }
 }
 
-/* =====================================================================
-   PREMIUM PASS — About / Apartments
-   A serif display face for headlines + a restrained gold accent, plus
-   a handful of editorial components (fact band, numbered list, pull
-   quote, locale list) so these two pages read as considered rather
-   than templated. Scoped to the specific classes marketing pages use —
-   the app-like dashboard/admin screens have their own stylesheets and
-   are untouched.
-   ===================================================================== */
-
-:root {
-  --font-display: 'Fraunces', 'Poppins', Georgia, serif;
-  --gold: #b58a4a;
-  --gold-soft: #f2e8da;
+/* ---------------- ABOUT / APARTMENTS — small shared helpers ---------------- */
+/* Plain bullet list, usable on its own (a tighter variant already exists
+   scoped to .intro-v2 on the Home page) */
+.prose-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px;
+  max-width: 560px;
+  display: grid;
+  gap: 10px;
+}
+.prose-list li {
+  font-size: 16px;
+  color: var(--muted);
+  line-height: 1.55;
+  padding-left: 22px;
+  position: relative;
+}
+.prose-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 9px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
 }
 
-/* ---------------- SERIF HEADLINES (marketing pages only) ---------------- */
-.hero-v2-title,
-.page-header-v2 h1,
-.intro-v2 h2,
-.section-head-left h2,
-.two-col h2,
-.cta-content h2,
-.stat-value,
-.rate-card-price {
-  font-family: var(--font-display);
-}
-.hero-v2-title { font-weight: 500; letter-spacing: -.02em; }
-.page-header-v2 h1 { font-weight: 500; letter-spacing: -.015em; }
-.intro-v2 h2,
-.section-head-left h2,
-.two-col h2,
-.cta-content h2 { font-weight: 500; letter-spacing: -.01em; }
-.stat-value, .rate-card-price { font-weight: 500; }
-
-/* ---------------- TWO-COL TEXT (no image) ---------------- */
-/* Top-align instead of centering two asymmetric blocks of copy */
+/* Two-column text (no image) — top-align instead of centering two
+   asymmetric blocks of copy */
 .two-col-text { align-items: start; }
 
-/* ---------------- FACT BAND — dark, editorial "at a glance" strip ---------------- */
-.fact-band {
-  background: var(--ink);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  box-shadow: var(--shadow-lg);
-}
-@media (max-width: 720px) {
-  .fact-band { grid-template-columns: repeat(2, 1fr); }
-}
-.fact-item {
-  padding: 40px 28px;
-  border-right: 1px solid rgba(255,255,255,.1);
-}
-.fact-item:last-child { border-right: 0; }
-@media (max-width: 720px) {
-  .fact-item:nth-child(2n) { border-right: 0; }
-  .fact-item:nth-child(-n+2) { border-bottom: 1px solid rgba(255,255,255,.1); }
-}
-.fact-rule { width: 22px; height: 2px; background: var(--gold); margin-bottom: 18px; }
-.fact-value {
-  font-family: var(--font-display);
-  font-size: 32px;
-  font-weight: 500;
-  letter-spacing: -.01em;
-  color: #fff;
-  line-height: 1;
-  margin-bottom: 8px;
-}
-.fact-label {
-  font-size: 11.5px;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,.55);
-  font-weight: 600;
-}
-.fact-suffix { font-size: 12.5px; color: rgba(255,255,255,.4); margin-top: 6px; }
-
-/* ---------------- PHOTO BADGE — floating caption card on a photo ---------------- */
-.photo-frame { position: relative; }
-.photo-badge {
-  position: absolute;
-  left: 28px;
-  bottom: -28px;
-  background: #fff;
-  padding: 18px 24px;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-lg);
-}
-.photo-badge-value {
-  display: block;
-  font-family: var(--font-display);
-  font-size: 19px;
-  font-weight: 500;
-  letter-spacing: -.005em;
-  color: var(--ink);
-}
-.photo-badge-label {
-  display: block;
-  margin-top: 3px;
-  font-size: 10.5px;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  color: var(--muted);
-  font-weight: 600;
-}
-
-/* ---------------- LOCALE LIST — icon rows for nearby places ---------------- */
-.locale-list { display: grid; gap: 20px; margin-top: 28px; }
-.locale-item { display: flex; align-items: flex-start; gap: 14px; }
-.locale-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 999px;
-  border: 1px solid var(--line);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--accent);
-  flex-shrink: 0;
-}
-.locale-icon svg { width: 16px; height: 16px; stroke-width: 1.6; }
-.locale-item h4 { margin: 0 0 2px; font-size: 15px; font-weight: 600; }
-.locale-item p { margin: 0; font-size: 13.5px; color: var(--muted); line-height: 1.5; }
-
-/* ---------------- NUMBERED LIST — editorial feature rows ---------------- */
-.numbered-list {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0 56px;
-  margin-top: 8px;
-  border-bottom: 1px solid var(--line);
-}
-@media (max-width: 720px) {
-  .numbered-list { grid-template-columns: 1fr; }
-}
-.numbered-item {
-  display: flex;
-  gap: 20px;
-  padding: 28px 0;
-  border-top: 1px solid var(--line);
-}
-.numbered-index {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: 16px;
-  font-weight: 500;
-  color: var(--gold);
-  padding-top: 2px;
-  flex-shrink: 0;
-  width: 24px;
-}
-.numbered-item h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -.005em; }
-.numbered-item p { margin: 0; color: var(--muted); font-size: 14.5px; line-height: 1.6; }
-
-/* ---------------- PULL QUOTE ---------------- */
-.pull-quote-block { max-width: 760px; }
-.pull-quote {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-weight: 500;
-  font-size: clamp(24px, 3vw, 34px);
-  line-height: 1.32;
-  letter-spacing: -.01em;
-  color: var(--ink);
-  margin: 0;
-  padding-left: 28px;
-  border-left: 3px solid var(--gold);
-}
-.pull-quote-cite {
-  display: block;
-  margin: 18px 0 0 31px;
-  font-size: 12px;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  color: var(--muted);
-  font-weight: 600;
-}
-.pull-quote-body {
-  margin-top: 44px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 40px;
-}
-@media (max-width: 720px) {
-  .pull-quote-body { grid-template-columns: 1fr; }
-}
-.pull-quote-body .prose { max-width: none; margin: 0; }
-
-/* ---------------- FEATURES — refined thin-ring icons (Apartments only) ---------------- */
-.feature-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 999px;
-  background: transparent;
-  border: 1px solid var(--line);
-  color: var(--accent);
-}
-
-/* ---------------- RATE CARDS — gold accent for the featured tier ---------------- */
-.rate-card.featured { border-color: var(--gold); box-shadow: 0 4px 24px rgba(181,138,74,.18); }
-.rate-badge { background: var(--gold); }
