@@ -28,7 +28,7 @@ export default function PageTransition() {
       setActive(true);
       // Also scroll to top on route change (Lenis-safe)
       window.scrollTo({ top: 0, behavior: 'instant' });
-      const t = setTimeout(() => setActive(false), 1100);
+      const t = setTimeout(() => setActive(false), 800);
       return () => clearTimeout(t);
     }
   }, [location.pathname]);
@@ -40,8 +40,8 @@ export default function PageTransition() {
       <div className="page-curtain-mark">
         <span className="page-curtain-dot">H</span>
         <span className="page-curtain-word">
-          Home-Office <em>Apartments</em>
-          <small>LivingSpring Gardens</small>
+          <span className="page-curtain-primary">Home-Office Apartments</span>
+          <span className="page-curtain-sub">and Living<em>Spring</em> Gardens</span>
         </span>
       </div>
     </div>,
