@@ -5,16 +5,18 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase';
 /**
  * Book — enquiry form that actually sends and actually persists.
  *
- * Duplicate enquiries: while a guest has an enquiry sitting unattended
- * (status 'new') for less than 3 days, a second submission from the
- * same email is rejected by a database trigger (see supabase/
- * migrations/20260909200000_self_expiring_enquiry_block.sql) — caught
- * below and turned into a friendly message. The 3-day window is
- * deliberate: if an enquiry is ever missed entirely, the guest isn't
- * locked out forever waiting on someone to notice. As soon as the
- * email field loses focus, has_open_enquiry() is also checked
- * proactively so a guest with a pending enquiry finds out before
- * filling in the rest of the form, not after.
+ * Duplicate enquiries: while a guest has an enquiry that hasn't turned
+ * into a booking yet (marking it replied or archived does NOT release
+ * this — only AdminEnquiries.jsx's "Confirm booking" does), for less
+ * than 3 days, a second submission from the same email is rejected by
+ * a database trigger (see supabase/migrations/20260909210000_block_
+ * until_booked_not_just_replied.sql) — caught below and turned into a
+ * friendly message. The 3-day window is deliberate: if an enquiry is
+ * ever missed entirely, the guest isn't locked out forever waiting on
+ * someone to notice. As soon as the email field loses focus,
+ * has_open_enquiry() is also checked proactively so a guest with a
+ * pending enquiry finds out before filling in the rest of the form,
+ * not after.
  *
  * On submit:
  *   1. Saves the enquiry to Supabase (table: enquiries) so it shows up
@@ -101,7 +103,7 @@ export default function Book() {
 
         if (dbError?.message?.includes('DUPLICATE_OPEN_ENQUIRY')) {
           setError(
-            `You already have an enquiry with us that we haven't replied to yet — we'll be in touch soon! Email ${CONTACT_EMAIL} if it's urgent.`
+            `You already have an enquiry with us that we're still working on — we'll be in touch soon! Email ${CONTACT_EMAIL} if it's urgent.`
           );
           setLoading(false);
           return;
@@ -205,7 +207,7 @@ export default function Book() {
                   />
                   {pendingNotice && (
                     <p className="field-note">
-                      You already have an enquiry with us we haven't replied to yet — no need to send another, we'll be in touch soon.
+                      You already have an enquiry with us we're still working on — no need to send another, we'll be in touch soon.
                     </p>
                   )}
                 </div>
