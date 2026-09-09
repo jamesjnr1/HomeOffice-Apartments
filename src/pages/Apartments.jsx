@@ -2,10 +2,10 @@ import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 
 const APT_SLIDES = [
-  { src: '/images/living-room-1.jpg', alt: 'Living room with black leather seating', caption: 'Living room' },
-  { src: '/images/lounge.jpg', alt: 'Second living room with warm brown seating', caption: 'Lounge' },
-  { src: '/images/kitchen.jpg', alt: 'Fully equipped kitchen', caption: 'Kitchen' },
-  { src: '/images/bathroom.jpg', alt: 'Washroom with walk-in shower', caption: 'Washroom' },
+  { src: '/images/living-room-1.jpg', alt: 'Living room with black leather seating' },
+  { src: '/images/lounge.jpg', alt: 'Second living room with warm brown seating' },
+  { src: '/images/kitchen.jpg', alt: 'Fully equipped kitchen' },
+  { src: '/images/bathroom.jpg', alt: 'Washroom with walk-in shower' },
 ];
 
 export default function Apartments() {
@@ -23,15 +23,8 @@ export default function Apartments() {
         </div>
       </section>
 
-      <section className="section section-cream">
-        <div className="container">
-          <div className="section-head-left reveal">
-            <span className="eyebrow">INSIDE</span>
-            <h2>A look around.</h2>
-          </div>
-
-          <ApartmentSlider />
-        </div>
+      <section className="apt-marquee-section">
+        <ApartmentSlider />
       </section>
 
       <section className="section">
@@ -100,17 +93,16 @@ function ApartmentSlider() {
   // photo list twice back to back; animating it exactly -50% loops
   // seamlessly back to the start.
   return (
-    <div className="apt-marquee reveal">
-      <div className="apt-marquee-track">
-        {[...APT_SLIDES, ...APT_SLIDES].map((slide, i) => (
-          <figure className="apt-marquee-card" key={`${slide.src}-${i}`}>
-            <div className="apt-marquee-card-frame">
-              <img src={slide.src} alt={slide.alt} loading={i < APT_SLIDES.length ? 'eager' : 'lazy'} />
-            </div>
-            <figcaption>{slide.caption}</figcaption>
-          </figure>
-        ))}
-      </div>
+    <div className="apt-marquee-track">
+      {[...APT_SLIDES, ...APT_SLIDES].map((slide, i) => (
+        <img
+          key={`${slide.src}-${i}`}
+          className="apt-marquee-card"
+          src={slide.src}
+          alt={slide.alt}
+          loading={i < APT_SLIDES.length ? 'eager' : 'lazy'}
+        />
+      ))}
     </div>
   );
 }
