@@ -31,6 +31,7 @@ export default function AdminEnquiries() {
   const [amounts, setAmounts] = useState({}); // enquiry id -> draft total string
   const [confirmingId, setConfirmingId] = useState(null);
   const [bookError, setBookError] = useState('');
+  const [loadError, setLoadError] = useState('');
 
   useEffect(() => {
     loadEnquiries();
@@ -48,16 +49,28 @@ export default function AdminEnquiries() {
     try {
       // Embedded select pulls the linked booking's reference/status in
       // one query, so a converted enquiry can show "Booked · HO-XXXXX"
-      // without a second round trip.
+      // without a second round trip. There are two FKs between these
+      // tables (bookings.enquiry_id and enquiries.booking_id), so the
+      // embed is ambiguous unless we name the constraint — without
+      // this, PostgREST errors on every request and the whole list
+      // silently comes back empty (this was the "enquiries not
+      // showing" bug).
       const { data, error } = await supabase
         .from('enquiries')
-        .select('*, bookings(reference, status)')
+        .select('*, bookings!enquiries_booking_id_fkey(reference, status)')
         .order('created_at', { ascending: false });
 
-      if (!error && data) setEnquiries(data);
+      if (error) {
+        // Surface it instead of silently leaving the list empty —
+        // that silence is exactly how the ambiguous-embed bug above
+        // went unnoticed.
+        setLoadError(error.message);
+      } else if (data) {
+        setEnquiries(data);
+        setLoadError('');
+      }
     } catch {
-      // A network-level failure would otherwise leave this stuck on
-      // "Loading…" forever.
+      setLoadError("Couldn't reach the database — check your connection and try again.");
     } finally {
       setLoading(false);
     }
@@ -157,6 +170,12 @@ export default function AdminEnquiries() {
           </button>
         ))}
       </div>
+
+      {loadError && (
+        <div className="form-error" style={{ marginBottom: 16 }}>
+          Couldn't load enquiries: {loadError}
+        </div>
+      )}
 
       <div className="mgmt-card mgmt-card-flush">
         {loading ? (
