@@ -1,7 +1,13 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  Wifi, UtensilsCrossed, Snowflake, Bath, ShieldCheck, Trees, ArrowRight,
-} from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+
+const APT_SLIDES = [
+  { src: '/images/living-room-1.jpg', alt: 'Living room with black leather seating', caption: 'Living room' },
+  { src: '/images/lounge.jpg', alt: 'Second living room with warm brown seating', caption: 'Lounge' },
+  { src: '/images/kitchen.jpg', alt: 'Fully equipped kitchen', caption: 'Kitchen' },
+  { src: '/images/bathroom.jpg', alt: 'Washroom with walk-in shower', caption: 'Washroom' },
+];
 
 export default function Apartments() {
   return (
@@ -21,18 +27,11 @@ export default function Apartments() {
       <section className="section section-cream">
         <div className="container">
           <div className="section-head-left reveal">
-            <span className="eyebrow">FEATURES</span>
-            <h2>Small comforts, well considered.</h2>
+            <span className="eyebrow">INSIDE</span>
+            <h2>A look around.</h2>
           </div>
 
-          <div className="features-grid features-3">
-            <Feature icon={<Wifi />} title="High-Speed Wi-Fi">Fast, reliable, dedicated. Suitable for video calls.</Feature>
-            <Feature icon={<UtensilsCrossed />} title="Full kitchen">Fridge, stove, cookware.</Feature>
-            <Feature icon={<Snowflake />} title="Air conditioning">Bedroom and living area, quiet at night.</Feature>
-            <Feature icon={<Bath />} title="Hot shower">Instant hot water, generous pressure.</Feature>
-            <Feature icon={<ShieldCheck />} title="Safe compound">Gated, quiet, with a caretaker on-site.</Feature>
-            <Feature icon={<Trees />} title="Private verandah">Shaded outdoor space attached to each apartment.</Feature>
-          </div>
+          <ApartmentSlider />
         </div>
       </section>
 
@@ -97,12 +96,49 @@ export default function Apartments() {
   );
 }
 
-function Feature({ icon, title, children }) {
+function ApartmentSlider() {
+  const [index, setIndex] = useState(0);
+  const go = (i) => setIndex((i + APT_SLIDES.length) % APT_SLIDES.length);
+  const slide = APT_SLIDES[index];
+
   return (
-    <div className="feature reveal">
-      <div className="feature-icon">{icon}</div>
-      <h3>{title}</h3>
-      <p>{children}</p>
+    <div className="apt-slider reveal">
+      <div className="apt-slider-frame">
+        <img src={slide.src} alt={slide.alt} loading="lazy" />
+        <button
+          type="button"
+          className="apt-slider-nav apt-slider-nav-prev"
+          onClick={() => go(index - 1)}
+          aria-label="Previous photo"
+        >
+          <ChevronLeft size={20} />
+        </button>
+        <button
+          type="button"
+          className="apt-slider-nav apt-slider-nav-next"
+          onClick={() => go(index + 1)}
+          aria-label="Next photo"
+        >
+          <ChevronRight size={20} />
+        </button>
+      </div>
+
+      <div className="apt-slider-foot">
+        <span className="apt-slider-caption">{slide.caption}</span>
+        <div className="apt-slider-dots" role="tablist" aria-label="Choose a photo">
+          {APT_SLIDES.map((s, i) => (
+            <button
+              key={s.src}
+              type="button"
+              role="tab"
+              className={`apt-slider-dot${i === index ? ' active' : ''}`}
+              aria-selected={i === index}
+              aria-label={`Show ${s.caption}`}
+              onClick={() => setIndex(i)}
+            />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
