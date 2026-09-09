@@ -13,24 +13,29 @@ import { supabase } from '../../lib/supabase';
  * and enter the agreed total to create a `bookings` row (see
  * supabase/migrations/20260909150000_create_bookings.sql). That's the
  * only place bookings get created — no on-site payment, the admin
- * confirms after agreeing dates/price with the guest directly.
+ * confirms after agreeing dates/price with the guest directly. It's
+ * also the only thing that releases a guest to submit another enquiry
+ * — see the urgency() helper below and supabase/migrations/
+ * 20260909210000_block_until_booked_not_just_replied.sql. Marking an
+ * enquiry replied or archived deliberately does NOT release it.
  */
 
 const TABS = ['all', 'new', 'replied', 'archived'];
 const RESUBMIT_WINDOW_MS = 3 * 24 * 60 * 60 * 1000; // keep in sync with the
-// 3-day window in supabase/migrations/20260909200000_self_expiring_enquiry_block.sql
+// 3-day window in supabase/migrations/20260909210000_block_until_booked_not_just_replied.sql
 
 function makeReference() {
   const code = Math.random().toString(36).slice(2, 7).toUpperCase();
   return `HO-${code}`;
 }
 
-// A 'new' enquiry left unattended long enough lets the same guest
-// resubmit (see the migration above) — this surfaces that here so it
-// doesn't come as a surprise when a second one from the same person
-// shows up.
+// An enquiry that hasn't become a booking yet blocks the same email
+// from resubmitting — marking it replied or archived does NOT release
+// this, only confirming a booking does (see confirmBooking below) or
+// the 3-day self-expiry. Surfaced here so a second enquiry from the
+// same person, once the window opens, doesn't come as a surprise.
 function urgency(e) {
-  if (e.status !== 'new') return null;
+  if (e.booking_id) return null;
   const remaining = RESUBMIT_WINDOW_MS - (Date.now() - new Date(e.created_at).getTime());
   if (remaining <= 0) return { label: 'Overdue · guest can resubmit', className: 'cancelled' };
   if (remaining <= 24 * 60 * 60 * 1000) {
