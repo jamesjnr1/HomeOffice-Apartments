@@ -2213,41 +2213,6 @@ html, body {
    asymmetric blocks of copy */
 .two-col-text { align-items: start; }
 
-/* ---------------- APARTMENT PHOTO MARQUEE ---------------- */
-/* Auto-scrolling strip — no heading, no captions, no rounded corners,
-   no gradients. Cards have breathing room between them and at the
-   left/right ends of the section. The track holds the photo list
-   twice back to back and animates exactly -50%, so it loops
-   seamlessly. */
-.apt-marquee-section {
-  background: var(--bg-cream);
-  overflow: hidden;
-  padding: 0 32px;
-}
-.apt-marquee-track {
-  display: flex;
-  gap: 20px;
-  width: max-content;
-  height: clamp(320px, 45vw, 560px);
-  animation: apt-marquee-scroll 60s linear infinite;
-}
-.apt-marquee-card {
-  flex: 0 0 auto;
-  height: 100%;
-  width: auto;
-  aspect-ratio: 3/2;
-  object-fit: cover;
-  display: block;
-  margin: 0;
-}
-@keyframes apt-marquee-scroll {
-  from { transform: translateX(0); }
-  to   { transform: translateX(calc(-50% - 10px)); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .apt-marquee-track { animation: none; }
-}
-html.a11y-reduce-motion .apt-marquee-track { animation: none !important; }
 
 /* =====================================================================
    ACCESSIBILITY WIDGET
