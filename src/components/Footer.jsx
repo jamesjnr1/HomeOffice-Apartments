@@ -36,11 +36,14 @@ export default function Footer() {
 
           <div className="footer-col">
             <h5>Contact</h5>
-            <a href="mailto:hello@homeoffice.gh">
-              <Mail size={14} /> hello@homeoffice.gh
+            <a href="mailto:jamesduah@gmail.com">
+              <Mail size={14} /> jamesduah@gmail.com
             </a>
-            <a href="tel:+233000000000">
-              <Phone size={14} /> +233 00 000 0000
+            <a href="tel:+233206301032">
+              <Phone size={14} /> +233 20 630 1032
+            </a>
+            <a href="tel:+233549624125">
+              <Phone size={14} /> +233 54 962 4125
             </a>
             <span className="footer-loc">
               <MapPin size={14} /> Sunyani, Bono Region, Ghana
@@ -53,7 +56,6 @@ export default function Footer() {
 
         <div className="footer-bottom">
           <div>© {new Date().getFullYear()} Home-Office Apartments and LivingSpring Gardens</div>
-          <div>Built with care in Ghana</div>
         </div>
       </div>
     </footer>
