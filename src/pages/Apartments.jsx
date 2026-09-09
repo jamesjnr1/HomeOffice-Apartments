@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 
@@ -97,31 +96,19 @@ export default function Apartments() {
 }
 
 function ApartmentSlider() {
-  const [index, setIndex] = useState(0);
-
-  useEffect(() => {
-    // Auto-advance only — no arrows, no dots. Respect the site's
-    // reduce-motion preference (accessibility widget or OS setting)
-    // by just holding on the first photo instead of cycling.
-    const reduceMotion =
-      document.documentElement.classList.contains('a11y-reduce-motion') ||
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduceMotion) return;
-
-    const id = setInterval(() => {
-      setIndex((i) => (i + 1) % APT_SLIDES.length);
-    }, 4000);
-    return () => clearInterval(id);
-  }, []);
-
-  const slide = APT_SLIDES[index];
-
+  // Pure-CSS marquee — no JS timers, no controls. The track holds the
+  // photo list twice back to back; animating it exactly -50% loops
+  // seamlessly back to the start.
   return (
-    <div className="apt-slider reveal">
-      <div className="apt-slider-frame">
-        <img key={slide.src} src={slide.src} alt={slide.alt} loading="lazy" />
+    <div className="apt-marquee reveal">
+      <div className="apt-marquee-track">
+        {[...APT_SLIDES, ...APT_SLIDES].map((slide, i) => (
+          <figure className="apt-marquee-card" key={`${slide.src}-${i}`}>
+            <img src={slide.src} alt={slide.alt} loading={i < APT_SLIDES.length ? 'eager' : 'lazy'} />
+            <figcaption>{slide.caption}</figcaption>
+          </figure>
+        ))}
       </div>
-      <span className="apt-slider-caption">{slide.caption}</span>
     </div>
   );
 }
