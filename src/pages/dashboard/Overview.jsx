@@ -6,6 +6,10 @@ import {
   Clock,
   ArrowRight,
   MessageSquare,
+  Wifi,
+  KeyRound,
+  ScrollText,
+  Info,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
@@ -14,6 +18,12 @@ import { supabase } from '../../lib/supabase';
  * Landing screen after login. Reads real bookings scoped to this
  * guest (guest_id = auth.uid()) — see AdminEnquiries.jsx for how a
  * booking gets created and linked to an account.
+ *
+ * Also shows check-in details (WiFi, access, house rules) once the
+ * guest has a current or upcoming stay — see AdminSettings.jsx for
+ * where those get filled in, and property_details' RLS policy (guest
+ * must have a confirmed/completed booking) for why this only ever
+ * loads for guests who qualify.
  *
  * Scope: this site represents ONLY Home-Office Apartments, a single
  * 4-bedroom self-contained property — no other listings.
@@ -30,6 +40,8 @@ export default function Overview() {
   const { user, displayName } = useOutletContext();
   const [nextStay, setNextStay] = useState(null);
   const [stats, setStats] = useState({ upcomingBookings: 0, pastStays: 0, nightsWithUs: 0 });
+  const [hasActiveStay, setHasActiveStay] = useState(false);
+  const [checkInDetails, setCheckInDetails] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -44,6 +56,20 @@ export default function Overview() {
     return () => { supabase.removeChannel(sub); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
+
+  // Only fetch check-in details once we know this guest actually has a
+  // current or upcoming stay — RLS would block it otherwise anyway,
+  // this just avoids a pointless request for everyone else.
+  useEffect(() => {
+    if (!hasActiveStay) { setCheckInDetails(null); return; }
+    supabase
+      .from('property_details')
+      .select('*')
+      .eq('id', 'home-office')
+      .maybeSingle()
+      .then(({ data }) => setCheckInDetails(data || null))
+      .catch(() => setCheckInDetails(null));
+  }, [hasActiveStay]);
 
   const load = async () => {
     const { data, error } = await supabase
@@ -61,6 +87,7 @@ export default function Overview() {
       const started = bookings.filter((b) => b.checkIn <= now);
 
       setNextStay(upcoming[0] || null);
+      setHasActiveStay(bookings.some((b) => b.checkOut >= now));
       setStats({
         upcomingBookings: upcoming.length,
         pastStays: bookings.filter((b) => b.checkOut < now).length,
@@ -153,9 +180,76 @@ export default function Overview() {
             <StatCard label="Past stays" value={stats.pastStays} suffix="visits" />
             <StatCard label="Nights with us" value={stats.nightsWithUs} suffix="total" />
           </section>
+
+          {/* Check-in details — only for guests with a current/upcoming stay */}
+          {checkInDetails && <CheckInDetailsCard details={checkInDetails} />}
         </>
       )}
     </div>
+  );
+}
+
+function CheckInDetailsCard({ details: d }) {
+  const hasWifi = d.wifi_network || d.wifi_password;
+  return (
+    <section className="dash-card" style={{ marginTop: 24 }}>
+      <h2 className="dash-card-h">Check-in details</h2>
+      <p className="dash-card-sub">Everything you need for your stay.</p>
+
+      <div className="dash-checkin-grid">
+        <div>
+          <div className="dash-detail-label">CHECK-IN</div>
+          <div className="dash-detail-value">{d.check_in_time}</div>
+        </div>
+        <div>
+          <div className="dash-detail-label">CHECK-OUT</div>
+          <div className="dash-detail-value">{d.check_out_time}</div>
+        </div>
+      </div>
+
+      {hasWifi && (
+        <div className="dash-checkin-item">
+          <Wifi size={16} />
+          <div>
+            <div className="dash-checkin-item-label">WiFi</div>
+            <div className="dash-checkin-item-body">
+              {d.wifi_network && <div>{d.wifi_network}</div>}
+              {d.wifi_password && <div className="dash-mono">{d.wifi_password}</div>}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {d.access_instructions && (
+        <div className="dash-checkin-item">
+          <KeyRound size={16} />
+          <div>
+            <div className="dash-checkin-item-label">How to get in</div>
+            <div className="dash-checkin-item-body">{d.access_instructions}</div>
+          </div>
+        </div>
+      )}
+
+      {d.house_rules && (
+        <div className="dash-checkin-item">
+          <ScrollText size={16} />
+          <div>
+            <div className="dash-checkin-item-label">House rules</div>
+            <div className="dash-checkin-item-body">{d.house_rules}</div>
+          </div>
+        </div>
+      )}
+
+      {d.host_notes && (
+        <div className="dash-checkin-item">
+          <Info size={16} />
+          <div>
+            <div className="dash-checkin-item-label">Good to know</div>
+            <div className="dash-checkin-item-body">{d.host_notes}</div>
+          </div>
+        </div>
+      )}
+    </section>
   );
 }
 
