@@ -23,7 +23,7 @@ export default function AdminLayout() {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!mounted) return;
       if (!user) { navigate('/admin/signin', { replace: true }); return; }
-      const r = user.user_metadata?.role;
+      const r = user.app_metadata?.role;
       if (r !== 'owner' && r !== 'manager') { navigate('/admin/signin', { replace: true }); return; }
       setUser(user); setRole(r); setLoading(false);
     });

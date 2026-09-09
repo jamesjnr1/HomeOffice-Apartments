@@ -102,19 +102,26 @@ export default function AdminSettings() {
           <a href="https://supabase.com/dashboard" target="_blank" rel="noopener noreferrer" style={{ color: '#2d6a4f', fontWeight: 500 }}>
             Supabase SQL Editor <ExternalLink size={11} style={{ verticalAlign: 'middle' }} />
           </a>
+          . Uses <code>app_metadata</code>, not <code>user_metadata</code> — that's deliberate,
+          it's the only place a role can live that a signed-in user can't edit themselves.
         </p>
 
         <div className="mgmt-code-block" style={{ marginBottom: 16 }}>
           <pre>{`-- Owner (full access including revenue + settings):
 UPDATE auth.users
-SET raw_user_meta_data = raw_user_meta_data || '{"role":"owner"}'::jsonb
+SET raw_app_meta_data = raw_app_meta_data || '{"role":"owner"}'::jsonb
 WHERE email = 'james@example.com';
 
 -- Manager (no revenue or settings):
 UPDATE auth.users
-SET raw_user_meta_data = raw_user_meta_data || '{"role":"manager"}'::jsonb
+SET raw_app_meta_data = raw_app_meta_data || '{"role":"manager"}'::jsonb
 WHERE email = 'dad@example.com';`}</pre>
         </div>
+
+        <p className="mgmt-card-sub" style={{ margin: '0 0 16px' }}>
+          The account you just granted needs to sign out and back in before the new role takes
+          effect — it's read from their session token, which only refreshes on sign-in.
+        </p>
 
         <p className="mgmt-card-sub" style={{ margin: 0 }}>
           Admin sign-in URL: <code style={{ background: '#f4f5f3', padding: '2px 8px', borderRadius: 5, fontSize: 13, color: '#2d6a4f' }}>
