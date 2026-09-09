@@ -55,13 +55,13 @@ ALTER TABLE public.property_details ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "property_details_admin_select" ON public.property_details;
 CREATE POLICY "property_details_admin_select" ON public.property_details
   FOR SELECT TO authenticated
-  USING ((auth.jwt() -> 'user_metadata' ->> 'role') IN ('owner', 'manager'));
+  USING ((auth.jwt() -> 'app_metadata' ->> 'role') IN ('owner', 'manager'));
 
 DROP POLICY IF EXISTS "property_details_admin_update" ON public.property_details;
 CREATE POLICY "property_details_admin_update" ON public.property_details
   FOR UPDATE TO authenticated
-  USING ((auth.jwt() -> 'user_metadata' ->> 'role') IN ('owner', 'manager'))
-  WITH CHECK ((auth.jwt() -> 'user_metadata' ->> 'role') IN ('owner', 'manager'));
+  USING ((auth.jwt() -> 'app_metadata' ->> 'role') IN ('owner', 'manager'))
+  WITH CHECK ((auth.jwt() -> 'app_metadata' ->> 'role') IN ('owner', 'manager'));
 
 DROP POLICY IF EXISTS "property_details_guest_select" ON public.property_details;
 CREATE POLICY "property_details_guest_select" ON public.property_details

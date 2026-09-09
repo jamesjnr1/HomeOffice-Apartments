@@ -21,7 +21,7 @@ export default function AdminSignIn() {
     const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (authError) { setError(authError.message); return; }
-    const role = data.user?.user_metadata?.role;
+    const role = data.user?.app_metadata?.role;
     if (role !== 'owner' && role !== 'manager') {
       await supabase.auth.signOut();
       setError('This account does not have admin access.');
