@@ -43,12 +43,9 @@ export default function Header() {
       <header className={`site-header ${solid ? 'solid' : ''} ${scrolledShadow ? 'scrolled' : ''}`}>
         <div className="container header-inner">
           <NavLink to="/" className="brand" aria-label="Home-Office Apartments home">
-            <span className="brand-dot">H</span>
-            <span className="brand-text">
-              <span className="brand-primary">Home-Office Apartments</span>
-              <span className="brand-sub">
-                and Living<span className="brand-accent">Spring</span> Gardens
-              </span>
+            <span className="brand-primary">Home-Office Apartments</span>
+            <span className="brand-sub">
+              and Living<span className="brand-accent">Spring</span> Gardens
             </span>
           </NavLink>
 
@@ -90,12 +87,9 @@ export default function Header() {
       <div className={`mobile-menu ${mobileOpen ? 'open' : ''}`} aria-hidden={!mobileOpen}>
         <div className="mobile-menu-head">
           <span className="brand">
-            <span className="brand-dot">H</span>
-            <span className="brand-text">
-              <span className="brand-primary">Home-Office Apartments</span>
-              <span className="brand-sub">
-                and Living<span className="brand-accent">Spring</span> Gardens
-              </span>
+            <span className="brand-primary">Home-Office Apartments</span>
+            <span className="brand-sub">
+              and Living<span className="brand-accent">Spring</span> Gardens
             </span>
           </span>
           <button
