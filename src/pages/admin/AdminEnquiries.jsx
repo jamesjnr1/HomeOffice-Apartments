@@ -1,5 +1,5 @@
 import { Fragment, useState, useEffect } from 'react';
-import { Check, Reply, Archive, Trash2 } from 'lucide-react';
+import { Check, Reply, Archive, Trash2, CalendarCheck } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { supabase } from '../../lib/supabase';
 
@@ -8,15 +8,29 @@ import { supabase } from '../../lib/supabase';
  * in the `enquiries` table (see supabase/migrations/20260909140000_
  * create_enquiries.sql). Kept live via a realtime subscription, same
  * pattern as AdminMessages.jsx.
+ *
+ * Also where an enquiry becomes a real booking (Phase 2): expand a row
+ * and enter the agreed total to create a `bookings` row (see
+ * supabase/migrations/20260909150000_create_bookings.sql). That's the
+ * only place bookings get created — no on-site payment, the admin
+ * confirms after agreeing dates/price with the guest directly.
  */
 
 const TABS = ['all', 'new', 'replied', 'archived'];
+
+function makeReference() {
+  const code = Math.random().toString(36).slice(2, 7).toUpperCase();
+  return `HO-${code}`;
+}
 
 export default function AdminEnquiries() {
   const [tab, setTab] = useState('all');
   const [enquiries, setEnquiries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(null);
+  const [amounts, setAmounts] = useState({}); // enquiry id -> draft total string
+  const [confirmingId, setConfirmingId] = useState(null);
+  const [bookError, setBookError] = useState('');
 
   useEffect(() => {
     loadEnquiries();
@@ -31,9 +45,12 @@ export default function AdminEnquiries() {
   }, []);
 
   const loadEnquiries = async () => {
+    // Embedded select pulls the linked booking's reference/status in
+    // one query, so a converted enquiry can show "Booked · HO-XXXXX"
+    // without a second round trip.
     const { data, error } = await supabase
       .from('enquiries')
-      .select('*')
+      .select('*, bookings(reference, status)')
       .order('created_at', { ascending: false });
 
     if (!error && data) setEnquiries(data);
@@ -52,6 +69,70 @@ export default function AdminEnquiries() {
     setEnquiries(prev => prev.filter(e => e.id !== id));
     if (expanded === id) setExpanded(null);
     await supabase.from('enquiries').delete().eq('id', id);
+  };
+
+  const confirmBooking = async (e) => {
+    const total = Number(amounts[e.id]);
+    if (!total || total <= 0) {
+      setBookError('Enter the agreed total before confirming.');
+      return;
+    }
+    setBookError('');
+    setConfirmingId(e.id);
+
+    // Best-effort: if this guest already has an account under the
+    // same email, link the booking to it so it shows in their
+    // dashboard. No account yet → guest_id stays null.
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('email', e.email)
+      .maybeSingle();
+
+    const bookingRow = {
+      enquiry_id: e.id,
+      guest_id: profile?.id || null,
+      guest_name: e.name,
+      guest_email: e.email,
+      guest_phone: e.phone || null,
+      check_in: e.check_in,
+      check_out: e.check_out,
+      guests: e.guests,
+      total,
+      status: 'confirmed',
+    };
+
+    // `reference` has a unique constraint — retry once on the rare
+    // collision instead of failing the whole confirmation.
+    let inserted = null;
+    for (let attempt = 0; attempt < 2 && !inserted; attempt++) {
+      const { data, error } = await supabase
+        .from('bookings')
+        .insert({ ...bookingRow, reference: makeReference() })
+        .select()
+        .single();
+      if (!error) inserted = data;
+      else if (!String(error.message).includes('reference')) {
+        setBookError("Couldn't create the booking. Please try again.");
+        setConfirmingId(null);
+        return;
+      }
+    }
+    if (!inserted) {
+      setBookError("Couldn't create the booking. Please try again.");
+      setConfirmingId(null);
+      return;
+    }
+
+    await supabase
+      .from('enquiries')
+      .update({ booking_id: inserted.id, status: e.status === 'new' ? 'replied' : e.status })
+      .eq('id', e.id);
+
+    setEnquiries(prev => prev.map(row => row.id === e.id
+      ? { ...row, booking_id: inserted.id, bookings: { reference: inserted.reference, status: inserted.status }, status: row.status === 'new' ? 'replied' : row.status }
+      : row));
+    setConfirmingId(null);
   };
 
   return (
@@ -85,11 +166,21 @@ export default function AdminEnquiries() {
               <tbody>
                 {filtered.map(e => (
                   <Fragment key={e.id}>
-                    <tr className={`mgmt-tr-click ${expanded === e.id ? 'expanded' : ''}`} onClick={() => setExpanded(expanded === e.id ? null : e.id)}>
+                    <tr
+                      className={`mgmt-tr-click ${expanded === e.id ? 'expanded' : ''}`}
+                      onClick={() => { setExpanded(expanded === e.id ? null : e.id); setBookError(''); }}
+                    >
                       <td><div className="mgmt-td-primary">{e.name}</div><div className="mgmt-td-sub">{e.email}</div></td>
                       <td>{e.check_in} → {e.check_out}</td>
                       <td>{e.guests}</td>
-                      <td><span className={`mgmt-status ${e.status}`}>{e.status}</span></td>
+                      <td>
+                        <span className={`mgmt-status ${e.status}`}>{e.status}</span>
+                        {e.bookings && (
+                          <span className="mgmt-status confirmed" style={{ marginLeft: 6 }}>
+                            Booked · {e.bookings.reference}
+                          </span>
+                        )}
+                      </td>
                       <td className="mgmt-td-muted">{formatDistanceToNow(new Date(e.created_at), { addSuffix: true })}</td>
                       <td>
                         <div className="mgmt-row-actions" onClick={ev => ev.stopPropagation()}>
@@ -115,6 +206,38 @@ export default function AdminEnquiries() {
                                 </a>
                               )}
                             </div>
+
+                            <div className="mgmt-divider" />
+
+                            {e.bookings ? (
+                              <p className="mgmt-td-muted">
+                                Already booked as <strong>{e.bookings.reference}</strong> ({e.bookings.status}).
+                              </p>
+                            ) : (
+                              <div className="mgmt-confirm-booking" onClick={ev => ev.stopPropagation()}>
+                                <label>
+                                  <span>Agreed total (GHS)</span>
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    placeholder="e.g. 2480"
+                                    value={amounts[e.id] || ''}
+                                    onChange={ev => setAmounts(prev => ({ ...prev, [e.id]: ev.target.value }))}
+                                  />
+                                </label>
+                                <button
+                                  className="mgmt-btn mgmt-btn-primary"
+                                  disabled={confirmingId === e.id}
+                                  onClick={() => confirmBooking(e)}
+                                >
+                                  <CalendarCheck size={14}/> {confirmingId === e.id ? 'Confirming…' : 'Confirm booking'}
+                                </button>
+                                {bookError && confirmingId === null && (
+                                  <span className="form-error" style={{ margin: 0 }}>{bookError}</span>
+                                )}
+                              </div>
+                            )}
                           </div>
                         </td>
                       </tr>

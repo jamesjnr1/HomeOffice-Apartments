@@ -1,12 +1,20 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { Download, MessageSquare, ArrowRight, MapPin } from 'lucide-react';
 import Receipt from '../../components/Receipt';
+import { supabase } from '../../lib/supabase';
 
 /**
- * Bookings — all mocks are stays at Home-Office Apartments.
- * No other properties exist on this site.
+ * Bookings — real rows from the `bookings` table, scoped to this
+ * guest (guest_id = auth.uid(), enforced by RLS too). Only shows up
+ * here if the enquiry's email matched an existing account at the
+ * moment an admin confirmed it — see AdminEnquiries.jsx.
+ *
+ * The site represents ONLY Home-Office Apartments, a single
+ * 4-bedroom self-contained property, so the photo/location shown
+ * alongside each booking is the same fixed APARTMENT constant rather
+ * than per-row data.
  */
 
 const APARTMENT = {
@@ -15,68 +23,61 @@ const APARTMENT = {
   coverImage: '/images/hero-property.jpg',
 };
 
-const MOCK_BOOKINGS = [
-  {
-    reference: 'HO-8FQ2P',
-    apartment: APARTMENT,
-    checkIn: new Date(Date.now() + 6 * 86400000),
-    checkOut: new Date(Date.now() + 10 * 86400000),
-    nights: 4,
-    guests: 2,
-    total: 2480,
-    status: 'CONFIRMED',
-  },
-  {
-    reference: 'HO-2XR7T',
-    apartment: APARTMENT,
-    checkIn: new Date(Date.now() - 30 * 86400000),
-    checkOut: new Date(Date.now() - 26 * 86400000),
-    nights: 4,
-    guests: 2,
-    total: 1920,
-    status: 'COMPLETED',
-  },
-  {
-    reference: 'HO-YB4LN',
-    apartment: APARTMENT,
-    checkIn: new Date(Date.now() - 90 * 86400000),
-    checkOut: new Date(Date.now() - 83 * 86400000),
-    nights: 7,
-    guests: 2,
-    total: 3780,
-    status: 'COMPLETED',
-  },
-];
-
 export default function Bookings() {
   const { user, displayName } = useOutletContext();
   const [tab, setTab] = useState('upcoming');
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [receiptBooking, setReceiptBooking] = useState(null);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    loadBookings();
+
+    const sub = supabase
+      .channel(`guest-bookings-${user.id}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings', filter: `guest_id=eq.${user.id}` }, loadBookings)
+      .subscribe();
+
+    return () => { supabase.removeChannel(sub); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
+  const loadBookings = async () => {
+    const { data, error } = await supabase
+      .from('bookings')
+      .select('*')
+      .eq('guest_id', user.id)
+      .order('check_in', { ascending: false });
+
+    if (!error && data) {
+      setBookings(data.map((b) => ({
+        ...b,
+        checkIn: parseISO(b.check_in),
+        checkOut: parseISO(b.check_out),
+      })));
+    }
+    setLoading(false);
+  };
 
   const filtered = useMemo(() => {
     const now = new Date();
-    return MOCK_BOOKINGS.filter((b) => {
-      if (tab === 'upcoming') return b.checkIn > now && b.status !== 'CANCELLED';
+    return bookings.filter((b) => {
+      if (tab === 'upcoming') return b.checkIn > now && b.status !== 'cancelled';
       if (tab === 'current') return b.checkIn <= now && b.checkOut >= now;
-      if (tab === 'past') return b.checkOut < now || b.status === 'CANCELLED';
+      if (tab === 'past') return b.checkOut < now || b.status === 'cancelled';
       return true;
     });
-  }, [tab]);
+  }, [tab, bookings]);
 
   const counts = useMemo(() => {
     const now = new Date();
     return {
-      upcoming: MOCK_BOOKINGS.filter(
-        (b) => b.checkIn > now && b.status !== 'CANCELLED'
-      ).length,
-      current: MOCK_BOOKINGS.filter(
-        (b) => b.checkIn <= now && b.checkOut >= now
-      ).length,
-      past: MOCK_BOOKINGS.filter(
-        (b) => b.checkOut < now || b.status === 'CANCELLED'
-      ).length,
+      upcoming: bookings.filter((b) => b.checkIn > now && b.status !== 'cancelled').length,
+      current: bookings.filter((b) => b.checkIn <= now && b.checkOut >= now).length,
+      past: bookings.filter((b) => b.checkOut < now || b.status === 'cancelled').length,
     };
-  }, []);
+  }, [bookings]);
 
   return (
     <div className="dash-page">
@@ -98,7 +99,9 @@ export default function Bookings() {
         </TabBtn>
       </div>
 
-      {filtered.length === 0 ? (
+      {loading ? (
+        <div className="dash-empty"><p>Loading your trips…</p></div>
+      ) : filtered.length === 0 ? (
         <div className="dash-empty">
           <h3>Nothing here yet</h3>
           <p>
@@ -142,17 +145,17 @@ function BookingCard({ booking, onReceipt }) {
   return (
     <article className="dash-booking">
       <img
-        src={b.apartment.coverImage}
-        alt={b.apartment.name}
+        src={APARTMENT.coverImage}
+        alt={APARTMENT.name}
         className="dash-booking-img"
       />
       <div className="dash-booking-body">
         <div className="dash-booking-top">
           <div>
-            <h3>{b.apartment.name}</h3>
+            <h3>{APARTMENT.name}</h3>
             <div className="dash-loc">
               <MapPin size={12} />
-              {b.apartment.location}
+              {APARTMENT.location}
             </div>
           </div>
           <StatusBadge status={b.status} />
@@ -175,7 +178,7 @@ function BookingCard({ booking, onReceipt }) {
           </div>
           <div>
             <div className="dash-detail-label">TOTAL</div>
-            <div className="dash-detail-value">GHS {b.total.toLocaleString()}</div>
+            <div className="dash-detail-value">GHS {Number(b.total).toLocaleString()}</div>
           </div>
           <div>
             <div className="dash-detail-label">REFERENCE</div>
@@ -198,11 +201,11 @@ function BookingCard({ booking, onReceipt }) {
 
 function StatusBadge({ status }) {
   const map = {
-    CONFIRMED: { className: 'dash-status confirmed', label: 'Confirmed' },
-    PENDING: { className: 'dash-status pending', label: 'Pending' },
-    COMPLETED: { className: 'dash-status completed', label: 'Completed' },
-    CANCELLED: { className: 'dash-status cancelled', label: 'Cancelled' },
+    confirmed: { className: 'dash-status confirmed', label: 'Confirmed' },
+    pending: { className: 'dash-status pending', label: 'Pending' },
+    completed: { className: 'dash-status completed', label: 'Completed' },
+    cancelled: { className: 'dash-status cancelled', label: 'Cancelled' },
   };
-  const s = map[status] || map.PENDING;
+  const s = map[status] || map.pending;
   return <span className={s.className}>{s.label}</span>;
 }
