@@ -237,6 +237,19 @@ body:has(.auth-photo-admin) .site-footer { display: none !important; }
 .mgmt-stat-value { font-size: 26px; font-weight: 500; letter-spacing: -.02em; color: #1f2b26; line-height: 1; }
 .mgmt-stat-label { font-size: 12px; color: #6a706d; font-weight: 500; }
 
+/* ── FUNNEL (Analytics) ── */
+.mgmt-funnel { display: flex; align-items: center; gap: 14px; margin-bottom: 32px; }
+.mgmt-funnel-step { flex: 1; min-width: 0; }
+.mgmt-funnel-step .mgmt-stat { width: 100%; }
+.mgmt-funnel-arrow {
+  flex: 0 0 auto; font-size: 12.5px; font-weight: 600; color: #6a706d;
+  white-space: nowrap;
+}
+@media (max-width: 700px) {
+  .mgmt-funnel { flex-direction: column; align-items: stretch; }
+  .mgmt-funnel-arrow { text-align: center; }
+}
+
 /* ── CARD ── */
 .mgmt-card { background: #fff; border: 1px solid #e8ebe8; border-radius: 12px; padding: 26px; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
 .mgmt-card-flush { padding: 0; overflow: hidden; }
@@ -473,6 +486,11 @@ body:has(.auth-photo-admin) .site-footer { display: none !important; }
 .mgmt-bar-label { font-size: 10.5px; color: #9aa19d; font-weight: 500; }
 .mgmt-bar-val { font-size: 10px; color: #2d6a4f; font-weight: 600; }
 .mgmt-occ-pill { display: inline-block; padding: 3px 10px; border-radius: 999px; background: #e2ece6; color: #2d6a4f; font-size: 12px; font-weight: 600; }
+
+/* Denser variant for a 30-bar daily chart (Analytics) — thinner gap,
+   no per-bar label since 30 date labels wouldn't fit legibly. */
+.mgmt-bar-chart-dense { gap: 3px; height: 120px; }
+.mgmt-bar-chart-dense .mgmt-bar { border-radius: 2px 2px 0 0; background: #2563eb; }
 
 /* ── SETTINGS ── */
 .mgmt-code-block { background: #f4f5f3; border: 1px solid #e8ebe8; border-radius: 10px; padding: 16px; overflow-x: auto; }

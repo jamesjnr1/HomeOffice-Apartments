@@ -72,29 +72,35 @@ export default function Overview() {
   }, [hasActiveStay]);
 
   const load = async () => {
-    const { data, error } = await supabase
-      .from('bookings')
-      .select('*')
-      .eq('guest_id', user.id)
-      .neq('status', 'cancelled')
-      .order('check_in', { ascending: true });
+    try {
+      const { data, error } = await supabase
+        .from('bookings')
+        .select('*')
+        .eq('guest_id', user.id)
+        .neq('status', 'cancelled')
+        .order('check_in', { ascending: true });
 
-    if (!error && data) {
-      const now = new Date();
-      const bookings = data.map((b) => ({ ...b, checkIn: parseISO(b.check_in), checkOut: parseISO(b.check_out) }));
+      if (!error && data) {
+        const now = new Date();
+        const bookings = data.map((b) => ({ ...b, checkIn: parseISO(b.check_in), checkOut: parseISO(b.check_out) }));
 
-      const upcoming = bookings.filter((b) => b.checkIn > now);
-      const started = bookings.filter((b) => b.checkIn <= now);
+        const upcoming = bookings.filter((b) => b.checkIn > now);
+        const started = bookings.filter((b) => b.checkIn <= now);
 
-      setNextStay(upcoming[0] || null);
-      setHasActiveStay(bookings.some((b) => b.checkOut >= now));
-      setStats({
-        upcomingBookings: upcoming.length,
-        pastStays: bookings.filter((b) => b.checkOut < now).length,
-        nightsWithUs: started.reduce((sum, b) => sum + b.nights, 0),
-      });
+        setNextStay(upcoming[0] || null);
+        setHasActiveStay(bookings.some((b) => b.checkOut >= now));
+        setStats({
+          upcomingBookings: upcoming.length,
+          pastStays: bookings.filter((b) => b.checkOut < now).length,
+          nightsWithUs: started.reduce((sum, b) => sum + b.nights, 0),
+        });
+      }
+    } catch {
+      // A network-level failure would otherwise leave this stuck on
+      // "Loading…" forever.
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const daysUntil = nextStay
