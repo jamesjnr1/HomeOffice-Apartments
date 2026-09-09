@@ -2214,31 +2214,31 @@ html, body {
 .two-col-text { align-items: start; }
 
 /* ---------------- APARTMENT PHOTO MARQUEE ---------------- */
-/* Continuously auto-scrolling row of cards, no controls at all — the
-   track holds the photo list twice back to back and animates exactly
-   -50%, so it loops seamlessly. Each card gets the same dark bottom
-   scrim as the homepage hero photo, for the caption to sit on. */
+/* Continuously auto-scrolling row of BIG cards, no controls at all —
+   the track holds the photo list twice back to back and animates
+   exactly -50%, so it loops seamlessly. No gradient/overlay of any
+   kind on the photos; the caption is a plain label under each card. */
 .apt-marquee {
   overflow: hidden;
   margin: 0 -32px;
-  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 48px, #000 calc(100% - 48px), transparent 100%);
-  mask-image: linear-gradient(90deg, transparent 0, #000 48px, #000 calc(100% - 48px), transparent 100%);
 }
 .apt-marquee-track {
   display: flex;
-  gap: 16px;
+  align-items: flex-start;
+  gap: 24px;
   width: max-content;
   padding: 0 32px;
-  animation: apt-marquee-scroll 32s linear infinite;
+  animation: apt-marquee-scroll 60s linear infinite;
 }
 .apt-marquee-card {
-  position: relative;
   flex: 0 0 auto;
-  width: 320px;
-  aspect-ratio: 4/3;
+  width: 640px;
   margin: 0;
+}
+.apt-marquee-card-frame {
   border-radius: var(--radius-lg);
   overflow: hidden;
+  aspect-ratio: 3/2;
   background: var(--bg-soft);
 }
 .apt-marquee-card img {
@@ -2247,30 +2247,24 @@ html, body {
   object-fit: cover;
   display: block;
 }
-.apt-marquee-card::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(20,30,25,0) 50%, rgba(20,30,25,.75) 100%);
-}
 .apt-marquee-card figcaption {
-  position: absolute;
-  left: 18px;
-  bottom: 16px;
-  z-index: 1;
-  color: #fff;
-  font-size: 15px;
-  font-weight: 600;
+  margin-top: 16px;
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--ink);
   letter-spacing: -.005em;
 }
 @keyframes apt-marquee-scroll {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
 }
-@media (max-width: 720px) {
+@media (max-width: 900px) {
+  .apt-marquee-card { width: 440px; }
+}
+@media (max-width: 600px) {
   .apt-marquee { margin: 0 -20px; }
-  .apt-marquee-track { padding: 0 20px; }
-  .apt-marquee-card { width: 240px; }
+  .apt-marquee-track { padding: 0 20px; gap: 16px; }
+  .apt-marquee-card { width: 300px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .apt-marquee-track { animation: none; }

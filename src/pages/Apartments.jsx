@@ -104,7 +104,9 @@ function ApartmentSlider() {
       <div className="apt-marquee-track">
         {[...APT_SLIDES, ...APT_SLIDES].map((slide, i) => (
           <figure className="apt-marquee-card" key={`${slide.src}-${i}`}>
-            <img src={slide.src} alt={slide.alt} loading={i < APT_SLIDES.length ? 'eager' : 'lazy'} />
+            <div className="apt-marquee-card-frame">
+              <img src={slide.src} alt={slide.alt} loading={i < APT_SLIDES.length ? 'eager' : 'lazy'} />
+            </div>
             <figcaption>{slide.caption}</figcaption>
           </figure>
         ))}
