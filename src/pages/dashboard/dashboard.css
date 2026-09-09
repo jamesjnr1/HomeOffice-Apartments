@@ -266,11 +266,6 @@ body:has(.dash-shell) main { padding: 0 !important; }
 .dash-btn-ghost { background: transparent; color: #1f2b26; }
 .dash-btn-ghost:hover { background: #f7f8f6; }
 .dash-btn-sm { padding: 7px 12px; font-size: 12.5px; }
-.dash-linky {
-  display: inline-flex; align-items: center; gap: 4px;
-  color: #2d6a4f; text-decoration: none; font-weight: 500; font-size: 13.5px;
-}
-.dash-linky:hover { text-decoration: underline; }
 
 /* ── NEXT STAY HERO ── */
 .dash-next-stay {
@@ -323,35 +318,6 @@ body:has(.dash-shell) main { padding: 0 !important; }
 .dash-stat-label { font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: #9aa19d; font-weight: 500; }
 .dash-stat-value { font-size: 30px; font-weight: 500; margin-top: 6px; letter-spacing: -.025em; line-height: 1; color: #1f2b26; }
 .dash-stat-suffix { font-size: 12.5px; color: #9aa19d; margin-top: 4px; }
-
-/* ── SECTION HEAD ── */
-.dash-section-head {
-  display: flex; align-items: baseline; justify-content: space-between;
-  gap: 12px; margin-bottom: 18px;
-}
-.dash-section-head h2 { margin: 0; font-size: 19px; font-weight: 500; letter-spacing: -.02em; color: #1f2b26; }
-
-/* ── APARTMENT CARDS ── */
-.dash-rec-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
-@media (max-width: 700px) { .dash-rec-grid { grid-template-columns: 1fr; } }
-.dash-rec-card {
-  background: #fff; border: 1px solid #e8ebe8; border-radius: 14px;
-  overflow: hidden; text-decoration: none; color: inherit;
-  transition: transform .2s ease, box-shadow .2s ease;
-  box-shadow: 0 1px 3px rgba(0,0,0,.04);
-}
-.dash-rec-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,.07); }
-.dash-rec-img { aspect-ratio: 16/10; overflow: hidden; background: #f7f8f6; }
-.dash-rec-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s ease; }
-.dash-rec-card:hover .dash-rec-img img { transform: scale(1.04); }
-.dash-rec-body { padding: 18px 20px; }
-.dash-rec-body h3 { margin: 0 0 4px; font-size: 16px; font-weight: 500; letter-spacing: -.01em; color: #1f2b26; }
-.dash-rec-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 0; }
-.dash-tag {
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 4px 10px; background: #f7f8f6; border-radius: 999px;
-  font-size: 11.5px; color: #3b3b3b; font-weight: 500;
-}
 
 /* ── TABS ── */
 .dash-tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid #e8ebe8; }

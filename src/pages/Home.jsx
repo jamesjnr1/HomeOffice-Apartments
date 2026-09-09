@@ -55,9 +55,6 @@ export default function Home() {
               where well‑kept lawns and tranquil surroundings create the perfect setting for
               relaxation, reflection, and holidays.
             </p>
-            <Link to="/apartments" className="link-arrow">
-              Explore the apartments <ArrowRight size={14} />
-            </Link>
           </div>
         </div>
       </section>
