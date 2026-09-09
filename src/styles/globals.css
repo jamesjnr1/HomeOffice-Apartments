@@ -26,6 +26,12 @@
   --shadow-lg:  0 24px 56px rgba(0,0,0,.16);
   --ease:       cubic-bezier(.22,.61,.36,1);
   --container:  1240px;
+
+  /* Base page background — separate from --bg on purpose: card/section
+     surfaces keep using --bg (white) as before, only the page
+     background itself moves to this. */
+  --ink-body:   #57584e;
+  --bg-page:    #fbfbfb;
 }
 
 * { box-sizing: border-box; }
@@ -33,10 +39,10 @@ html, body { margin: 0; padding: 0; }
 html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
 body {
   font-family: 'Poppins', system-ui, -apple-system, sans-serif;
-  color: var(--ink);
-  background: var(--bg);
+  color: var(--ink-body);
+  background: var(--bg-page);
   font-size: 16px;
-  line-height: 1.65;
+  line-height: 1.5;
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -1748,7 +1754,7 @@ h2 { letter-spacing: -.025em; }
 /* Body base — slightly warmer ink, better rendering */
 body {
   font-weight: 400;
-  color: var(--ink);
+  color: var(--ink-body);
   -webkit-font-smoothing: antialiased;
 }
 

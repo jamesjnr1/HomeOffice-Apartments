@@ -18,25 +18,30 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase';
  * pending enquiry finds out before filling in the rest of the form,
  * not after.
  *
- * On submit:
- *   1. Saves the enquiry to Supabase (table: enquiries) so it shows up
- *      for real in the admin Enquiries inbox — this is the source of
- *      truth other pages (admin overview stats, the sidebar badge)
- *      read from. Formspree is deliberately skipped when the
- *      duplicate check fires, so a blocked resubmission can't sneak
- *      through that path instead.
- *   2. Otherwise also POSTs to Formspree, set via VITE_FORMSPREE_URL,
- *      purely for an instant email notification to your inbox. Set it
- *      in Vercel → Settings → Environment Variables:
- *        VITE_FORMSPREE_URL=https://formspree.io/f/xxxxxxxx
+ * Availability: once both dates are picked, is_date_range_available()
+ * (see supabase/migrations/20260910100100_prevent_overlapping_
+ * bookings.sql) is also checked proactively — same privacy-safe,
+ * boolean-only RPC shape as has_open_enquiry, so it never exposes who
+ * else is staying when. This is only ever a heads-up, never a block:
+ * the admin still makes the real call (see AdminEnquiries.jsx's
+ * Confirm/Decline), since dates can free up or the admin may know
+ * something the calendar doesn't yet.
  *
- * Outside the duplicate case, either one succeeding counts as "sent"
- * — a Formspree hiccup doesn't stop the enquiry from being saved, and
- * vice versa. If neither is configured, guests are told to email
- * directly.
+ * On submit: saves the enquiry to Supabase (table: enquiries) — this
+ * is the single source of truth other pages (admin Enquiries inbox,
+ * overview stats, the sidebar badge) read from. That insert is also
+ * what triggers the admin email notification server-side (see
+ * supabase/migrations/20260909220000_notify_enquiry_by_email.sql and
+ * supabase/functions/notify-enquiry) — this used to be a second,
+ * separate POST to Formspree from the guest's own browser, which
+ * meant a flaky guest connection could silently mean the notification
+ * never arrived even though the enquiry itself saved fine. Now
+ * there's exactly one write, and the notification is guaranteed by
+ * the database itself rather than by the guest's browser completing a
+ * second request. If Supabase isn't configured at all, guests are
+ * told to email directly.
  */
 
-const FORMSPREE_URL = import.meta.env.VITE_FORMSPREE_URL;
 const CONTACT_EMAIL = 'jamesduah@gmail.com';
 const CONTACT_PHONE = '+233 20 630 1032';
 const WHATSAPP_NUMBER = '233206301032'; // CONTACT_PHONE in E.164, no spaces or +
@@ -50,6 +55,7 @@ export default function Book() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [pendingNotice, setPendingNotice] = useState(false);
+  const [availabilityNotice, setAvailabilityNotice] = useState(false);
 
   const update = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
@@ -60,6 +66,19 @@ export default function Book() {
     if (!isSupabaseConfigured || !form.email.trim()) return;
     const { data } = await supabase.rpc('has_open_enquiry', { check_email: form.email.trim() });
     setPendingNotice(!!data);
+  };
+
+  // Same idea, for dates: once both are picked, check them against
+  // existing bookings. Purely a heads-up (see doc comment above) —
+  // never blocks the form.
+  const checkAvailability = async () => {
+    if (!isSupabaseConfigured || !form.checkIn || !form.checkOut) { setAvailabilityNotice(false); return; }
+    if (new Date(form.checkOut) <= new Date(form.checkIn)) { setAvailabilityNotice(false); return; }
+    const { data } = await supabase.rpc('is_date_range_available', {
+      check_in: form.checkIn,
+      check_out: form.checkOut,
+    });
+    setAvailabilityNotice(data === false);
   };
 
   const submit = async (e) => {
@@ -76,7 +95,7 @@ export default function Book() {
       return;
     }
 
-    if (!FORMSPREE_URL && !isSupabaseConfigured) {
+    if (!isSupabaseConfigured) {
       setError(
         `Enquiries aren't wired up yet. Please email ${CONTACT_EMAIL} directly and we'll get right back to you.`
       );
@@ -85,65 +104,28 @@ export default function Book() {
 
     setLoading(true);
     try {
-      // Supabase goes first (and alone) so the duplicate-enquiry check
-      // can actually block the submission — if it ran in parallel with
-      // Formspree, a rejected duplicate would still get emailed
-      // through and look like it went fine to the sender.
-      let dbOk = false;
-      if (isSupabaseConfigured) {
-        const { error: dbError } = await supabase.from('enquiries').insert({
-          name: form.name,
-          email: form.email,
-          phone: form.phone || null,
-          check_in: form.checkIn,
-          check_out: form.checkOut,
-          guests: Number(form.guests),
-          message: form.message || null,
-        });
+      const { error: dbError } = await supabase.from('enquiries').insert({
+        name: form.name,
+        email: form.email,
+        phone: form.phone || null,
+        check_in: form.checkIn,
+        check_out: form.checkOut,
+        guests: Number(form.guests),
+        message: form.message || null,
+      });
 
-        if (dbError?.message?.includes('DUPLICATE_OPEN_ENQUIRY')) {
-          setError(
-            `You already have an enquiry with us that we're still working on — we'll be in touch soon! Email ${CONTACT_EMAIL} if it's urgent.`
-          );
-          setLoading(false);
-          return;
-        }
-        dbOk = !dbError;
+      if (dbError?.message?.includes('DUPLICATE_OPEN_ENQUIRY')) {
+        setError(
+          `You already have an enquiry with us that we're still working on — we'll be in touch soon! Email ${CONTACT_EMAIL} if it's urgent.`
+        );
+        setLoading(false);
+        return;
       }
-
-      let formspreeOk = false;
-      if (FORMSPREE_URL) {
-        try {
-          const response = await fetch(FORMSPREE_URL, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-            body: JSON.stringify({
-              name: form.name,
-              email: form.email,
-              phone: form.phone || '(not provided)',
-              checkIn: form.checkIn,
-              checkOut: form.checkOut,
-              guests: form.guests,
-              message: form.message || '(no message)',
-              _subject: `New enquiry from ${form.name} — ${form.checkIn} to ${form.checkOut}`,
-              _replyto: form.email,
-            }),
-          });
-          formspreeOk = response.ok;
-        } catch {
-          formspreeOk = false;
-        }
-      }
-
-      if (!dbOk && !formspreeOk) {
-        throw new Error('Both delivery methods failed');
-      }
+      if (dbError) throw dbError;
 
       setSent(true);
       setPendingNotice(false);
+      setAvailabilityNotice(false);
       setForm({
         name: '', email: '', phone: '', checkIn: '', checkOut: '',
         guests: '2', message: '',
@@ -229,7 +211,8 @@ export default function Book() {
                   <input
                     type="date"
                     value={form.checkIn}
-                    onChange={update('checkIn')}
+                    onChange={(e) => { setAvailabilityNotice(false); update('checkIn')(e); }}
+                    onBlur={checkAvailability}
                     required
                     disabled={loading}
                   />
@@ -239,12 +222,18 @@ export default function Book() {
                   <input
                     type="date"
                     value={form.checkOut}
-                    onChange={update('checkOut')}
+                    onChange={(e) => { setAvailabilityNotice(false); update('checkOut')(e); }}
+                    onBlur={checkAvailability}
                     required
                     disabled={loading}
                   />
                 </div>
               </div>
+              {availabilityNotice && (
+                <p className="field-note">
+                  Heads up — those dates may already be booked. We'll confirm availability when we reply, or feel free to try different dates.
+                </p>
+              )}
 
               <div className="field">
                 <label>Guests</label>

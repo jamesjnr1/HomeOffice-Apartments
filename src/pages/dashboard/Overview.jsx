@@ -25,6 +25,17 @@ import { supabase } from '../../lib/supabase';
  * must have a confirmed/completed booking) for why this only ever
  * loads for guests who qualify.
  *
+ * Also shows the status of a not-yet-booked enquiry, if there is one
+ * — still pending, or declined (e.g. the requested dates turned out
+ * to be already reserved — see AdminEnquiries.jsx's Decline action
+ * and supabase/migrations/20260910100000_decline_enquiries_and_guest_
+ * visibility.sql, which is what lets a guest read their own enquiries
+ * by email match at all). A declined enquiry also always gets an
+ * email (supabase/migrations/20260910100200_notify_enquiry_declined.
+ * sql) and, best-effort, a message on /dashboard/messages — this card
+ * is the "see something on their dashboard" half of that, so it's not
+ * email-only.
+ *
  * Scope: this site represents ONLY Home-Office Apartments, a single
  * 4-bedroom self-contained property — no other listings.
  */
@@ -42,20 +53,61 @@ export default function Overview() {
   const [stats, setStats] = useState({ upcomingBookings: 0, pastStays: 0, nightsWithUs: 0 });
   const [hasActiveStay, setHasActiveStay] = useState(false);
   const [checkInDetails, setCheckInDetails] = useState(null);
+  const [openEnquiry, setOpenEnquiry] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user?.id) return;
     load();
+    loadEnquiryStatus();
 
     const sub = supabase
       .channel(`guest-overview-${user.id}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings', filter: `guest_id=eq.${user.id}` }, load)
       .subscribe();
 
-    return () => { supabase.removeChannel(sub); };
+    // Enquiries aren't tied to guest_id (they're submitted before an
+    // account necessarily exists — see enquiries_guest_select_own),
+    // so this channel filters by email instead.
+    const enquirySub = user.email
+      ? supabase
+          .channel(`guest-enquiries-${user.id}`)
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'enquiries', filter: `email=eq.${user.email}` }, loadEnquiryStatus)
+          .subscribe()
+      : null;
+
+    return () => {
+      supabase.removeChannel(sub);
+      if (enquirySub) supabase.removeChannel(enquirySub);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
+
+  // Most recent enquiry that hasn't (yet) become a booking — shown
+  // while it's still pending, or for a couple of weeks after being
+  // declined so the guest has time to see why, without it lingering
+  // on the dashboard indefinitely.
+  const loadEnquiryStatus = async () => {
+    if (!user?.email) return;
+    try {
+      const { data } = await supabase
+        .from('enquiries')
+        .select('id, check_in, check_out, status, decline_reason, created_at')
+        .eq('email', user.email)
+        .is('booking_id', null)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (!data) { setOpenEnquiry(null); return; }
+      const ageDays = (Date.now() - new Date(data.created_at).getTime()) / 86400000;
+      if (data.status === 'declined' && ageDays > 14) { setOpenEnquiry(null); return; }
+      if (data.status === 'archived') { setOpenEnquiry(null); return; }
+      setOpenEnquiry(data);
+    } catch {
+      // Non-critical — the enquiry card just won't show.
+    }
+  };
 
   // Only fetch check-in details once we know this guest actually has a
   // current or upcoming stay — RLS would block it otherwise anyway,
@@ -119,6 +171,8 @@ export default function Overview() {
         <div className="dash-empty"><p>Loading…</p></div>
       ) : (
         <>
+          {openEnquiry && <EnquiryStatusCard enquiry={openEnquiry} />}
+
           {/* Next stay hero */}
           {nextStay && (
             <section className="dash-next-stay">
@@ -253,6 +307,26 @@ function CheckInDetailsCard({ details: d }) {
             <div className="dash-checkin-item-label">Good to know</div>
             <div className="dash-checkin-item-body">{d.host_notes}</div>
           </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function EnquiryStatusCard({ enquiry: en }) {
+  const dates = `${format(parseISO(en.check_in), 'd MMM')} → ${format(parseISO(en.check_out), 'd MMM yyyy')}`;
+  return (
+    <section className="dash-card" style={{ marginBottom: 24 }}>
+      <h2 className="dash-card-h">Your enquiry</h2>
+      <p className="dash-card-sub">{dates}</p>
+      {en.status === 'declined' ? (
+        <div className="form-error" style={{ marginBottom: 0 }}>
+          Unfortunately we couldn't host you for these dates — they're no longer available.
+          {en.decline_reason ? ` ${en.decline_reason}` : ''} Feel free to send a new enquiry with different dates any time.
+        </div>
+      ) : (
+        <div className="field-note" style={{ marginTop: 0 }}>
+          We're reviewing your enquiry — we'll be in touch soon to confirm availability and rates.
         </div>
       )}
     </section>
