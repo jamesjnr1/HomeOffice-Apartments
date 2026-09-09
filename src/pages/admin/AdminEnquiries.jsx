@@ -1,26 +1,58 @@
-import { Fragment, useState } from 'react';
+import { Fragment, useState, useEffect } from 'react';
 import { Check, Reply, Archive, Trash2 } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import { supabase } from '../../lib/supabase';
 
-const MOCK = [
-  { id:1, name:'Abena Mensah', email:'abena@example.com', phone:'+233 24 000 0001', checkIn:'2026-10-10', checkOut:'2026-10-15', guests:2, message:'Visiting for work. Will need reliable Wi-Fi.', status:'new', at:'2h ago' },
-  { id:2, name:'Kofi Asante', email:'kofi@example.com', phone:'+233 20 000 0002', checkIn:'2026-10-20', checkOut:'2026-10-24', guests:1, message:'Solo trip. Quiet space preferred.', status:'new', at:'4h ago' },
-  { id:3, name:'Ama Darko', email:'ama@example.com', phone:'', checkIn:'2026-11-01', checkOut:'2026-11-08', guests:3, message:'Family visit from Accra.', status:'new', at:'1d ago' },
-  { id:4, name:'Emmanuel Owusu', email:'eo@example.com', phone:'+233 27 000 0004', checkIn:'2026-09-12', checkOut:'2026-09-15', guests:2, message:'', status:'replied', at:'3d ago' },
-  { id:5, name:'Grace Ofori', email:'grace@example.com', phone:'', checkIn:'2026-09-05', checkOut:'2026-09-08', guests:2, message:'Short break.', status:'archived', at:'1wk ago' },
-];
+/**
+ * AdminEnquiries — real submissions from the public Book form, stored
+ * in the `enquiries` table (see supabase/migrations/20260909140000_
+ * create_enquiries.sql). Kept live via a realtime subscription, same
+ * pattern as AdminMessages.jsx.
+ */
 
-const TABS = ['all','new','replied','archived'];
+const TABS = ['all', 'new', 'replied', 'archived'];
 
 export default function AdminEnquiries() {
   const [tab, setTab] = useState('all');
-  const [enquiries, setEnquiries] = useState(MOCK);
+  const [enquiries, setEnquiries] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(null);
+
+  useEffect(() => {
+    loadEnquiries();
+
+    const sub = supabase
+      .channel('admin-enquiries')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'enquiries' }, loadEnquiries)
+      .subscribe();
+
+    return () => { supabase.removeChannel(sub); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const loadEnquiries = async () => {
+    const { data, error } = await supabase
+      .from('enquiries')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (!error && data) setEnquiries(data);
+    setLoading(false);
+  };
 
   const filtered = enquiries.filter(e => tab === 'all' || e.status === tab);
   const counts = Object.fromEntries(TABS.map(t => [t, t === 'all' ? enquiries.length : enquiries.filter(e => e.status === t).length]));
 
-  const act = (id, status) => setEnquiries(prev => prev.map(e => e.id === id ? { ...e, status } : e));
-  const remove = (id) => setEnquiries(prev => prev.filter(e => e.id !== id));
+  const act = async (id, status) => {
+    setEnquiries(prev => prev.map(e => e.id === id ? { ...e, status } : e));
+    await supabase.from('enquiries').update({ status }).eq('id', id);
+  };
+
+  const remove = async (id) => {
+    setEnquiries(prev => prev.filter(e => e.id !== id));
+    if (expanded === id) setExpanded(null);
+    await supabase.from('enquiries').delete().eq('id', id);
+  };
 
   return (
     <div className="mgmt-page">
@@ -40,7 +72,9 @@ export default function AdminEnquiries() {
       </div>
 
       <div className="mgmt-card mgmt-card-flush">
-        {filtered.length === 0 ? (
+        {loading ? (
+          <div className="mgmt-empty"><p>Loading enquiries…</p></div>
+        ) : filtered.length === 0 ? (
           <div className="mgmt-empty"><p>No enquiries in this category.</p></div>
         ) : (
           <div className="mgmt-table-wrap">
@@ -53,10 +87,10 @@ export default function AdminEnquiries() {
                   <Fragment key={e.id}>
                     <tr className={`mgmt-tr-click ${expanded === e.id ? 'expanded' : ''}`} onClick={() => setExpanded(expanded === e.id ? null : e.id)}>
                       <td><div className="mgmt-td-primary">{e.name}</div><div className="mgmt-td-sub">{e.email}</div></td>
-                      <td>{e.checkIn} → {e.checkOut}</td>
+                      <td>{e.check_in} → {e.check_out}</td>
                       <td>{e.guests}</td>
                       <td><span className={`mgmt-status ${e.status}`}>{e.status}</span></td>
-                      <td className="mgmt-td-muted">{e.at}</td>
+                      <td className="mgmt-td-muted">{formatDistanceToNow(new Date(e.created_at), { addSuffix: true })}</td>
                       <td>
                         <div className="mgmt-row-actions" onClick={ev => ev.stopPropagation()}>
                           <button title="Mark replied" onClick={() => act(e.id,'replied')}><Check size={14}/></button>
