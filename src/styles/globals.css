@@ -2214,17 +2214,19 @@ html, body {
 .two-col-text { align-items: start; }
 
 /* ---------------- APARTMENT PHOTO MARQUEE ---------------- */
-/* Full-bleed, edge-to-edge auto-scrolling strip — no heading, no
-   captions, no rounded corners, no gaps, no gradients. The photos
-   themselves fill the entire band. The track holds the photo list
+/* Auto-scrolling strip — no heading, no captions, no rounded corners,
+   no gradients. Cards have breathing room between them and at the
+   left/right ends of the section. The track holds the photo list
    twice back to back and animates exactly -50%, so it loops
    seamlessly. */
 .apt-marquee-section {
   background: var(--bg-cream);
   overflow: hidden;
+  padding: 0 32px;
 }
 .apt-marquee-track {
   display: flex;
+  gap: 20px;
   width: max-content;
   height: clamp(320px, 45vw, 560px);
   animation: apt-marquee-scroll 60s linear infinite;
@@ -2240,7 +2242,7 @@ html, body {
 }
 @keyframes apt-marquee-scroll {
   from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
+  to   { transform: translateX(calc(-50% - 10px)); }
 }
 @media (prefers-reduced-motion: reduce) {
   .apt-marquee-track { animation: none; }
