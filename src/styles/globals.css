@@ -2213,38 +2213,69 @@ html, body {
    asymmetric blocks of copy */
 .two-col-text { align-items: start; }
 
-/* ---------------- APARTMENT PHOTO SLIDER ---------------- */
-/* Full-width, auto-advancing, no controls at all — each photo just
-   fades in as it takes its turn. */
-.apt-slider-frame {
+/* ---------------- APARTMENT PHOTO MARQUEE ---------------- */
+/* Continuously auto-scrolling row of cards, no controls at all — the
+   track holds the photo list twice back to back and animates exactly
+   -50%, so it loops seamlessly. Each card gets the same dark bottom
+   scrim as the homepage hero photo, for the caption to sit on. */
+.apt-marquee {
+  overflow: hidden;
+  margin: 0 -32px;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 48px, #000 calc(100% - 48px), transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 48px, #000 calc(100% - 48px), transparent 100%);
+}
+.apt-marquee-track {
+  display: flex;
+  gap: 16px;
+  width: max-content;
+  padding: 0 32px;
+  animation: apt-marquee-scroll 32s linear infinite;
+}
+.apt-marquee-card {
   position: relative;
+  flex: 0 0 auto;
+  width: 320px;
+  aspect-ratio: 4/3;
+  margin: 0;
   border-radius: var(--radius-lg);
   overflow: hidden;
-  aspect-ratio: 21/9;
   background: var(--bg-soft);
-  box-shadow: var(--shadow);
 }
-.apt-slider-frame img {
+.apt-marquee-card img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-  animation: apt-slide-fade 1s var(--ease) both;
 }
-@keyframes apt-slide-fade {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+.apt-marquee-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(20,30,25,0) 50%, rgba(20,30,25,.75) 100%);
 }
-.apt-slider-caption {
-  display: block;
-  margin-top: 16px;
+.apt-marquee-card figcaption {
+  position: absolute;
+  left: 18px;
+  bottom: 16px;
+  z-index: 1;
+  color: #fff;
   font-size: 15px;
-  font-weight: 500;
-  color: var(--ink);
+  font-weight: 600;
+  letter-spacing: -.005em;
+}
+@keyframes apt-marquee-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+@media (max-width: 720px) {
+  .apt-marquee { margin: 0 -20px; }
+  .apt-marquee-track { padding: 0 20px; }
+  .apt-marquee-card { width: 240px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .apt-slider-frame img { animation: none; }
+  .apt-marquee-track { animation: none; }
 }
+html.a11y-reduce-motion .apt-marquee-track { animation: none !important; }
 
 /* =====================================================================
    ACCESSIBILITY WIDGET
