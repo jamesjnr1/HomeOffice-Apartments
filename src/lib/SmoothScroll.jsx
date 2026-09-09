@@ -29,9 +29,14 @@ export default function SmoothScroll({ children }) {
 
     if (isMobile) return; // Leave mobile scrolling to the browser
 
+    // lerp (continuous per-frame interpolation) instead of a fixed
+    // duration+easing curve — each wheel tick used to kick off its own
+    // ~1.2s eased animation, and rapid scrolling made those stack up
+    // and fight each other, which is what read as "staggered". lerp
+    // tracks the input continuously frame-to-frame instead, which is
+    // both smoother and more responsive.
     const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      lerp: 0.1,
       smoothWheel: true,
       wheelMultiplier: 1,
       touchMultiplier: 1.5,

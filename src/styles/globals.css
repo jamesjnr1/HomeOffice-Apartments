@@ -179,11 +179,32 @@ h4 { font-size: 16px; }
 /* Brand */
 .brand {
   display: inline-flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  gap: 10px;
   line-height: 1.1;
   color: var(--ink);
   transition: color .3s var(--ease);
+}
+.brand-dot {
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  border: 1.5px solid var(--accent);
+  color: var(--accent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: -.02em;
+  flex-shrink: 0;
+  transition: border-color .3s var(--ease), color .3s var(--ease);
+}
+.brand-text {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
 }
 .brand-primary {
   font-family: 'Poppins', sans-serif;
@@ -221,6 +242,7 @@ h4 { font-size: 16px; }
 }
 .site-header:not(.solid) .brand-accent { color: var(--accent-mint); }
 .site-header:not(.solid) .brand-sub { color: rgba(255,255,255,.75); }
+.site-header:not(.solid) .brand-dot { border-color: rgba(255,255,255,.6); color: #fff; }
 .site-header:not(.solid) .nav-link:hover,
 .site-header:not(.solid) .nav-link.active {
   background-color: rgba(255,255,255,.16);
