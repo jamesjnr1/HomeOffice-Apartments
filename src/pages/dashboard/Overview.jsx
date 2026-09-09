@@ -24,7 +24,6 @@ const APARTMENT = {
   name: 'Home-Office Apartments',
   location: 'Sunyani, Ghana',
   coverImage: '/images/hero-property.jpg',
-  highlights: ['Sleeps 4', '4 bedrooms · 5 beds · 4 baths', 'Fibre Wi-Fi'],
 };
 
 const MOCK_NEXT_STAY = {
@@ -131,36 +130,6 @@ export default function Overview() {
         <StatCard label="Upcoming" value={stats.upcomingBookings} suffix="bookings" />
         <StatCard label="Past stays" value={stats.pastStays} suffix="visits" />
         <StatCard label="Nights with us" value={stats.nightsWithUs} suffix="total" />
-      </section>
-
-      {/* The apartment */}
-      <section>
-        <div className="dash-section-head">
-          <h2>The apartment</h2>
-          <Link to="/apartments" className="dash-linky">
-            More about the apartment <ArrowRight size={14} />
-          </Link>
-        </div>
-
-        <div className="dash-rec-grid" style={{ gridTemplateColumns: '1fr', maxWidth: 420 }}>
-          <Link to="/apartments" className="dash-rec-card">
-            <div className="dash-rec-img">
-              <img src={APARTMENT.coverImage} alt={APARTMENT.name} />
-            </div>
-            <div className="dash-rec-body">
-              <h3>{APARTMENT.name}</h3>
-              <div className="dash-loc">
-                <MapPin size={12} />
-                {APARTMENT.location}
-              </div>
-              <div className="dash-rec-tags">
-                {APARTMENT.highlights.map((h) => (
-                  <span key={h} className="dash-tag">{h}</span>
-                ))}
-              </div>
-            </div>
-          </Link>
-        </div>
       </section>
     </div>
   );
