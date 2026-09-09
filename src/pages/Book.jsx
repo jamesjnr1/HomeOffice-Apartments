@@ -1,14 +1,23 @@
 import { useState } from 'react';
 import { Mail, Phone, MessageCircle, Check, AlertCircle } from 'lucide-react';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 /**
- * Book — enquiry form that actually sends.
+ * Book — enquiry form that actually sends and actually persists.
  *
- * POST to Formspree endpoint set in VITE_FORMSPREE_URL.
- * Set it in Vercel → Settings → Environment Variables:
- *   VITE_FORMSPREE_URL=https://formspree.io/f/xxxxxxxx
+ * On submit:
+ *   1. Saves the enquiry to Supabase (table: enquiries) so it shows up
+ *      for real in the admin Enquiries inbox — this is the source of
+ *      truth other pages (admin overview stats, the sidebar badge)
+ *      read from.
+ *   2. Also POSTs to Formspree, set via VITE_FORMSPREE_URL, purely for
+ *      an instant email notification to your inbox. Set it in
+ *      Vercel → Settings → Environment Variables:
+ *        VITE_FORMSPREE_URL=https://formspree.io/f/xxxxxxxx
  *
- * Formspree emails every submission to your inbox for free.
+ * Either one succeeding counts as "sent" — they're independent, so a
+ * Formspree hiccup doesn't stop the enquiry from being saved, and vice
+ * versa. If neither is configured, guests are told to email directly.
  */
 
 const FORMSPREE_URL = import.meta.env.VITE_FORMSPREE_URL;
@@ -41,7 +50,7 @@ export default function Book() {
       return;
     }
 
-    if (!FORMSPREE_URL) {
+    if (!FORMSPREE_URL && !isSupabaseConfigured) {
       setError(
         `Enquiries aren't wired up yet. Please email ${CONTACT_EMAIL} directly and we'll get right back to you.`
       );
@@ -50,29 +59,48 @@ export default function Book() {
 
     setLoading(true);
     try {
-      const response = await fetch(FORMSPREE_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify({
-          name: form.name,
-          email: form.email,
-          phone: form.phone || '(not provided)',
-          checkIn: form.checkIn,
-          checkOut: form.checkOut,
-          guests: form.guests,
-          message: form.message || '(no message)',
-          _subject: `New enquiry from ${form.name} — ${form.checkIn} to ${form.checkOut}`,
-          _replyto: form.email,
-        }),
-      });
+      const attempts = await Promise.allSettled([
+        isSupabaseConfigured
+          ? supabase.from('enquiries').insert({
+              name: form.name,
+              email: form.email,
+              phone: form.phone || null,
+              check_in: form.checkIn,
+              check_out: form.checkOut,
+              guests: Number(form.guests),
+              message: form.message || null,
+            }).then(({ error }) => { if (error) throw error; })
+          : Promise.reject(new Error('Supabase not configured')),
 
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data?.errors?.[0]?.message || 'Failed to send enquiry');
-      }
+        FORMSPREE_URL
+          ? fetch(FORMSPREE_URL, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+              },
+              body: JSON.stringify({
+                name: form.name,
+                email: form.email,
+                phone: form.phone || '(not provided)',
+                checkIn: form.checkIn,
+                checkOut: form.checkOut,
+                guests: form.guests,
+                message: form.message || '(no message)',
+                _subject: `New enquiry from ${form.name} — ${form.checkIn} to ${form.checkOut}`,
+                _replyto: form.email,
+              }),
+            }).then(async (response) => {
+              if (!response.ok) {
+                const data = await response.json().catch(() => ({}));
+                throw new Error(data?.errors?.[0]?.message || 'Failed to send enquiry');
+              }
+            })
+          : Promise.reject(new Error('Formspree not configured')),
+      ]);
+
+      const succeeded = attempts.some((a) => a.status === 'fulfilled');
+      if (!succeeded) throw new Error('Both delivery methods failed');
 
       setSent(true);
       setForm({

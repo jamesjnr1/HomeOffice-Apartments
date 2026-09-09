@@ -16,6 +16,7 @@ export default function AdminLayout() {
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [unreadMessages, setUnreadMessages] = useState(0);
+  const [newEnquiries, setNewEnquiries] = useState(0);
 
   useEffect(() => {
     let mounted = true;
@@ -54,6 +55,25 @@ export default function AdminLayout() {
     return () => { supabase.removeChannel(sub); };
   }, []);
 
+  // Live new-enquiry count for the sidebar badge.
+  useEffect(() => {
+    const loadNew = async () => {
+      const { count } = await supabase
+        .from('enquiries')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'new');
+      setNewEnquiries(count || 0);
+    };
+    loadNew();
+
+    const sub = supabase
+      .channel('admin-sidebar-enquiries')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'enquiries' }, loadNew)
+      .subscribe();
+
+    return () => { supabase.removeChannel(sub); };
+  }, []);
+
   const signOut = async () => { await supabase.auth.signOut(); navigate('/'); };
 
   if (loading) return (
@@ -73,7 +93,7 @@ export default function AdminLayout() {
 
   const NAV = [
     { to: '/admin', icon: LayoutDashboard, label: 'Overview', end: true },
-    { to: '/admin/enquiries', icon: Inbox, label: 'Enquiries' },
+    { to: '/admin/enquiries', icon: Inbox, label: 'Enquiries', badge: newEnquiries || null },
     { to: '/admin/bookings', icon: CalendarDays, label: 'Bookings' },
     { to: '/admin/guests', icon: Users, label: 'Guests' },
     { to: '/admin/messages', icon: MessageSquare, label: 'Messages', badge: unreadMessages || null },
