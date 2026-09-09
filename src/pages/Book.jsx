@@ -18,6 +18,15 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase';
  * pending enquiry finds out before filling in the rest of the form,
  * not after.
  *
+ * Availability: once both dates are picked, is_date_range_available()
+ * (see supabase/migrations/20260910100100_prevent_overlapping_
+ * bookings.sql) is also checked proactively — same privacy-safe,
+ * boolean-only RPC shape as has_open_enquiry, so it never exposes who
+ * else is staying when. This is only ever a heads-up, never a block:
+ * the admin still makes the real call (see AdminEnquiries.jsx's
+ * Confirm/Decline), since dates can free up or the admin may know
+ * something the calendar doesn't yet.
+ *
  * On submit: saves the enquiry to Supabase (table: enquiries) — this
  * is the single source of truth other pages (admin Enquiries inbox,
  * overview stats, the sidebar badge) read from. That insert is also
@@ -46,6 +55,7 @@ export default function Book() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [pendingNotice, setPendingNotice] = useState(false);
+  const [availabilityNotice, setAvailabilityNotice] = useState(false);
 
   const update = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
@@ -56,6 +66,19 @@ export default function Book() {
     if (!isSupabaseConfigured || !form.email.trim()) return;
     const { data } = await supabase.rpc('has_open_enquiry', { check_email: form.email.trim() });
     setPendingNotice(!!data);
+  };
+
+  // Same idea, for dates: once both are picked, check them against
+  // existing bookings. Purely a heads-up (see doc comment above) —
+  // never blocks the form.
+  const checkAvailability = async () => {
+    if (!isSupabaseConfigured || !form.checkIn || !form.checkOut) { setAvailabilityNotice(false); return; }
+    if (new Date(form.checkOut) <= new Date(form.checkIn)) { setAvailabilityNotice(false); return; }
+    const { data } = await supabase.rpc('is_date_range_available', {
+      check_in: form.checkIn,
+      check_out: form.checkOut,
+    });
+    setAvailabilityNotice(data === false);
   };
 
   const submit = async (e) => {
@@ -102,6 +125,7 @@ export default function Book() {
 
       setSent(true);
       setPendingNotice(false);
+      setAvailabilityNotice(false);
       setForm({
         name: '', email: '', phone: '', checkIn: '', checkOut: '',
         guests: '2', message: '',
@@ -187,7 +211,8 @@ export default function Book() {
                   <input
                     type="date"
                     value={form.checkIn}
-                    onChange={update('checkIn')}
+                    onChange={(e) => { setAvailabilityNotice(false); update('checkIn')(e); }}
+                    onBlur={checkAvailability}
                     required
                     disabled={loading}
                   />
@@ -197,12 +222,18 @@ export default function Book() {
                   <input
                     type="date"
                     value={form.checkOut}
-                    onChange={update('checkOut')}
+                    onChange={(e) => { setAvailabilityNotice(false); update('checkOut')(e); }}
+                    onBlur={checkAvailability}
                     required
                     disabled={loading}
                   />
                 </div>
               </div>
+              {availabilityNotice && (
+                <p className="field-note">
+                  Heads up — those dates may already be booked. We'll confirm availability when we reply, or feel free to try different dates.
+                </p>
+              )}
 
               <div className="field">
                 <label>Guests</label>

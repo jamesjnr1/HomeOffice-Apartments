@@ -1,5 +1,5 @@
 import { Fragment, useState, useEffect } from 'react';
-import { Check, Reply, Archive, Trash2, CalendarCheck } from 'lucide-react';
+import { Check, Reply, Archive, Trash2, CalendarCheck, Ban, AlertTriangle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { supabase } from '../../lib/supabase';
 
@@ -14,13 +14,23 @@ import { supabase } from '../../lib/supabase';
  * supabase/migrations/20260909150000_create_bookings.sql). That's the
  * only place bookings get created — no on-site payment, the admin
  * confirms after agreeing dates/price with the guest directly. It's
- * also the only thing that releases a guest to submit another enquiry
- * — see the urgency() helper below and supabase/migrations/
+ * also one of the two things that release a guest to submit another
+ * enquiry — see the urgency() helper below and supabase/migrations/
  * 20260909210000_block_until_booked_not_just_replied.sql. Marking an
- * enquiry replied or archived deliberately does NOT release it.
+ * enquiry replied or archived deliberately does NOT release it;
+ * declining it (see declineEnquiry below) does, immediately.
+ *
+ * Reservation conflicts: since 20260910100100_prevent_overlapping_
+ * bookings.sql, two confirmed bookings can never actually overlap —
+ * the database rejects it outright. This page surfaces that ahead of
+ * time (the overlap() badge below) so an admin sees the conflict
+ * before trying, and offers Decline as the resolution — see
+ * declineEnquiry, which emails the guest via supabase/migrations/
+ * 20260910100200_notify_enquiry_declined.sql and, if they have an
+ * account, also leaves them a message they'll see on next login.
  */
 
-const TABS = ['all', 'new', 'replied', 'archived'];
+const TABS = ['all', 'new', 'replied', 'archived', 'declined'];
 const RESUBMIT_WINDOW_MS = 3 * 24 * 60 * 60 * 1000; // keep in sync with the
 // 3-day window in supabase/migrations/20260909210000_block_until_booked_not_just_replied.sql
 
@@ -29,13 +39,20 @@ function makeReference() {
   return `HO-${code}`;
 }
 
+// Do two date ranges (as YYYY-MM-DD strings, check-out exclusive)
+// overlap? Mirrors the daterange && check the DB does in
+// bookings_no_date_overlap and is_date_range_available.
+function rangesOverlap(aStart, aEnd, bStart, bEnd) {
+  return aStart < bEnd && bStart < aEnd;
+}
+
 // An enquiry that hasn't become a booking yet blocks the same email
 // from resubmitting — marking it replied or archived does NOT release
-// this, only confirming a booking does (see confirmBooking below) or
-// the 3-day self-expiry. Surfaced here so a second enquiry from the
-// same person, once the window opens, doesn't come as a surprise.
+// this, only confirming a booking or declining it does (or the 3-day
+// self-expiry). Surfaced here so a second enquiry from the same
+// person, once the window opens, doesn't come as a surprise.
 function urgency(e) {
-  if (e.booking_id) return null;
+  if (e.booking_id || e.status === 'declined') return null;
   const remaining = RESUBMIT_WINDOW_MS - (Date.now() - new Date(e.created_at).getTime());
   if (remaining <= 0) return { label: 'Overdue · guest can resubmit', className: 'cancelled' };
   if (remaining <= 24 * 60 * 60 * 1000) {
@@ -48,10 +65,13 @@ function urgency(e) {
 export default function AdminEnquiries() {
   const [tab, setTab] = useState('all');
   const [enquiries, setEnquiries] = useState([]);
+  const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(null);
   const [amounts, setAmounts] = useState({}); // enquiry id -> draft total string
+  const [declineReasons, setDeclineReasons] = useState({}); // enquiry id -> draft reason string
   const [confirmingId, setConfirmingId] = useState(null);
+  const [decliningId, setDecliningId] = useState(null);
   const [bookError, setBookError] = useState('');
   const [loadError, setLoadError] = useState('');
 
@@ -61,6 +81,7 @@ export default function AdminEnquiries() {
     const sub = supabase
       .channel('admin-enquiries')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'enquiries' }, loadEnquiries)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, loadEnquiries)
       .subscribe();
 
     return () => { supabase.removeChannel(sub); };
@@ -77,25 +98,44 @@ export default function AdminEnquiries() {
       // this, PostgREST errors on every request and the whole list
       // silently comes back empty (this was the "enquiries not
       // showing" bug).
-      const { data, error } = await supabase
-        .from('enquiries')
-        .select('*, bookings!enquiries_booking_id_fkey(reference, status)')
-        .order('created_at', { ascending: false });
+      const [enquiriesRes, bookingsRes] = await Promise.all([
+        supabase
+          .from('enquiries')
+          .select('*, bookings!enquiries_booking_id_fkey(reference, status)')
+          .order('created_at', { ascending: false }),
+        // All bookings' dates, for the overlap warning below — full
+        // row detail is fine here, this page is already admin-only.
+        supabase
+          .from('bookings')
+          .select('id, reference, status, check_in, check_out')
+          .neq('status', 'cancelled'),
+      ]);
 
-      if (error) {
+      if (enquiriesRes.error) {
         // Surface it instead of silently leaving the list empty —
         // that silence is exactly how the ambiguous-embed bug above
         // went unnoticed.
-        setLoadError(error.message);
-      } else if (data) {
-        setEnquiries(data);
+        setLoadError(enquiriesRes.error.message);
+      } else if (enquiriesRes.data) {
+        setEnquiries(enquiriesRes.data);
         setLoadError('');
       }
+      if (bookingsRes.data) setBookings(bookingsRes.data);
     } catch {
       setLoadError("Couldn't reach the database — check your connection and try again.");
     } finally {
       setLoading(false);
     }
+  };
+
+  // Does this (not-yet-booked) enquiry's date range overlap an
+  // existing confirmed booking? Advisory only — the database itself
+  // is the real backstop (bookings_no_date_overlap), this just lets
+  // an admin see the conflict before trying instead of hitting an
+  // error after filling in the amount.
+  const overlap = (e) => {
+    if (e.booking_id) return null;
+    return bookings.find(b => rangesOverlap(e.check_in, e.check_out, b.check_in, b.check_out)) || null;
   };
 
   const filtered = enquiries.filter(e => tab === 'all' || e.status === tab);
@@ -116,6 +156,11 @@ export default function AdminEnquiries() {
     const total = Number(amounts[e.id]);
     if (!total || total <= 0) {
       setBookError('Enter the agreed total before confirming.');
+      return;
+    }
+    const conflict = overlap(e);
+    if (conflict) {
+      setBookError(`Those dates overlap an existing booking (${conflict.reference}). Decline this enquiry instead, or agree different dates first.`);
       return;
     }
     setBookError('');
@@ -144,7 +189,11 @@ export default function AdminEnquiries() {
     };
 
     // `reference` has a unique constraint — retry once on the rare
-    // collision instead of failing the whole confirmation.
+    // collision instead of failing the whole confirmation. A
+    // '23P01' here means the overlap check above raced with another
+    // confirmation (or missed something) — the DB's own exclusion
+    // constraint (bookings_no_date_overlap) is the real backstop, so
+    // it still can't happen even if the advisory check above is wrong.
     let inserted = null;
     for (let attempt = 0; attempt < 2 && !inserted; attempt++) {
       const { data, error } = await supabase
@@ -153,7 +202,11 @@ export default function AdminEnquiries() {
         .select()
         .single();
       if (!error) inserted = data;
-      else if (!String(error.message).includes('reference')) {
+      else if (error.code === '23P01') {
+        setBookError('Those dates overlap an existing booking. Decline this enquiry instead, or agree different dates first.');
+        setConfirmingId(null);
+        return;
+      } else if (!String(error.message).includes('reference')) {
         setBookError("Couldn't create the booking. Please try again.");
         setConfirmingId(null);
         return;
@@ -173,7 +226,57 @@ export default function AdminEnquiries() {
     setEnquiries(prev => prev.map(row => row.id === e.id
       ? { ...row, booking_id: inserted.id, bookings: { reference: inserted.reference, status: inserted.status }, status: row.status === 'new' ? 'replied' : row.status }
       : row));
+    setBookings(prev => [...prev, { id: inserted.id, reference: inserted.reference, status: inserted.status, check_in: inserted.check_in, check_out: inserted.check_out }]);
     setConfirmingId(null);
+  };
+
+  // Decline — most commonly used when the requested dates conflict
+  // with an existing booking (see the overlap warning above), but
+  // works for any reason. Releases the duplicate-enquiry block
+  // immediately (the DB trigger checks status <> 'declined') and
+  // notifies the guest two ways: an email always (see
+  // 20260910100200_notify_enquiry_declined.sql), and — best-effort,
+  // same email-match pattern as confirmBooking — an in-app message if
+  // they already have an account, so it's waiting on their dashboard
+  // even before they check their inbox.
+  const declineEnquiry = async (e) => {
+    const reason = (declineReasons[e.id] || '').trim();
+    setDecliningId(e.id);
+    setBookError('');
+
+    const { error } = await supabase
+      .from('enquiries')
+      .update({ status: 'declined', decline_reason: reason || null })
+      .eq('id', e.id);
+
+    if (error) {
+      setBookError("Couldn't decline this enquiry. Please try again.");
+      setDecliningId(null);
+      return;
+    }
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('email', e.email)
+      .maybeSingle();
+
+    if (profile?.id) {
+      await supabase.from('messages').insert({
+        guest_id: profile.id,
+        guest_name: e.name,
+        guest_email: e.email,
+        from_admin: true,
+        body: reason
+          ? `About your enquiry for ${e.check_in} → ${e.check_out}: ${reason}`
+          : `Unfortunately we can't host you for ${e.check_in} → ${e.check_out} — those dates are no longer available. Feel free to send a new enquiry with different dates any time.`,
+        read_by_guest: false,
+        read_by_admin: true,
+      });
+    }
+
+    setEnquiries(prev => prev.map(row => row.id === e.id ? { ...row, status: 'declined', decline_reason: reason || null } : row));
+    setDecliningId(null);
   };
 
   return (
@@ -211,7 +314,9 @@ export default function AdminEnquiries() {
                 <tr><th>Guest</th><th>Dates</th><th>Guests</th><th>Status</th><th>Received</th><th></th></tr>
               </thead>
               <tbody>
-                {filtered.map(e => (
+                {filtered.map(e => {
+                  const conflict = overlap(e);
+                  return (
                   <Fragment key={e.id}>
                     <tr
                       className={`mgmt-tr-click ${expanded === e.id ? 'expanded' : ''}`}
@@ -232,6 +337,12 @@ export default function AdminEnquiries() {
                             {urgency(e).label}
                           </span>
                         )}
+                        {conflict && (
+                          <span className="mgmt-status cancelled" style={{ marginLeft: 6 }} title={`Overlaps ${conflict.reference}`}>
+                            <AlertTriangle size={11} style={{ verticalAlign: -1, marginRight: 3 }} />
+                            Dates taken · {conflict.reference}
+                          </span>
+                        )}
                       </td>
                       <td className="mgmt-td-muted">{formatDistanceToNow(new Date(e.created_at), { addSuffix: true })}</td>
                       <td>
@@ -248,6 +359,11 @@ export default function AdminEnquiries() {
                           <div className="mgmt-expanded-body">
                             {e.message && <p><strong>Message:</strong> {e.message}</p>}
                             {e.phone && <p><strong>Phone:</strong> {e.phone}</p>}
+                            {e.status === 'declined' && (
+                              <p className="mgmt-td-muted">
+                                Declined{e.decline_reason ? ` — ${e.decline_reason}` : ''}.
+                              </p>
+                            )}
                             <div className="mgmt-expanded-actions">
                               <a className="mgmt-btn mgmt-btn-primary" href={`mailto:${e.email}?subject=Re: Your enquiry — Home-Office Apartments`}>
                                 <Reply size={14}/> Reply by email
@@ -265,27 +381,55 @@ export default function AdminEnquiries() {
                               <p className="mgmt-td-muted">
                                 Already booked as <strong>{e.bookings.reference}</strong> ({e.bookings.status}).
                               </p>
-                            ) : (
-                              <div className="mgmt-confirm-booking" onClick={ev => ev.stopPropagation()}>
-                                <label>
-                                  <span>Agreed total (GHS)</span>
-                                  <input
-                                    type="number"
-                                    min="0"
-                                    step="0.01"
-                                    placeholder="e.g. 2480"
-                                    value={amounts[e.id] || ''}
-                                    onChange={ev => setAmounts(prev => ({ ...prev, [e.id]: ev.target.value }))}
-                                  />
-                                </label>
-                                <button
-                                  className="mgmt-btn mgmt-btn-primary"
-                                  disabled={confirmingId === e.id}
-                                  onClick={() => confirmBooking(e)}
-                                >
-                                  <CalendarCheck size={14}/> {confirmingId === e.id ? 'Confirming…' : 'Confirm booking'}
-                                </button>
-                                {bookError && confirmingId === null && (
+                            ) : e.status === 'declined' ? null : (
+                              <div className="mgmt-decision-row" onClick={ev => ev.stopPropagation()}>
+                                <div className="mgmt-confirm-booking">
+                                  {conflict && (
+                                    <p className="form-error" style={{ margin: '0 0 10px' }}>
+                                      <AlertTriangle size={13} style={{ verticalAlign: -2, marginRight: 4 }} />
+                                      These dates overlap an existing booking ({conflict.reference}). Confirming will fail — decline this enquiry instead, or agree different dates.
+                                    </p>
+                                  )}
+                                  <label>
+                                    <span>Agreed total (GHS)</span>
+                                    <input
+                                      type="number"
+                                      min="0"
+                                      step="0.01"
+                                      placeholder="e.g. 2480"
+                                      value={amounts[e.id] || ''}
+                                      onChange={ev => setAmounts(prev => ({ ...prev, [e.id]: ev.target.value }))}
+                                    />
+                                  </label>
+                                  <button
+                                    className="mgmt-btn mgmt-btn-primary"
+                                    disabled={confirmingId === e.id || decliningId === e.id}
+                                    onClick={() => confirmBooking(e)}
+                                  >
+                                    <CalendarCheck size={14}/> {confirmingId === e.id ? 'Confirming…' : 'Confirm booking'}
+                                  </button>
+                                </div>
+
+                                <div className="mgmt-decline-box">
+                                  <label>
+                                    <span>Decline reason (optional, shown to guest)</span>
+                                    <input
+                                      type="text"
+                                      placeholder="e.g. Those dates are already booked"
+                                      value={declineReasons[e.id] || ''}
+                                      onChange={ev => setDeclineReasons(prev => ({ ...prev, [e.id]: ev.target.value }))}
+                                    />
+                                  </label>
+                                  <button
+                                    className="mgmt-btn mgmt-btn-outline mgmt-action-danger"
+                                    disabled={confirmingId === e.id || decliningId === e.id}
+                                    onClick={() => declineEnquiry(e)}
+                                  >
+                                    <Ban size={14}/> {decliningId === e.id ? 'Declining…' : 'Decline enquiry'}
+                                  </button>
+                                </div>
+
+                                {bookError && confirmingId === null && decliningId === null && (
                                   <span className="form-error" style={{ margin: 0 }}>{bookError}</span>
                                 )}
                               </div>
@@ -295,7 +439,8 @@ export default function AdminEnquiries() {
                       </tr>
                     )}
                   </Fragment>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
