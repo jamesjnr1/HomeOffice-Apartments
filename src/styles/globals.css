@@ -26,21 +26,44 @@
   --shadow-lg:  0 24px 56px rgba(0,0,0,.16);
   --ease:       cubic-bezier(.22,.61,.36,1);
   --container:  1240px;
+
+  /* Base page typography/background — separate from --ink/--bg on
+     purpose: headings, buttons and the green accent keep using
+     --ink/--bg/--accent as before, only plain body copy and the page
+     background (not card/section surfaces) move to these. */
+  --font-body:  'Graphik', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+  --ink-body:   #57584e;
+  --bg-page:    #fbfbfb;
 }
 
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
 html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
 body {
-  font-family: 'Poppins', system-ui, -apple-system, sans-serif;
-  color: var(--ink);
-  background: var(--bg);
+  font-family: var(--font-body);
+  color: var(--ink-body);
+  background: var(--bg-page);
   font-size: 16px;
-  line-height: 1.65;
+  line-height: 1.5;
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+/* Graphik itself can't be shipped here — it's a commercial font
+   (Commercial Type), and we don't hold a license to self-host its
+   files. It's listed first so it's picked up automatically if this
+   site is ever given licensed woff2 files (drop them in /public/fonts
+   and add the @font-face block below); until then every browser falls
+   through to the next entry in --font-body, same as any page
+   referencing a font the visitor doesn't have installed.
+@font-face {
+  font-family: 'Graphik';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/Graphik-Regular.woff2') format('woff2');
+}
+*/
 a { color: inherit; text-decoration: none; }
 img { display: block; max-width: 100%; }
 button { font: inherit; cursor: pointer; }
@@ -1748,7 +1771,7 @@ h2 { letter-spacing: -.025em; }
 /* Body base — slightly warmer ink, better rendering */
 body {
   font-weight: 400;
-  color: var(--ink);
+  color: var(--ink-body);
   -webkit-font-smoothing: antialiased;
 }
 
