@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 const APT_SLIDES = [
   { src: '/images/living-room-1.jpg', alt: 'Living room with black leather seating', caption: 'Living room' },
@@ -98,47 +98,30 @@ export default function Apartments() {
 
 function ApartmentSlider() {
   const [index, setIndex] = useState(0);
-  const go = (i) => setIndex((i + APT_SLIDES.length) % APT_SLIDES.length);
+
+  useEffect(() => {
+    // Auto-advance only — no arrows, no dots. Respect the site's
+    // reduce-motion preference (accessibility widget or OS setting)
+    // by just holding on the first photo instead of cycling.
+    const reduceMotion =
+      document.documentElement.classList.contains('a11y-reduce-motion') ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion) return;
+
+    const id = setInterval(() => {
+      setIndex((i) => (i + 1) % APT_SLIDES.length);
+    }, 4000);
+    return () => clearInterval(id);
+  }, []);
+
   const slide = APT_SLIDES[index];
 
   return (
     <div className="apt-slider reveal">
       <div className="apt-slider-frame">
-        <img src={slide.src} alt={slide.alt} loading="lazy" />
-        <button
-          type="button"
-          className="apt-slider-nav apt-slider-nav-prev"
-          onClick={() => go(index - 1)}
-          aria-label="Previous photo"
-        >
-          <ChevronLeft size={20} />
-        </button>
-        <button
-          type="button"
-          className="apt-slider-nav apt-slider-nav-next"
-          onClick={() => go(index + 1)}
-          aria-label="Next photo"
-        >
-          <ChevronRight size={20} />
-        </button>
+        <img key={slide.src} src={slide.src} alt={slide.alt} loading="lazy" />
       </div>
-
-      <div className="apt-slider-foot">
-        <span className="apt-slider-caption">{slide.caption}</span>
-        <div className="apt-slider-dots" role="tablist" aria-label="Choose a photo">
-          {APT_SLIDES.map((s, i) => (
-            <button
-              key={s.src}
-              type="button"
-              role="tab"
-              className={`apt-slider-dot${i === index ? ' active' : ''}`}
-              aria-selected={i === index}
-              aria-label={`Show ${s.caption}`}
-              onClick={() => setIndex(i)}
-            />
-          ))}
-        </div>
-      </div>
+      <span className="apt-slider-caption">{slide.caption}</span>
     </div>
   );
 }
