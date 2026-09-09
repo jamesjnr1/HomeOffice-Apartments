@@ -21,7 +21,16 @@ const IMAGES = [
   { src: '/images/bedroom-4.jpg', span: 6,  ratio: '4/3' },
   { src: '/images/bedroom-5.jpg', span: 6,  ratio: '4/3' },
   { src: '/images/toilet.jpg', span: 4,  ratio: '1/1' },
-  { src: '/images/exterior-2.jpg', span: 8,  ratio: '16/9' },
+  { src: '/images/living-room-2.jpg', span: 8,  ratio: '16/9' },
+  { src: '/images/exterior-2.jpg', span: 12, ratio: '21/9' },
+  { src: '/images/utility.jpg', span: 6,  ratio: '4/3' },
+  { src: '/images/dining-kitchenette-2.jpg', span: 6,  ratio: '4/3' },
+  { src: '/images/lounge-2.jpg', span: 7,  ratio: '4/3' },
+  { src: '/images/lounge-hallway.jpg', span: 5,  ratio: '4/5' },
+  { src: '/images/bedroom-3-alt.jpg', span: 5,  ratio: '4/5' },
+  { src: '/images/lounge-3.jpg', span: 7,  ratio: '4/3' },
+  { src: '/images/lounge-4.jpg', span: 6,  ratio: '4/3' },
+  { src: '/images/bedroom-5-alt.jpg', span: 6,  ratio: '4/3' },
 ];
 
 export default function Gallery() {
