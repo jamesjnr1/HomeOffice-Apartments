@@ -58,14 +58,20 @@ export default function Messages() {
   }, [messages]);
 
   const loadMessages = async () => {
-    const { data, error } = await supabase
-      .from('messages')
-      .select('*')
-      .eq('guest_id', user.id)
-      .order('created_at', { ascending: true });
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('guest_id', user.id)
+        .order('created_at', { ascending: true });
 
-    if (!error && data) setMessages(data);
-    setLoading(false);
+      if (!error && data) setMessages(data);
+    } catch {
+      // A network-level failure would otherwise leave this stuck on
+      // "Loading…" forever.
+    } finally {
+      setLoading(false);
+    }
   };
 
   const markRead = async () => {

@@ -44,20 +44,26 @@ export default function Bookings() {
   }, [user?.id]);
 
   const loadBookings = async () => {
-    const { data, error } = await supabase
-      .from('bookings')
-      .select('*')
-      .eq('guest_id', user.id)
-      .order('check_in', { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from('bookings')
+        .select('*')
+        .eq('guest_id', user.id)
+        .order('check_in', { ascending: false });
 
-    if (!error && data) {
-      setBookings(data.map((b) => ({
-        ...b,
-        checkIn: parseISO(b.check_in),
-        checkOut: parseISO(b.check_out),
-      })));
+      if (!error && data) {
+        setBookings(data.map((b) => ({
+          ...b,
+          checkIn: parseISO(b.check_in),
+          checkOut: parseISO(b.check_out),
+        })));
+      }
+    } catch {
+      // A network-level failure would otherwise leave this stuck on
+      // "Loading…" forever.
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const filtered = useMemo(() => {

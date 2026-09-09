@@ -29,37 +29,43 @@ export default function AdminOverview() {
   useEffect(() => { loadDashboard(); }, []);
 
   const loadDashboard = async () => {
-    const today = new Date().toISOString().slice(0, 10);
-    const [messagesRes, enquiriesRes, bookingsRes] = await Promise.all([
-      supabase.from('messages').select('*').order('created_at', { ascending: false }),
-      supabase.from('enquiries').select('id', { count: 'exact', head: true }).eq('status', 'new'),
-      supabase.from('bookings').select('id', { count: 'exact', head: true }).gte('check_in', today).neq('status', 'cancelled'),
-    ]);
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      const [messagesRes, enquiriesRes, bookingsRes] = await Promise.all([
+        supabase.from('messages').select('*').order('created_at', { ascending: false }),
+        supabase.from('enquiries').select('id', { count: 'exact', head: true }).eq('status', 'new'),
+        supabase.from('bookings').select('id', { count: 'exact', head: true }).gte('check_in', today).neq('status', 'cancelled'),
+      ]);
 
-    const { data, error } = messagesRes;
-    if (!error && data) {
-      const unread = data.filter(m => !m.from_admin && !m.read_by_admin).length;
-      const uniqueGuests = new Set(data.map(m => m.guest_id).filter(Boolean));
+      const { data, error } = messagesRes;
+      if (!error && data) {
+        const unread = data.filter(m => !m.from_admin && !m.read_by_admin).length;
+        const uniqueGuests = new Set(data.map(m => m.guest_id).filter(Boolean));
 
-      // Build recent threads (most recent message per guest)
-      const seen = new Set();
-      const recent = [];
-      for (const m of data) {
-        if (!m.guest_id || seen.has(m.guest_id)) continue;
-        seen.add(m.guest_id);
-        recent.push(m);
-        if (recent.length >= 5) break;
+        // Build recent threads (most recent message per guest)
+        const seen = new Set();
+        const recent = [];
+        for (const m of data) {
+          if (!m.guest_id || seen.has(m.guest_id)) continue;
+          seen.add(m.guest_id);
+          recent.push(m);
+          if (recent.length >= 5) break;
+        }
+
+        setStats({
+          unreadMessages: unread,
+          totalGuests: uniqueGuests.size,
+          newEnquiries: enquiriesRes.count || 0,
+          upcomingBookings: bookingsRes.count || 0,
+        });
+        setRecentThreads(recent);
       }
-
-      setStats({
-        unreadMessages: unread,
-        totalGuests: uniqueGuests.size,
-        newEnquiries: enquiriesRes.count || 0,
-        upcomingBookings: bookingsRes.count || 0,
-      });
-      setRecentThreads(recent);
+    } catch {
+      // A network-level failure (not just a Supabase error payload)
+      // would otherwise leave this stuck on "Loading…" forever.
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const STAT_CARDS = [

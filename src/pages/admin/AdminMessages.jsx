@@ -54,20 +54,26 @@ export default function AdminMessages() {
   }, [activeGuestId, allMessages]);
 
   const loadMessages = async () => {
-    const { data, error } = await supabase
-      .from('messages')
-      .select('*')
-      .order('created_at', { ascending: true });
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .order('created_at', { ascending: true });
 
-    if (!error && data) {
-      setAllMessages(data);
-      // Auto-select first guest thread if none selected yet
-      if (!activeGuestId && data.length > 0) {
-        const firstGuest = data[0].guest_id;
-        setActiveGuestId(firstGuest);
+      if (!error && data) {
+        setAllMessages(data);
+        // Auto-select first guest thread if none selected yet
+        if (!activeGuestId && data.length > 0) {
+          const firstGuest = data[0].guest_id;
+          setActiveGuestId(firstGuest);
+        }
       }
+    } catch {
+      // A network-level failure would otherwise leave this stuck on
+      // "Loading…" forever.
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const markThreadRead = async (guestId) => {

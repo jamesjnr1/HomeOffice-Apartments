@@ -6,5 +6,6 @@ export { default as AdminBookings } from './AdminBookings';
 export { default as AdminGuests } from './AdminGuests';
 export { default as AdminMessages } from './AdminMessages';
 export { default as AdminRates } from './AdminRates';
+export { default as AdminAnalytics } from './AdminAnalytics';
 export { default as AdminRevenue } from './AdminRevenue';
 export { default as AdminSettings } from './AdminSettings';

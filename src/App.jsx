@@ -3,6 +3,7 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import PageTransition from './components/PageTransition';
 import AccessibilityWidget from './components/AccessibilityWidget';
+import VisitTracker from './components/VisitTracker';
 import SmoothScroll from './lib/SmoothScroll';
 import { useReveal } from './lib/useReveal';
 
@@ -37,6 +38,7 @@ import {
   AdminMessages,
   AdminRates,
   AdminRevenue,
+  AdminAnalytics,
   AdminSettings,
 } from './pages/admin';
 
@@ -77,6 +79,7 @@ function AppContent() {
             <Route path="guests" element={<AdminGuests />} />
             <Route path="messages" element={<AdminMessages />} />
             <Route path="rates" element={<AdminRates />} />
+            <Route path="analytics" element={<AdminAnalytics />} />
             <Route path="revenue" element={<AdminRevenue />} />
             <Route path="settings" element={<AdminSettings />} />
           </Route>
@@ -87,6 +90,7 @@ function AppContent() {
       <Footer />
       <PageTransition />
       <AccessibilityWidget />
+      <VisitTracker />
     </>
   );
 }

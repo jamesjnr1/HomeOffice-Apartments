@@ -22,13 +22,19 @@ export default function AdminGuests() {
   }, []);
 
   const loadGuests = async () => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .order('created_at', { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    if (!error && data) setGuests(data);
-    setLoading(false);
+      if (!error && data) setGuests(data);
+    } catch {
+      // A network-level failure would otherwise leave this stuck on
+      // "Loading…" forever.
+    } finally {
+      setLoading(false);
+    }
   };
 
   const filtered = guests.filter((g) =>

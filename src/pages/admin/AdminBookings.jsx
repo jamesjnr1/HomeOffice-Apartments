@@ -31,13 +31,19 @@ export default function AdminBookings() {
   }, []);
 
   const loadBookings = async () => {
-    const { data, error } = await supabase
-      .from('bookings')
-      .select('*')
-      .order('check_in', { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from('bookings')
+        .select('*')
+        .order('check_in', { ascending: false });
 
-    if (!error && data) setBookings(data);
-    setLoading(false);
+      if (!error && data) setBookings(data);
+    } catch {
+      // A network-level failure would otherwise leave this stuck on
+      // "Loading…" forever.
+    } finally {
+      setLoading(false);
+    }
   };
 
   const days = eachDayOfInterval({ start: startOfMonth(month), end: endOfMonth(month) });

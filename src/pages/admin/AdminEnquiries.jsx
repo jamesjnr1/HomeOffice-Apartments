@@ -45,16 +45,22 @@ export default function AdminEnquiries() {
   }, []);
 
   const loadEnquiries = async () => {
-    // Embedded select pulls the linked booking's reference/status in
-    // one query, so a converted enquiry can show "Booked · HO-XXXXX"
-    // without a second round trip.
-    const { data, error } = await supabase
-      .from('enquiries')
-      .select('*, bookings(reference, status)')
-      .order('created_at', { ascending: false });
+    try {
+      // Embedded select pulls the linked booking's reference/status in
+      // one query, so a converted enquiry can show "Booked · HO-XXXXX"
+      // without a second round trip.
+      const { data, error } = await supabase
+        .from('enquiries')
+        .select('*, bookings(reference, status)')
+        .order('created_at', { ascending: false });
 
-    if (!error && data) setEnquiries(data);
-    setLoading(false);
+      if (!error && data) setEnquiries(data);
+    } catch {
+      // A network-level failure would otherwise leave this stuck on
+      // "Loading…" forever.
+    } finally {
+      setLoading(false);
+    }
   };
 
   const filtered = enquiries.filter(e => tab === 'all' || e.status === tab);
