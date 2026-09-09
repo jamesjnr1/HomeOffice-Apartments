@@ -17,10 +17,27 @@ import { supabase } from '../../lib/supabase';
  */
 
 const TABS = ['all', 'new', 'replied', 'archived'];
+const RESUBMIT_WINDOW_MS = 3 * 24 * 60 * 60 * 1000; // keep in sync with the
+// 3-day window in supabase/migrations/20260909200000_self_expiring_enquiry_block.sql
 
 function makeReference() {
   const code = Math.random().toString(36).slice(2, 7).toUpperCase();
   return `HO-${code}`;
+}
+
+// A 'new' enquiry left unattended long enough lets the same guest
+// resubmit (see the migration above) — this surfaces that here so it
+// doesn't come as a surprise when a second one from the same person
+// shows up.
+function urgency(e) {
+  if (e.status !== 'new') return null;
+  const remaining = RESUBMIT_WINDOW_MS - (Date.now() - new Date(e.created_at).getTime());
+  if (remaining <= 0) return { label: 'Overdue · guest can resubmit', className: 'cancelled' };
+  if (remaining <= 24 * 60 * 60 * 1000) {
+    const hrs = Math.max(1, Math.round(remaining / (60 * 60 * 1000)));
+    return { label: `Resubmit window opens in ${hrs}h`, className: 'pending' };
+  }
+  return null;
 }
 
 export default function AdminEnquiries() {
@@ -203,6 +220,11 @@ export default function AdminEnquiries() {
                         {e.bookings && (
                           <span className="mgmt-status confirmed" style={{ marginLeft: 6 }}>
                             Booked · {e.bookings.reference}
+                          </span>
+                        )}
+                        {urgency(e) && (
+                          <span className={`mgmt-status ${urgency(e).className}`} style={{ marginLeft: 6 }}>
+                            {urgency(e).label}
                           </span>
                         )}
                       </td>

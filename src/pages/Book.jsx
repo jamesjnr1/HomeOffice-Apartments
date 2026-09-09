@@ -5,16 +5,24 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase';
 /**
  * Book — enquiry form that actually sends and actually persists.
  *
+ * Duplicate enquiries: while a guest has an enquiry sitting unattended
+ * (status 'new') for less than 3 days, a second submission from the
+ * same email is rejected by a database trigger (see supabase/
+ * migrations/20260909200000_self_expiring_enquiry_block.sql) — caught
+ * below and turned into a friendly message. The 3-day window is
+ * deliberate: if an enquiry is ever missed entirely, the guest isn't
+ * locked out forever waiting on someone to notice. As soon as the
+ * email field loses focus, has_open_enquiry() is also checked
+ * proactively so a guest with a pending enquiry finds out before
+ * filling in the rest of the form, not after.
+ *
  * On submit:
  *   1. Saves the enquiry to Supabase (table: enquiries) so it shows up
  *      for real in the admin Enquiries inbox — this is the source of
  *      truth other pages (admin overview stats, the sidebar badge)
- *      read from. A database constraint (see supabase/migrations/
- *      20260909190000_prevent_duplicate_open_enquiries.sql) rejects a
- *      second submission from the same email while an earlier one is
- *      still unattended (status 'new') — caught below and turned into
- *      a friendly message, and Formspree is deliberately skipped in
- *      that case so a duplicate doesn't sneak through that path.
+ *      read from. Formspree is deliberately skipped when the
+ *      duplicate check fires, so a blocked resubmission can't sneak
+ *      through that path instead.
  *   2. Otherwise also POSTs to Formspree, set via VITE_FORMSPREE_URL,
  *      purely for an instant email notification to your inbox. Set it
  *      in Vercel → Settings → Environment Variables:
@@ -39,8 +47,18 @@ export default function Book() {
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [pendingNotice, setPendingNotice] = useState(false);
 
   const update = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+
+  // Proactive check as soon as the guest moves on from the email
+  // field — so they find out about a pending enquiry before filling
+  // in the rest of the form, not after submitting it.
+  const checkPendingEnquiry = async () => {
+    if (!isSupabaseConfigured || !form.email.trim()) return;
+    const { data } = await supabase.rpc('has_open_enquiry', { check_email: form.email.trim() });
+    setPendingNotice(!!data);
+  };
 
   const submit = async (e) => {
     e.preventDefault();
@@ -81,7 +99,7 @@ export default function Book() {
           message: form.message || null,
         });
 
-        if (dbError?.code === '23505') {
+        if (dbError?.message?.includes('DUPLICATE_OPEN_ENQUIRY')) {
           setError(
             `You already have an enquiry with us that we haven't replied to yet — we'll be in touch soon! Email ${CONTACT_EMAIL} if it's urgent.`
           );
@@ -123,6 +141,7 @@ export default function Book() {
       }
 
       setSent(true);
+      setPendingNotice(false);
       setForm({
         name: '', email: '', phone: '', checkIn: '', checkOut: '',
         guests: '2', message: '',
@@ -178,11 +197,17 @@ export default function Book() {
                   <input
                     type="email"
                     value={form.email}
-                    onChange={update('email')}
+                    onChange={(e) => { setPendingNotice(false); update('email')(e); }}
+                    onBlur={checkPendingEnquiry}
                     placeholder="jane@example.com"
                     required
                     disabled={loading}
                   />
+                  {pendingNotice && (
+                    <p className="field-note">
+                      You already have an enquiry with us we haven't replied to yet — no need to send another, we'll be in touch soon.
+                    </p>
+                  )}
                 </div>
                 <div className="field">
                   <label>Phone / WhatsApp</label>
