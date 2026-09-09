@@ -5,14 +5,14 @@ import { supabase } from '../../lib/supabase';
 
 /**
  * AdminOverview
- * Matches the live schema: `messages`, `profiles`, and (as of Phase 1
- * of the direct-booking rollout) `enquiries` are real. `bookings`
- * doesn't exist yet — that's Phase 2.
+ * Matches the live schema — messages, profiles, enquiries, and (as of
+ * Phase 2 of the direct-booking rollout) bookings are all real.
  *
  * - Unread messages: real, from messages.read_by_admin
  * - Total guests: real, distinct guest_id in messages
  * - New enquiries: real, count of enquiries.status = 'new'
- * - Upcoming bookings: 0 until the bookings table is built
+ * - Upcoming bookings: real, count of bookings.check_in in the future
+ *   and status != 'cancelled'
  */
 
 export default function AdminOverview() {
@@ -29,9 +29,11 @@ export default function AdminOverview() {
   useEffect(() => { loadDashboard(); }, []);
 
   const loadDashboard = async () => {
-    const [messagesRes, enquiriesRes] = await Promise.all([
+    const today = new Date().toISOString().slice(0, 10);
+    const [messagesRes, enquiriesRes, bookingsRes] = await Promise.all([
       supabase.from('messages').select('*').order('created_at', { ascending: false }),
       supabase.from('enquiries').select('id', { count: 'exact', head: true }).eq('status', 'new'),
+      supabase.from('bookings').select('id', { count: 'exact', head: true }).gte('check_in', today).neq('status', 'cancelled'),
     ]);
 
     const { data, error } = messagesRes;
@@ -53,7 +55,7 @@ export default function AdminOverview() {
         unreadMessages: unread,
         totalGuests: uniqueGuests.size,
         newEnquiries: enquiriesRes.count || 0,
-        upcomingBookings: 0,
+        upcomingBookings: bookingsRes.count || 0,
       });
       setRecentThreads(recent);
     }
