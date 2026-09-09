@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useOutletContext } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Download, MessageSquare, ArrowRight, MapPin } from 'lucide-react';
+import Receipt from '../../components/Receipt';
 
 /**
  * Bookings — all mocks are stays at Home-Office Apartments.
@@ -48,7 +49,9 @@ const MOCK_BOOKINGS = [
 ];
 
 export default function Bookings() {
+  const { user, displayName } = useOutletContext();
   const [tab, setTab] = useState('upcoming');
+  const [receiptBooking, setReceiptBooking] = useState(null);
 
   const filtered = useMemo(() => {
     const now = new Date();
@@ -108,9 +111,18 @@ export default function Bookings() {
       ) : (
         <div className="dash-booking-list">
           {filtered.map((b) => (
-            <BookingCard key={b.reference} booking={b} />
+            <BookingCard key={b.reference} booking={b} onReceipt={() => setReceiptBooking(b)} />
           ))}
         </div>
+      )}
+
+      {receiptBooking && (
+        <Receipt
+          booking={receiptBooking}
+          guestName={displayName}
+          guestEmail={user?.email}
+          onClose={() => setReceiptBooking(null)}
+        />
       )}
     </div>
   );
@@ -125,7 +137,7 @@ function TabBtn({ active, onClick, count, children }) {
   );
 }
 
-function BookingCard({ booking }) {
+function BookingCard({ booking, onReceipt }) {
   const b = booking;
   return (
     <article className="dash-booking">
@@ -172,12 +184,12 @@ function BookingCard({ booking }) {
         </div>
 
         <div className="dash-booking-actions">
-          <button className="dash-btn dash-btn-ghost dash-btn-sm">
+          <button className="dash-btn dash-btn-ghost dash-btn-sm" onClick={onReceipt}>
             <Download size={14} /> Receipt
           </button>
-          <button className="dash-btn dash-btn-ghost dash-btn-sm">
+          <Link to="/dashboard/messages" className="dash-btn dash-btn-ghost dash-btn-sm">
             <MessageSquare size={14} /> Message host
-          </button>
+          </Link>
         </div>
       </div>
     </article>

@@ -1,34 +1,37 @@
 import { useOutletContext, Navigate } from 'react-router-dom';
-import { ExternalLink, Upload } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 
+// All four slots below currently point at the same real property photo
+// (public/images/hero-property.jpg) — there's no per-slot image yet,
+// unlike the earlier Unsplash-placeholder version of this page.
 const PHOTO_SLOTS = [
   {
     id: 'hero',
     label: 'Homepage Hero',
     desc: 'Full-bleed photo on the homepage',
     file: 'src/pages/Home.jsx',
-    url: 'photo-1616486338812-3dadae4b4ace',
+    image: '/images/hero-property.jpg',
   },
   {
     id: 'apartment',
     label: 'Apartment photo',
     desc: 'Main photo for Home-Office Apartments on the guest dashboard',
     file: 'src/pages/dashboard/Overview.jsx',
-    url: 'photo-1522708323590-d24dbb6b0267',
+    image: '/images/hero-property.jpg',
   },
   {
     id: 'signin',
     label: 'Sign In page photo',
     desc: 'Left panel of the guest sign-in page',
-    file: 'src/pages/SignIn.jsx',
-    url: 'photo-1600585154340-be6161a56a0c',
+    file: 'src/styles/globals.css (.auth-photo)',
+    image: '/images/hero-property.jpg',
   },
   {
     id: 'book-side',
     label: 'Booking page sidebar',
     desc: 'Photo in the enquiry form sidebar',
     file: 'src/pages/Book.jsx',
-    url: 'photo-1600585154340-be6161a56a0c',
+    image: '/images/hero-property.jpg',
   },
 ];
 
@@ -48,19 +51,16 @@ export default function AdminSettings() {
       <section className="mgmt-card" style={{ marginBottom: 24 }}>
         <h2 className="mgmt-card-h">Site photos</h2>
         <p className="mgmt-card-sub">
-          The site uses placeholder photos from Unsplash. To use real photos of the property,
-          upload them to <a href="https://cloudinary.com/users/register/free" target="_blank" rel="noopener noreferrer" style={{ color: '#2d6a4f', fontWeight: 500 }}>Cloudinary</a> (free),
-          copy the URL, then replace the src in the file listed under each photo.
+          These are real photos of the property, served from <code>public/images/</code> in the
+          site's code — no Unsplash or Cloudinary involved. All four spots below currently show
+          the same photo (<code>hero-property.jpg</code>); swap any one in by replacing the file.
         </p>
 
         <div className="mgmt-photo-grid">
           {PHOTO_SLOTS.map(slot => (
             <div key={slot.id} className="mgmt-photo-slot">
               <div className="mgmt-photo-preview">
-                <img
-                  src={`https://images.unsplash.com/${slot.url}?auto=format&fit=crop&w=400&q=60`}
-                  alt={slot.label}
-                />
+                <img src={slot.image} alt={slot.label} />
               </div>
               <div className="mgmt-photo-info">
                 <div className="mgmt-photo-label">{slot.label}</div>
@@ -69,20 +69,12 @@ export default function AdminSettings() {
               </div>
               <div className="mgmt-photo-actions">
                 <a
-                  href="https://cloudinary.com/users/register/free"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mgmt-btn mgmt-btn-primary mgmt-btn-sm"
-                >
-                  <Upload size={12} /> Upload photo
-                </a>
-                <a
-                  href={`https://images.unsplash.com/${slot.url}?auto=format&fit=crop&w=2400&q=90`}
+                  href={slot.image}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="mgmt-btn mgmt-btn-outline mgmt-btn-sm"
                 >
-                  View current <ExternalLink size={11} />
+                  View full size <ExternalLink size={11} />
                 </a>
               </div>
             </div>
@@ -90,10 +82,9 @@ export default function AdminSettings() {
         </div>
 
         <div className="mgmt-photo-note">
-          <strong>How to swap a photo in 3 steps</strong>
+          <strong>How to swap a photo in 2 steps</strong>
           <ol>
-            <li>Click "Upload photo" → sign up for Cloudinary free → upload your image → copy the URL it gives you</li>
-            <li>Open the file shown (e.g. <code>src/pages/Home.jsx</code>) in VS Code, press ⌘F, search for the Unsplash URL and replace it with your Cloudinary URL</li>
+            <li>Replace the file in <code>public/images/</code> with your new photo, keeping the exact same filename (e.g. <code>hero-property.jpg</code>) — or give it a new filename and update the reference in the file shown under that photo</li>
             <li>Save → <code>git add . && git commit -m "Update photos" && git push</code> — Vercel deploys automatically in ~30 seconds</li>
           </ol>
         </div>

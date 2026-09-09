@@ -12,8 +12,9 @@ import { Mail, Phone, MessageCircle, Check, AlertCircle } from 'lucide-react';
  */
 
 const FORMSPREE_URL = import.meta.env.VITE_FORMSPREE_URL;
-const CONTACT_EMAIL = 'hello@homeoffice.gh'; // <-- update to real email later
-const CONTACT_PHONE = '+233 00 000 0000';
+const CONTACT_EMAIL = 'jamesduah@gmail.com';
+const CONTACT_PHONE = '+233 20 630 1032';
+const WHATSAPP_NUMBER = '233206301032'; // CONTACT_PHONE in E.164, no spaces or +
 
 export default function Book() {
   const [form, setForm] = useState({
@@ -237,7 +238,12 @@ export default function Book() {
                   <a className="contact-line" href={`tel:${CONTACT_PHONE.replace(/\s/g, '')}`}>
                     <Phone size={14} /> {CONTACT_PHONE}
                   </a>
-                  <a className="contact-line" href="#">
+                  <a
+                    className="contact-line"
+                    href={`https://wa.me/${WHATSAPP_NUMBER}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <MessageCircle size={14} /> WhatsApp
                   </a>
                 </div>
