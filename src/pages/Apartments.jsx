@@ -1,13 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 
-const APT_SLIDES = [
-  { src: '/images/living-room-1.jpg', alt: 'Living room with black leather seating' },
-  { src: '/images/lounge.jpg', alt: 'Second living room with warm brown seating' },
-  { src: '/images/kitchen.jpg', alt: 'Fully equipped kitchen' },
-  { src: '/images/bathroom.jpg', alt: 'Washroom with walk-in shower' },
-];
-
 export default function Apartments() {
   return (
     <>
@@ -21,10 +14,6 @@ export default function Apartments() {
             Gardens — thoughtfully laid out for how you work, rest, and unwind.
           </p>
         </div>
-      </section>
-
-      <section className="apt-marquee-section">
-        <ApartmentSlider />
       </section>
 
       <section className="section">
@@ -85,25 +74,6 @@ export default function Apartments() {
         </div>
       </section>
     </>
-  );
-}
-
-function ApartmentSlider() {
-  // Pure-CSS marquee — no JS timers, no controls. The track holds the
-  // photo list twice back to back; animating it exactly -50% loops
-  // seamlessly back to the start.
-  return (
-    <div className="apt-marquee-track">
-      {[...APT_SLIDES, ...APT_SLIDES].map((slide, i) => (
-        <img
-          key={`${slide.src}-${i}`}
-          className="apt-marquee-card"
-          src={slide.src}
-          alt={slide.alt}
-          loading={i < APT_SLIDES.length ? 'eager' : 'lazy'}
-        />
-      ))}
-    </div>
   );
 }
 
