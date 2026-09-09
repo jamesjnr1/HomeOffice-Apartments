@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isSameDay, parseISO } from 'date-fns';
-import { List, CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
+import { List, CalendarDays, ChevronLeft, ChevronRight, Download } from 'lucide-react';
+import Receipt from '../../components/Receipt';
 
 const BOOKINGS = [
   { id:1, ref:'HO-8FQ2P', guest:'Jonathan Duah', email:'james@example.com', checkIn:'2026-08-31', checkOut:'2026-09-04', nights:4, guests:2, total:2480, status:'confirmed' },
@@ -12,6 +13,7 @@ const BOOKINGS = [
 export default function AdminBookings() {
   const [view, setView] = useState('list');
   const [month, setMonth] = useState(new Date(2026, 7)); // Aug 2026
+  const [receiptBooking, setReceiptBooking] = useState(null);
 
   const days = eachDayOfInterval({ start: startOfMonth(month), end: endOfMonth(month) });
   const startPad = (getDay(days[0]) + 6) % 7; // Mon-start
@@ -40,7 +42,7 @@ export default function AdminBookings() {
           <div className="mgmt-table-wrap">
             <table className="mgmt-table">
               <thead>
-                <tr><th>Ref</th><th>Guest</th><th>Check-in</th><th>Check-out</th><th>Nights</th><th>Total</th><th>Status</th></tr>
+                <tr><th>Ref</th><th>Guest</th><th>Check-in</th><th>Check-out</th><th>Nights</th><th>Total</th><th>Status</th><th></th></tr>
               </thead>
               <tbody>
                 {BOOKINGS.map(b => (
@@ -52,6 +54,13 @@ export default function AdminBookings() {
                     <td>{b.nights}</td>
                     <td>GHS {b.total.toLocaleString()}</td>
                     <td><span className={`mgmt-status ${b.status}`}>{b.status}</span></td>
+                    <td>
+                      <div className="mgmt-row-actions">
+                        <button title="Print receipt" onClick={() => setReceiptBooking(b)}>
+                          <Download size={14} />
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -87,6 +96,23 @@ export default function AdminBookings() {
             })}
           </div>
         </div>
+      )}
+
+      {receiptBooking && (
+        <Receipt
+          booking={{
+            reference: receiptBooking.ref,
+            checkIn: parseISO(receiptBooking.checkIn),
+            checkOut: parseISO(receiptBooking.checkOut),
+            nights: receiptBooking.nights,
+            guests: receiptBooking.guests,
+            total: receiptBooking.total,
+            status: receiptBooking.status,
+          }}
+          guestName={receiptBooking.guest}
+          guestEmail={receiptBooking.email}
+          onClose={() => setReceiptBooking(null)}
+        />
       )}
     </div>
   );

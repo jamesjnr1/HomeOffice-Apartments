@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { Check, Reply, Archive, Trash2 } from 'lucide-react';
 
 const MOCK = [
@@ -50,8 +50,8 @@ export default function AdminEnquiries() {
               </thead>
               <tbody>
                 {filtered.map(e => (
-                  <>
-                    <tr key={e.id} className={`mgmt-tr-click ${expanded === e.id ? 'expanded' : ''}`} onClick={() => setExpanded(expanded === e.id ? null : e.id)}>
+                  <Fragment key={e.id}>
+                    <tr className={`mgmt-tr-click ${expanded === e.id ? 'expanded' : ''}`} onClick={() => setExpanded(expanded === e.id ? null : e.id)}>
                       <td><div className="mgmt-td-primary">{e.name}</div><div className="mgmt-td-sub">{e.email}</div></td>
                       <td>{e.checkIn} → {e.checkOut}</td>
                       <td>{e.guests}</td>
@@ -66,7 +66,7 @@ export default function AdminEnquiries() {
                       </td>
                     </tr>
                     {expanded === e.id && (
-                      <tr key={`${e.id}-exp`} className="mgmt-tr-expanded">
+                      <tr className="mgmt-tr-expanded">
                         <td colSpan={6}>
                           <div className="mgmt-expanded-body">
                             {e.message && <p><strong>Message:</strong> {e.message}</p>}
@@ -85,7 +85,7 @@ export default function AdminEnquiries() {
                         </td>
                       </tr>
                     )}
-                  </>
+                  </Fragment>
                 ))}
               </tbody>
             </table>

@@ -15,6 +15,7 @@ export default function AdminLayout() {
   const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
+  const [unreadMessages, setUnreadMessages] = useState(0);
 
   useEffect(() => {
     let mounted = true;
@@ -31,6 +32,27 @@ export default function AdminLayout() {
     });
     return () => { mounted = false; sub?.subscription?.unsubscribe(); };
   }, [navigate]);
+
+  // Live unread-message count for the sidebar badge — refreshed on
+  // mount and on any realtime change to the messages table.
+  useEffect(() => {
+    const loadUnread = async () => {
+      const { count } = await supabase
+        .from('messages')
+        .select('id', { count: 'exact', head: true })
+        .eq('from_admin', false)
+        .eq('read_by_admin', false);
+      setUnreadMessages(count || 0);
+    };
+    loadUnread();
+
+    const sub = supabase
+      .channel('admin-sidebar-messages')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, loadUnread)
+      .subscribe();
+
+    return () => { supabase.removeChannel(sub); };
+  }, []);
 
   const signOut = async () => { await supabase.auth.signOut(); navigate('/'); };
 
@@ -51,10 +73,10 @@ export default function AdminLayout() {
 
   const NAV = [
     { to: '/admin', icon: LayoutDashboard, label: 'Overview', end: true },
-    { to: '/admin/enquiries', icon: Inbox, label: 'Enquiries', badge: 3 },
+    { to: '/admin/enquiries', icon: Inbox, label: 'Enquiries' },
     { to: '/admin/bookings', icon: CalendarDays, label: 'Bookings' },
     { to: '/admin/guests', icon: Users, label: 'Guests' },
-    { to: '/admin/messages', icon: MessageSquare, label: 'Messages', badge: 2 },
+    { to: '/admin/messages', icon: MessageSquare, label: 'Messages', badge: unreadMessages || null },
     { to: '/admin/rates', icon: Tag, label: 'Rates & availability' },
   ];
   const OWNER_NAV = [

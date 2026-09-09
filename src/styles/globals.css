@@ -287,73 +287,6 @@ h4 { font-size: 16px; }
 .mobile-menu nav a.active { color: var(--accent); }
 .mobile-menu nav .btn { margin-top: 16px; border-bottom: 0; }
 
-/* ---------------- HERO ---------------- */
-.hero {
-  position: relative;
-  min-height: 92vh;
-  padding: 160px 0 100px;
-  display: flex;
-  align-items: center;
-  overflow: hidden;
-  color: #fff;
-}
-.hero-bg {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background-image: url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=2400&q=85');
-  background-size: cover;
-  background-position: center;
-}
-.hero-bg::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(20,30,25,.55) 0%, rgba(20,30,25,.25) 45%, rgba(20,30,25,.65) 100%);
-}
-.hero-content {
-  position: relative;
-  z-index: 2;
-  text-align: center;
-  max-width: 860px;
-  margin: 0 auto;
-}
-.hero h1 { color: #fff; margin: 20px auto 24px; max-width: 860px; }
-.hero-accent { color: var(--accent-mint); }
-.hero .lead {
-  color: rgba(255,255,255,.9);
-  margin: 0 auto 44px;
-  font-size: 19px;
-  max-width: 620px;
-}
-.hero-actions {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.scroll-hint {
-  position: absolute;
-  bottom: 36px;
-  left: 50%;
-  transform: translateX(-50%);
-  color: rgba(255,255,255,.7);
-  font-size: 11px;
-  letter-spacing: .3em;
-  text-transform: uppercase;
-  z-index: 3;
-  text-align: center;
-}
-.scroll-line {
-  display: block;
-  width: 1px;
-  height: 40px;
-  background: rgba(255,255,255,.6);
-  margin: 12px auto 0;
-  animation: scroll-pulse 2.2s ease-in-out infinite;
-}
-@keyframes scroll-pulse { 0%,100%{transform:scaleY(.4);opacity:.4;} 50%{transform:scaleY(1);opacity:1;} }
 
 /* ---------------- PAGE HEADER ---------------- */
 .page-header {
@@ -2385,4 +2318,168 @@ html.a11y-reduce-motion *::after {
   transition: none !important;
 }
 html.a11y-reduce-motion .reveal { opacity: 1 !important; transform: none !important; }
+
+/* =====================================================================
+   RECEIPT / PRINT TEMPLATE
+   Used by src/components/Receipt.jsx from both the guest and admin
+   bookings pages. On screen it's a centered modal card; @media print
+   hides everything else on the page so "Print / Save as PDF" produces
+   a clean single-page receipt.
+   ===================================================================== */
+.receipt-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(20, 30, 25, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  overflow-y: auto;
+}
+.receipt-modal {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.receipt-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 20px;
+  background: var(--bg-soft);
+  border-bottom: 1px solid var(--line);
+}
+.receipt-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 999px;
+  padding: 9px 16px;
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--ink);
+}
+.receipt-btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.receipt-btn-close {
+  padding: 9px;
+  color: var(--muted);
+}
+
+.receipt-printable {
+  padding: 36px 32px 32px;
+  font-family: 'Poppins', sans-serif;
+  color: var(--ink);
+}
+.receipt-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+.receipt-brand { display: flex; flex-direction: column; }
+.receipt-brand-primary { font-size: 16px; font-weight: 700; }
+.receipt-brand-sub { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+.receipt-accent { color: var(--accent); }
+.receipt-brand-addr { font-size: 12px; color: var(--muted-2); margin-top: 6px; }
+.receipt-title-block { text-align: right; display: flex; flex-direction: column; }
+.receipt-title { font-size: 20px; font-weight: 700; letter-spacing: 0.06em; color: var(--accent); }
+.receipt-issued { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+.receipt-divider { height: 1px; background: var(--line); margin: 20px 0; }
+
+.receipt-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 20px;
+}
+.receipt-label {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted-2);
+  margin-bottom: 3px;
+}
+.receipt-value { display: block; font-size: 14.5px; font-weight: 500; }
+.receipt-mono { font-family: ui-monospace, 'SF Mono', Menlo, monospace; }
+
+.receipt-table { width: 100%; border-collapse: collapse; }
+.receipt-table th {
+  text-align: left;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted-2);
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+.receipt-table td {
+  padding: 8px 0;
+  font-size: 14px;
+  border-bottom: 1px solid var(--line-2);
+}
+.receipt-table td:first-child { color: var(--muted); width: 40%; }
+.receipt-table td:last-child { font-weight: 500; text-align: right; }
+.receipt-table th:last-child { text-align: right; }
+
+.receipt-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 20px;
+  font-size: 15px;
+  font-weight: 600;
+}
+.receipt-total-value { font-size: 22px; font-weight: 700; color: var(--accent); }
+
+.receipt-foot { text-align: center; }
+.receipt-foot p { font-size: 13px; color: var(--muted); margin: 0 0 4px; }
+.receipt-foot-contact { font-size: 12px; color: var(--muted-2); }
+
+@media (max-width: 560px) {
+  .receipt-meta-grid { grid-template-columns: 1fr; }
+  .receipt-head { flex-direction: column; }
+  .receipt-title-block { text-align: left; }
+}
+
+@media print {
+  body * { visibility: hidden; }
+  .receipt-printable, .receipt-printable * { visibility: visible; }
+  .receipt-overlay {
+    position: static;
+    background: none;
+    padding: 0;
+    display: block;
+  }
+  .receipt-modal {
+    max-width: none;
+    max-height: none;
+    box-shadow: none;
+    border-radius: 0;
+  }
+  .receipt-toolbar { display: none; }
+  .receipt-printable {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 0;
+  }
+}
 
