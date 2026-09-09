@@ -9,15 +9,21 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase';
  *   1. Saves the enquiry to Supabase (table: enquiries) so it shows up
  *      for real in the admin Enquiries inbox — this is the source of
  *      truth other pages (admin overview stats, the sidebar badge)
- *      read from.
- *   2. Also POSTs to Formspree, set via VITE_FORMSPREE_URL, purely for
- *      an instant email notification to your inbox. Set it in
- *      Vercel → Settings → Environment Variables:
+ *      read from. A database constraint (see supabase/migrations/
+ *      20260909190000_prevent_duplicate_open_enquiries.sql) rejects a
+ *      second submission from the same email while an earlier one is
+ *      still unattended (status 'new') — caught below and turned into
+ *      a friendly message, and Formspree is deliberately skipped in
+ *      that case so a duplicate doesn't sneak through that path.
+ *   2. Otherwise also POSTs to Formspree, set via VITE_FORMSPREE_URL,
+ *      purely for an instant email notification to your inbox. Set it
+ *      in Vercel → Settings → Environment Variables:
  *        VITE_FORMSPREE_URL=https://formspree.io/f/xxxxxxxx
  *
- * Either one succeeding counts as "sent" — they're independent, so a
- * Formspree hiccup doesn't stop the enquiry from being saved, and vice
- * versa. If neither is configured, guests are told to email directly.
+ * Outside the duplicate case, either one succeeding counts as "sent"
+ * — a Formspree hiccup doesn't stop the enquiry from being saved, and
+ * vice versa. If neither is configured, guests are told to email
+ * directly.
  */
 
 const FORMSPREE_URL = import.meta.env.VITE_FORMSPREE_URL;
@@ -59,48 +65,62 @@ export default function Book() {
 
     setLoading(true);
     try {
-      const attempts = await Promise.allSettled([
-        isSupabaseConfigured
-          ? supabase.from('enquiries').insert({
+      // Supabase goes first (and alone) so the duplicate-enquiry check
+      // can actually block the submission — if it ran in parallel with
+      // Formspree, a rejected duplicate would still get emailed
+      // through and look like it went fine to the sender.
+      let dbOk = false;
+      if (isSupabaseConfigured) {
+        const { error: dbError } = await supabase.from('enquiries').insert({
+          name: form.name,
+          email: form.email,
+          phone: form.phone || null,
+          check_in: form.checkIn,
+          check_out: form.checkOut,
+          guests: Number(form.guests),
+          message: form.message || null,
+        });
+
+        if (dbError?.code === '23505') {
+          setError(
+            `You already have an enquiry with us that we haven't replied to yet — we'll be in touch soon! Email ${CONTACT_EMAIL} if it's urgent.`
+          );
+          setLoading(false);
+          return;
+        }
+        dbOk = !dbError;
+      }
+
+      let formspreeOk = false;
+      if (FORMSPREE_URL) {
+        try {
+          const response = await fetch(FORMSPREE_URL, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            body: JSON.stringify({
               name: form.name,
               email: form.email,
-              phone: form.phone || null,
-              check_in: form.checkIn,
-              check_out: form.checkOut,
-              guests: Number(form.guests),
-              message: form.message || null,
-            }).then(({ error }) => { if (error) throw error; })
-          : Promise.reject(new Error('Supabase not configured')),
+              phone: form.phone || '(not provided)',
+              checkIn: form.checkIn,
+              checkOut: form.checkOut,
+              guests: form.guests,
+              message: form.message || '(no message)',
+              _subject: `New enquiry from ${form.name} — ${form.checkIn} to ${form.checkOut}`,
+              _replyto: form.email,
+            }),
+          });
+          formspreeOk = response.ok;
+        } catch {
+          formspreeOk = false;
+        }
+      }
 
-        FORMSPREE_URL
-          ? fetch(FORMSPREE_URL, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-              },
-              body: JSON.stringify({
-                name: form.name,
-                email: form.email,
-                phone: form.phone || '(not provided)',
-                checkIn: form.checkIn,
-                checkOut: form.checkOut,
-                guests: form.guests,
-                message: form.message || '(no message)',
-                _subject: `New enquiry from ${form.name} — ${form.checkIn} to ${form.checkOut}`,
-                _replyto: form.email,
-              }),
-            }).then(async (response) => {
-              if (!response.ok) {
-                const data = await response.json().catch(() => ({}));
-                throw new Error(data?.errors?.[0]?.message || 'Failed to send enquiry');
-              }
-            })
-          : Promise.reject(new Error('Formspree not configured')),
-      ]);
-
-      const succeeded = attempts.some((a) => a.status === 'fulfilled');
-      if (!succeeded) throw new Error('Both delivery methods failed');
+      if (!dbOk && !formspreeOk) {
+        throw new Error('Both delivery methods failed');
+      }
 
       setSent(true);
       setForm({
