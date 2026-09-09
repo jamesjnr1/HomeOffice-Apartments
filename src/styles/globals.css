@@ -2236,12 +2236,13 @@ html, body {
 .two-col-text { align-items: start; }
 
 /* ---------------- APARTMENT PHOTO SLIDER ---------------- */
-.apt-slider { max-width: 880px; }
+/* Full-width, auto-advancing, no controls at all — each photo just
+   fades in as it takes its turn. */
 .apt-slider-frame {
   position: relative;
   border-radius: var(--radius-lg);
   overflow: hidden;
-  aspect-ratio: 16/9;
+  aspect-ratio: 21/9;
   background: var(--bg-soft);
   box-shadow: var(--shadow);
 }
@@ -2250,51 +2251,21 @@ html, body {
   height: 100%;
   object-fit: cover;
   display: block;
+  animation: apt-slide-fade 1s var(--ease) both;
 }
-.apt-slider-nav {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 44px;
-  height: 44px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, .92);
-  border: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
+@keyframes apt-slide-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.apt-slider-caption {
+  display: block;
+  margin-top: 16px;
+  font-size: 15px;
+  font-weight: 500;
   color: var(--ink);
-  box-shadow: var(--shadow-sm);
-  transition: background .2s var(--ease), transform .2s var(--ease);
 }
-.apt-slider-nav:hover { background: #fff; }
-.apt-slider-nav:active { transform: translateY(-50%) scale(.94); }
-.apt-slider-nav-prev { left: 16px; }
-.apt-slider-nav-next { right: 16px; }
-.apt-slider-foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 20px;
-}
-.apt-slider-caption { font-size: 15px; font-weight: 500; color: var(--ink); }
-.apt-slider-dots { display: flex; gap: 8px; }
-.apt-slider-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
-  background: var(--line);
-  border: 0;
-  cursor: pointer;
-  padding: 0;
-  transition: background .2s var(--ease), width .2s var(--ease);
-}
-.apt-slider-dot:hover { background: var(--muted-2); }
-.apt-slider-dot.active { background: var(--accent); width: 22px; }
-
-@media (max-width: 600px) {
-  .apt-slider-nav { width: 38px; height: 38px; }
+@media (prefers-reduced-motion: reduce) {
+  .apt-slider-frame img { animation: none; }
 }
 
 /* =====================================================================
