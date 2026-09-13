@@ -1,9 +1,10 @@
-import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { NavLink, Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { format } from 'date-fns';
 import {
   LayoutDashboard, Inbox, CalendarDays, Users,
   MessageSquare, Tag, TrendingUp, Settings as Cog,
-  LogOut, Menu, X, ArrowLeft, BarChart3,
+  LogOut, Menu, X, ArrowLeft, BarChart3, Bell,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import './admin.css';
@@ -184,6 +185,28 @@ export default function AdminLayout() {
       {open && <div className="mgmt-backdrop" onClick={() => setOpen(false)}/>}
 
       <main className="mgmt-main">
+        {/* Persistent identity strip — same idea as the top-right avatar/
+            bell every reference dashboard keeps visible regardless of
+            which page you're on. The bell links to whichever of
+            messages/enquiries actually has something waiting. */}
+        <div className="mgmt-topbar">
+          <span className="mgmt-topbar-date">{format(new Date(), 'EEEE, d MMMM yyyy')}</span>
+          <div className="mgmt-topbar-actions">
+            <Link
+              to={unreadMessages > 0 ? '/admin/messages' : '/admin/enquiries'}
+              className="mgmt-topbar-bell"
+              aria-label="Notifications"
+            >
+              <Bell size={17}/>
+              {(unreadMessages + newEnquiries) > 0 && <span className="mgmt-topbar-dot" />}
+            </Link>
+            <div className="mgmt-topbar-user">
+              <div className="mgmt-avatar-sm">{initial}</div>
+              <span className="mgmt-topbar-name">{name}</span>
+            </div>
+          </div>
+        </div>
+
         {/* Back button — shows on every page except the root overview */}
         {!isRoot && (
           <button className="mgmt-back-btn" onClick={() => navigate(-1)}>

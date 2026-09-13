@@ -183,6 +183,27 @@ body:has(.auth-photo-admin) .site-footer { display: none !important; }
   .mgmt-page { padding: 28px 20px 80px; }
 }
 
+/* ── TOP BAR (persistent identity strip, every admin page) ── */
+.mgmt-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 44px 0; gap: 16px;
+}
+@media (max-width: 900px) { .mgmt-topbar { padding: 16px 20px 0; } }
+.mgmt-topbar-date { font-size: 13px; color: #6a706d; font-weight: 500; }
+@media (max-width: 620px) { .mgmt-topbar-date { display: none; } }
+.mgmt-topbar-actions { display: flex; align-items: center; gap: 16px; margin-left: auto; }
+.mgmt-topbar-bell {
+  position: relative; display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: 999px; background: #fff;
+  border: 1px solid #e8ebe8; color: #6a706d; text-decoration: none;
+  transition: all .15s ease;
+}
+.mgmt-topbar-bell:hover { color: #1f2b26; border-color: #1f2b26; }
+.mgmt-topbar-dot { position: absolute; top: 7px; right: 8px; width: 8px; height: 8px; border-radius: 999px; background: #b3261e; border: 1.5px solid #fff; }
+.mgmt-topbar-user { display: flex; align-items: center; gap: 9px; }
+.mgmt-topbar-name { font-size: 13px; font-weight: 600; color: #1f2b26; }
+@media (max-width: 500px) { .mgmt-topbar-name { display: none; } }
+
 /* ── BACK BUTTON ── */
 .mgmt-back-btn {
   display: inline-flex; align-items: center; gap: 8px;
@@ -533,6 +554,9 @@ body:has(.auth-photo-admin) .site-footer { display: none !important; }
 
 .mgmt-hero-card { display: flex; flex-direction: column; justify-content: space-between; gap: 22px; }
 .mgmt-hero-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.mgmt-hero-photo-row { display: flex; align-items: center; gap: 16px; min-width: 0; }
+.mgmt-hero-photo { width: 64px; height: 64px; border-radius: 14px; object-fit: cover; flex-shrink: 0; }
+@media (max-width: 480px) { .mgmt-hero-photo { display: none; } }
 .mgmt-hero-label {
   display: flex; align-items: center; gap: 6px;
   font-size: 12px; font-weight: 500; color: #6a706d; margin-bottom: 10px;
@@ -610,6 +634,45 @@ body:has(.auth-photo-admin) .site-footer { display: none !important; }
 .mgmt-donut-legend li { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #1f2b26; font-weight: 500; }
 .mgmt-donut-dot { width: 9px; height: 9px; border-radius: 999px; flex-shrink: 0; }
 .mgmt-donut-legend-count { margin-left: auto; color: #6a706d; font-weight: 600; }
+
+/* ── OVERVIEW: activity feed (recent conversations) ── */
+.mgmt-activity-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.mgmt-activity-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 12px 0; border-bottom: 1px solid #f0f2ef;
+}
+.mgmt-activity-item:last-child { border-bottom: 0; padding-bottom: 0; }
+.mgmt-activity-item:first-child { padding-top: 0; }
+.mgmt-activity-avatar {
+  width: 34px; height: 34px; border-radius: 999px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 600; font-size: 13px;
+}
+.mgmt-activity-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.mgmt-activity-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.mgmt-activity-name { font-weight: 600; font-size: 13.5px; color: #1f2b26; }
+.mgmt-activity-time { font-size: 11px; color: #9aa19d; flex-shrink: 0; }
+.mgmt-activity-preview { font-size: 12.5px; color: #6a706d; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mgmt-activity-dot { width: 8px; height: 8px; border-radius: 999px; background: #2d6a4f; flex-shrink: 0; margin-top: 5px; }
+
+/* ── OVERVIEW: check-in readiness checklist ── */
+.mgmt-checklist-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+@media (max-width: 800px) { .mgmt-checklist-row { grid-template-columns: repeat(2,1fr); } }
+@media (max-width: 460px) { .mgmt-checklist-row { grid-template-columns: 1fr; } }
+.mgmt-checklist-item {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 10px;
+  padding: 16px; border: 1px solid #e8ebe8; border-radius: 12px; background: #fbfcfb;
+}
+.mgmt-checklist-icon {
+  width: 32px; height: 32px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+}
+.mgmt-checklist-icon.set { background: #e2ece6; color: #2d6a4f; }
+.mgmt-checklist-icon.missing { background: #fef3c7; color: #b58a4a; }
+.mgmt-checklist-label { font-size: 12.5px; font-weight: 500; color: #1f2b26; }
+.mgmt-checklist-pill { font-size: 10.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; }
+.mgmt-checklist-pill.set { background: #e2ece6; color: #2d6a4f; }
+.mgmt-checklist-pill.missing { background: #fef3c7; color: #b58a4a; }
 
 /* ── EMPTY ── */
 .mgmt-empty { padding: 48px 20px; text-align: center; color: #9aa19d; }

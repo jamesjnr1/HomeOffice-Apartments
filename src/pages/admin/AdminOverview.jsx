@@ -1,28 +1,38 @@
 import { useOutletContext, Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { formatDistanceToNow } from 'date-fns';
 import {
   ArrowRight, Inbox, Users, CalendarDays, MessageSquare,
-  Home, DoorOpen, TrendingUp, Sparkles,
+  MapPin, DoorOpen, TrendingUp, Sparkles, Wifi, KeyRound, ScrollText, Info,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 /**
- * AdminOverview — the admin landing dashboard. Redesigned around a
- * reference layout (a card-based fintech dashboard: a hero summary
- * card + a colorful highlight card up top, a row of compact stat
- * cards, then a details list next to a breakdown chart) using this
- * site's own real data instead:
- *   - Hero card: today's occupancy status for the one apartment this
- *     site represents (see APARTMENT in Bookings.jsx/Overview.jsx —
- *     there's only ever one "room" to be vacant or occupied).
- *   - Highlight card: this month's revenue (owner) or a nudge toward
- *     whatever needs attention right now (manager — revenue is
- *     owner-only, same restriction as AdminRevenue.jsx).
+ * AdminOverview — the admin landing dashboard. Built around a set of
+ * reference dashboards (property/hotel management + booking admin
+ * panels: a photo-led property card, a colorful highlight card, a
+ * compact stat row, an activity feed, a readiness/compliance-style
+ * checklist, and a breakdown chart), using this site's own real data
+ * throughout — nothing here is decorative or hardcoded:
+ *   - Hero card: the actual apartment photo plus today's occupancy,
+ *     computed live from bookings spanning today (there's only ever
+ *     one "room" to be vacant or occupied — see APARTMENT in
+ *     Bookings.jsx/Overview.jsx).
+ *   - Highlight card: this month's revenue (owner-only, same
+ *     restriction AdminRevenue.jsx already enforces) or a "needs
+ *     attention" nudge for managers, who don't see revenue.
  *   - Stat row: unread messages / guests / new enquiries / upcoming
- *     bookings — all real, same source queries as before.
- *   - Recent conversations list (unchanged data) next to a donut
- *     chart of booking status breakdown — new, real, replaces a
- *     decorative chart with something actually useful to glance at.
+ *     bookings.
+ *   - Activity feed: the same "most recent message per guest" data as
+ *     before, restyled as a feed with colored avatars instead of a
+ *     plain table.
+ *   - Booking-status donut: confirmed/pending/completed/cancelled
+ *     breakdown.
+ *   - Check-in readiness: reads property_details (the same row
+ *     AdminSettings.jsx edits and guests see once they have a
+ *     confirmed stay — see property_details' RLS policy) and flags
+ *     which fields are still blank, so an empty WiFi password or
+ *     house-rules field doesn't go unnoticed until a guest asks.
  */
 
 const STATUS_COLORS = {
@@ -31,6 +41,25 @@ const STATUS_COLORS = {
   completed: '#9aa19d',
   cancelled: '#b3261e',
 };
+
+const AVATAR_COLORS = [
+  { bg: '#e2ece6', fg: '#2d6a4f' },
+  { bg: '#dbeafe', fg: '#2563eb' },
+  { bg: '#ede9fe', fg: '#7c3aed' },
+  { bg: '#fef3c7', fg: '#b58a4a' },
+  { bg: '#fbe9e7', fg: '#b3261e' },
+];
+function avatarColor(seed) {
+  const code = (seed || '?').charCodeAt(0) || 0;
+  return AVATAR_COLORS[code % AVATAR_COLORS.length];
+}
+
+function greeting() {
+  const h = new Date().getHours();
+  if (h < 12) return 'Good morning';
+  if (h < 18) return 'Good afternoon';
+  return 'Good evening';
+}
 
 export default function AdminOverview() {
   const { displayName, isOwner } = useOutletContext();
@@ -45,6 +74,7 @@ export default function AdminOverview() {
   const [monthRevenue, setMonthRevenue] = useState(0);
   const [monthNights, setMonthNights] = useState(0);
   const [statusCounts, setStatusCounts] = useState({ confirmed: 0, pending: 0, completed: 0, cancelled: 0 });
+  const [checkIn, setCheckIn] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => { loadDashboard(); }, []);
@@ -56,7 +86,7 @@ export default function AdminOverview() {
       const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
       const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString().slice(0, 10);
 
-      const [messagesRes, enquiriesRes, upcomingRes, currentRes, monthRes, allBookingsRes] = await Promise.all([
+      const [messagesRes, enquiriesRes, upcomingRes, currentRes, monthRes, allBookingsRes, detailsRes] = await Promise.all([
         supabase.from('messages').select('*').order('created_at', { ascending: false }),
         supabase.from('enquiries').select('id', { count: 'exact', head: true }).eq('status', 'new'),
         supabase.from('bookings').select('id', { count: 'exact', head: true }).gte('check_in', todayStr).neq('status', 'cancelled'),
@@ -64,6 +94,7 @@ export default function AdminOverview() {
         supabase.from('bookings').select('guest_name, check_out').neq('status', 'cancelled').lte('check_in', todayStr).gt('check_out', todayStr).maybeSingle(),
         supabase.from('bookings').select('total, nights').neq('status', 'cancelled').gte('check_in', monthStart).lt('check_in', nextMonth),
         supabase.from('bookings').select('status'),
+        supabase.from('property_details').select('*').eq('id', 'home-office').maybeSingle(),
       ]);
 
       const { data, error } = messagesRes;
@@ -101,6 +132,8 @@ export default function AdminOverview() {
         for (const b of allBookingsRes.data) if (counts[b.status] !== undefined) counts[b.status]++;
         setStatusCounts(counts);
       }
+
+      if (detailsRes.data) setCheckIn(detailsRes.data);
     } catch {
       // A network-level failure (not just a Supabase error payload)
       // would otherwise leave this stuck on "Loading…" forever.
@@ -116,36 +149,46 @@ export default function AdminOverview() {
     { label: 'Upcoming bookings', value: stats.upcomingBookings, icon: CalendarDays, link: '/admin/bookings', color: 'gold' },
   ];
 
+  const READINESS = checkIn ? [
+    { label: 'WiFi details', icon: Wifi, set: Boolean(checkIn.wifi_network?.trim() || checkIn.wifi_password?.trim()) },
+    { label: 'Access instructions', icon: KeyRound, set: Boolean(checkIn.access_instructions?.trim()) },
+    { label: 'House rules', icon: ScrollText, set: Boolean(checkIn.house_rules?.trim()) },
+    { label: 'Good-to-know notes', icon: Info, set: Boolean(checkIn.host_notes?.trim()) },
+  ] : [];
+
   return (
     <div className="mgmt-page">
       <header className="mgmt-page-head">
         <span className="mgmt-eyebrow">OVERVIEW</span>
-        <h1>Welcome, {displayName}.</h1>
+        <h1>{greeting()}, {displayName}!</h1>
         <p className="mgmt-lead">
-          {loading ? 'Loading…' : "Here's what needs your attention today."}
+          {loading ? 'Loading…' : "It's a good day to stay on top of enquiries and bookings."}
         </p>
       </header>
 
       <div className="mgmt-hero-row">
         <section className="mgmt-card mgmt-hero-card">
           <div className="mgmt-hero-top">
-            <div>
-              <span className="mgmt-hero-label">
-                <Home size={13} /> Home-Office Apartments — today
-              </span>
-              {loading ? (
-                <div className="mgmt-hero-value">…</div>
-              ) : today?.occupied ? (
-                <>
-                  <div className="mgmt-hero-value">Occupied</div>
-                  <p className="mgmt-hero-sub">{today.guestName} · checking out {today.until}</p>
-                </>
-              ) : (
-                <>
-                  <div className="mgmt-hero-value">Vacant</div>
-                  <p className="mgmt-hero-sub">No one checked in today — ready for a new booking.</p>
-                </>
-              )}
+            <div className="mgmt-hero-photo-row">
+              <img src="/images/hero-property.jpg" alt="Home-Office Apartments" className="mgmt-hero-photo" />
+              <div>
+                <span className="mgmt-hero-label">
+                  <MapPin size={12} /> Home-Office Apartments — today
+                </span>
+                {loading ? (
+                  <div className="mgmt-hero-value">…</div>
+                ) : today?.occupied ? (
+                  <>
+                    <div className="mgmt-hero-value">Occupied</div>
+                    <p className="mgmt-hero-sub">{today.guestName} · checking out {today.until}</p>
+                  </>
+                ) : (
+                  <>
+                    <div className="mgmt-hero-value">Vacant</div>
+                    <p className="mgmt-hero-sub">No one checked in today — ready for a new booking.</p>
+                  </>
+                )}
+              </div>
             </div>
             <span className={`mgmt-hero-badge ${today?.occupied ? 'occupied' : 'vacant'}`}>
               <DoorOpen size={13} /> {today?.occupied ? 'Occupied' : 'Vacant'}
@@ -198,26 +241,27 @@ export default function AdminOverview() {
           {recentThreads.length === 0 ? (
             <div className="mgmt-empty"><p>No messages yet. Guests can message you from their dashboard.</p></div>
           ) : (
-            <div className="mgmt-table-wrap">
-              <table className="mgmt-table">
-                <thead>
-                  <tr><th>Guest</th><th>Last message</th></tr>
-                </thead>
-                <tbody>
-                  {recentThreads.map(m => (
-                    <tr key={m.guest_id}>
-                      <td>
-                        <div className="mgmt-td-primary">{m.guest_name || 'Guest'}</div>
-                        <div className="mgmt-td-sub">{m.guest_email || ''}</div>
-                      </td>
-                      <td className="mgmt-td-muted" style={{ maxWidth: 320, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {m.body}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <ul className="mgmt-activity-list">
+              {recentThreads.map(m => {
+                const c = avatarColor(m.guest_name);
+                const unread = !m.from_admin && !m.read_by_admin;
+                return (
+                  <li key={m.guest_id} className="mgmt-activity-item">
+                    <span className="mgmt-activity-avatar" style={{ background: c.bg, color: c.fg }}>
+                      {(m.guest_name || 'G').charAt(0).toUpperCase()}
+                    </span>
+                    <span className="mgmt-activity-body">
+                      <span className="mgmt-activity-top">
+                        <span className="mgmt-activity-name">{m.guest_name || 'Guest'}</span>
+                        <span className="mgmt-activity-time">{formatDistanceToNow(new Date(m.created_at), { addSuffix: true })}</span>
+                      </span>
+                      <span className="mgmt-activity-preview">{m.body}</span>
+                    </span>
+                    {unread && <span className="mgmt-activity-dot" />}
+                  </li>
+                );
+              })}
+            </ul>
           )}
         </section>
 
@@ -229,6 +273,26 @@ export default function AdminOverview() {
           <BookingDonut counts={statusCounts} loading={loading} />
         </section>
       </div>
+
+      <section className="mgmt-card">
+        <div className="mgmt-card-head">
+          <h2>Check-in readiness</h2>
+          {isOwner && <Link to="/admin/settings" className="mgmt-linky">Edit details <ArrowRight size={14} /></Link>}
+        </div>
+        {!checkIn ? (
+          <div className="mgmt-empty"><p>{loading ? 'Loading…' : "Couldn't load check-in details."}</p></div>
+        ) : (
+          <div className="mgmt-checklist-row">
+            {READINESS.map(item => (
+              <div key={item.label} className="mgmt-checklist-item">
+                <span className={`mgmt-checklist-icon ${item.set ? 'set' : 'missing'}`}><item.icon size={15} /></span>
+                <span className="mgmt-checklist-label">{item.label}</span>
+                <span className={`mgmt-checklist-pill ${item.set ? 'set' : 'missing'}`}>{item.set ? 'Set' : 'Missing'}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 }
