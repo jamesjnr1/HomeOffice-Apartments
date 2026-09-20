@@ -42,10 +42,13 @@ export default function Header() {
     <>
       <header className={`site-header ${solid ? 'solid' : ''} ${scrolledShadow ? 'scrolled' : ''}`}>
         <div className="container header-inner">
-          <NavLink to="/" className="brand" aria-label="Home-Office Apartments home">
-            <span className="brand-primary">Home-Office Apartments</span>
-            <span className="brand-sub">
-              and Living<span className="brand-accent">Spring</span> Gardens
+          <NavLink to="/" className="brand brand-logo" aria-label="Home-Office Apartments home">
+            <img src="/images/logo-icon.png" alt="" className="brand-icon" />
+            <span className="brand-text">
+              <span className="brand-primary">Home-Office Apartments</span>
+              <span className="brand-sub">
+                and Living<span className="brand-accent">Spring</span> Gardens
+              </span>
             </span>
           </NavLink>
 
@@ -86,10 +89,13 @@ export default function Header() {
 
       <div className={`mobile-menu ${mobileOpen ? 'open' : ''}`} aria-hidden={!mobileOpen}>
         <div className="mobile-menu-head">
-          <span className="brand">
-            <span className="brand-primary">Home-Office Apartments</span>
-            <span className="brand-sub">
-              and Living<span className="brand-accent">Spring</span> Gardens
+          <span className="brand brand-logo">
+            <img src="/images/logo-icon.png" alt="" className="brand-icon" />
+            <span className="brand-text">
+              <span className="brand-primary">Home-Office Apartments</span>
+              <span className="brand-sub">
+                and Living<span className="brand-accent">Spring</span> Gardens
+              </span>
             </span>
           </span>
           <button
