@@ -31,6 +31,12 @@
 // secrets every edge function gets automatically, to write with a
 // client that bypasses RLS (external_calendar_blocks has no INSERT/
 // UPDATE/DELETE policy for any role — only this function writes it).
+//
+// Also reads ARKESEL_API_KEY / ARKESEL_SENDER_ID / NOTIFY_SMS_TO —
+// the same secrets already set for notify-enquiry's SMS alert (Edge
+// Function secrets are project-wide, not per-function, so nothing
+// extra needs setting here). Used to text the admin the moment a
+// brand-new Airbnb reservation is first seen in either feed.
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
@@ -47,6 +53,10 @@ const AIRBNB_FEEDS = [
 const SYNC_SECRET = Deno.env.get("SYNC_SECRET");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+const ARKESEL_API_KEY = Deno.env.get("ARKESEL_API_KEY");
+const ARKESEL_SENDER_ID = Deno.env.get("ARKESEL_SENDER_ID") || "Home-Office";
+const NOTIFY_SMS_TO = Deno.env.get("NOTIFY_SMS_TO") || "0206301032";
 
 // Airbnb's export feed uses all-day events: DTSTART;VALUE=DATE:20261101
 // and DTEND;VALUE=DATE:20261103 (end is exclusive, same convention as
@@ -101,6 +111,50 @@ function parseEvents(ics: string): BusyRange[] {
   return events;
 }
 
+// "26 Sep" — compact, for the SMS where every character counts.
+function formatDateShort(iso: string): string {
+  const d = new Date(`${iso}T00:00:00`);
+  if (isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+}
+
+// A local Ghana number (0XXXXXXXXX) becomes 233XXXXXXXXX — the
+// international format Arkesel expects, without a leading '+'.
+function toArkeselRecipient(phone: string): string {
+  const digits = phone.replace(/\D/g, "");
+  if (digits.startsWith("0")) return `233${digits.slice(1)}`;
+  if (digits.startsWith("233")) return digits;
+  return digits;
+}
+
+// Best-effort, same as notify-enquiry's own SMS step — a sync run
+// should never fail or roll back over a text message not going out.
+async function sendNewBookingSms(range: BusyRange): Promise<void> {
+  if (!ARKESEL_API_KEY) return;
+  const message =
+    `New booking (Airbnb): ${formatDateShort(range.start)}-${formatDateShort(range.end)}` +
+    (range.summary ? ` (${range.summary})` : "");
+  try {
+    const res = await fetch("https://sms.arkesel.com/api/v2/sms/send", {
+      method: "POST",
+      headers: {
+        "api-key": ARKESEL_API_KEY,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        sender: ARKESEL_SENDER_ID,
+        message,
+        recipients: [toArkeselRecipient(NOTIFY_SMS_TO)],
+      }),
+    });
+    if (!res.ok) {
+      console.error("sync-airbnb-calendar: Arkesel SMS error", res.status, await res.text());
+    }
+  } catch (err) {
+    console.error("sync-airbnb-calendar: Arkesel SMS fetch error", err);
+  }
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method !== "POST") {
     return new Response("Method not allowed", { status: 405 });
@@ -139,6 +193,24 @@ Deno.serve(async (req: Request) => {
     const events = parseEvents(ics).filter((e) => e.end > e.start);
     totalSynced += events.length;
 
+    // Fetched once, before upserting, so the same snapshot answers two
+    // questions: which of today's events are genuinely new (not in this
+    // set — worth a text) and which previously-synced rows disappeared
+    // from the feed entirely (also not in today's events — stale,
+    // cleaned up below). Upserting doesn't remove anything in between,
+    // so one query correctly serves both.
+    const { data: existingRows, error: existingError } = await supabase
+      .from("external_calendar_blocks")
+      .select("uid")
+      .eq("source", feed.source);
+    if (existingError) {
+      console.error("sync-airbnb-calendar: fetch existing uids error", feed.source, existingError.message);
+      failures++;
+      continue;
+    }
+    const existingUids = new Set((existingRows ?? []).map((r) => r.uid));
+    const newEvents = events.filter((e) => !existingUids.has(e.uid));
+
     if (events.length > 0) {
       const { error: upsertError } = await supabase
         .from("external_calendar_blocks")
@@ -156,8 +228,15 @@ Deno.serve(async (req: Request) => {
       if (upsertError) {
         console.error("sync-airbnb-calendar: upsert error", feed.source, upsertError.message);
         failures++;
-        continue; // don't run cleanup below on a failed upsert
+        continue; // don't run cleanup/SMS below on a failed upsert
       }
+    }
+
+    // Text the admin about each newly-seen reservation — not on every
+    // 3-hourly resync of ones already known, only the first time a UID
+    // shows up in this feed.
+    for (const e of newEvents) {
+      await sendNewBookingSms(e);
     }
 
     // Drop rows for events that disappeared from this feed (e.g. a
@@ -169,17 +248,7 @@ Deno.serve(async (req: Request) => {
     // so a UID containing a comma or quote can't produce a malformed
     // or unintended filter.
     const currentUids = new Set(events.map((e) => e.uid));
-    const { data: existingRows, error: existingError } = await supabase
-      .from("external_calendar_blocks")
-      .select("uid")
-      .eq("source", feed.source);
-    if (existingError) {
-      console.error("sync-airbnb-calendar: fetch existing uids error", feed.source, existingError.message);
-      continue;
-    }
-    const staleUids = (existingRows ?? [])
-      .map((r) => r.uid)
-      .filter((uid) => !currentUids.has(uid));
+    const staleUids = [...existingUids].filter((uid) => !currentUids.has(uid));
     if (staleUids.length > 0) {
       const { error: deleteError } = await supabase
         .from("external_calendar_blocks")
