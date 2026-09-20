@@ -70,6 +70,23 @@ body:has(.dash-shell) main { padding: 0 !important; }
   color: #1f2b26;
   min-width: 0;
 }
+.dash-brand-logo {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+.dash-brand-icon {
+  height: 28px;
+  width: auto;
+  flex-shrink: 0;
+  display: block;
+}
+.dash-brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
 .dash-brand-primary {
   font-weight: 700;
   font-size: 13.5px;

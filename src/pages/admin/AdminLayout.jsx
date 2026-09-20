@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import {
   LayoutDashboard, Inbox, CalendarDays, Users,
   MessageSquare, Tag, TrendingUp, Settings as Cog,
-  LogOut, Menu, X, Shield, ArrowLeft, BarChart3,
+  LogOut, Menu, X, ArrowLeft, BarChart3,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import './admin.css';
@@ -79,7 +79,7 @@ export default function AdminLayout() {
   if (loading) return (
     <div className="mgmt-loading">
       <div className="mgmt-brand-link">
-        <span className="mgmt-brand-mark"><Shield size={15}/></span>
+        <img src="/images/logo-icon.png" alt="" className="mgmt-brand-mark" />
         <span className="mgmt-brand-title">Admin</span>
       </div>
       <p>Verifying access…</p>
@@ -109,7 +109,7 @@ export default function AdminLayout() {
     <div className="mgmt-shell">
       <div className="mgmt-mobile-bar">
         <a href="/admin" className="mgmt-brand-link">
-          <span className="mgmt-brand-mark"><Shield size={14}/></span>
+          <img src="/images/logo-icon.png" alt="" className="mgmt-brand-mark" />
           <span className="mgmt-brand-title">Admin</span>
         </a>
         <button className="mgmt-icon-btn" onClick={() => setOpen(true)} aria-label="Open menu">
@@ -120,7 +120,7 @@ export default function AdminLayout() {
       <aside className={`mgmt-sidebar${open ? ' open' : ''}`}>
         <div className="mgmt-sidebar-top">
           <a href="/admin" className="mgmt-brand-link">
-            <span className="mgmt-brand-mark"><Shield size={14}/></span>
+            <img src="/images/logo-icon.png" alt="" className="mgmt-brand-mark" />
             <div className="mgmt-brand-text">
               <span className="mgmt-brand-title">Admin</span>
               <span className="mgmt-brand-sub">HomeOffice · LivingSpring</span>

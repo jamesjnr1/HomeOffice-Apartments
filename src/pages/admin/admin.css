@@ -55,9 +55,7 @@ body:has(.auth-photo-admin) .site-footer { display: none !important; }
   text-decoration: none; color: #1f2b26; flex: 1; min-width: 0;
 }
 .mgmt-brand-mark {
-  width: 30px; height: 30px; border-radius: 8px;
-  background: #2d6a4f; color: #fff; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
+  height: 30px; width: auto; flex-shrink: 0; display: block;
 }
 .mgmt-brand-text { display: flex; flex-direction: column; gap: 1px; line-height: 1.1; min-width: 0; }
 .mgmt-brand-title { font-weight: 700; font-size: 14px; letter-spacing: -.02em; color: #1f2b26; white-space: nowrap; }
@@ -313,8 +311,9 @@ body:has(.auth-photo-admin) .site-footer { display: none !important; }
   cursor: pointer; display: flex; align-items: center; justify-content: center;
   color: #6a706d; transition: all .15s ease;
 }
-.mgmt-row-actions button:hover { background: #f4f5f3; color: #1f2b26; border-color: #1f2b26; }
-.mgmt-action-danger:hover { background: #fbe9e7 !important; color: #b3261e !important; border-color: #b3261e !important; }
+.mgmt-row-actions button:hover:not(:disabled) { background: #f4f5f3; color: #1f2b26; border-color: #1f2b26; }
+.mgmt-action-danger:hover:not(:disabled) { background: #fbe9e7 !important; color: #b3261e !important; border-color: #b3261e !important; }
+.mgmt-row-actions button:disabled { opacity: .35; cursor: not-allowed; }
 
 .mgmt-divider { height: 1px; background: #e8ebe8; margin: 16px 0; }
 .mgmt-confirm-booking {
