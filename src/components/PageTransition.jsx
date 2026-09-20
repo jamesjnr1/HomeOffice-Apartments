@@ -38,7 +38,9 @@ export default function PageTransition() {
   return createPortal(
     <div className="page-curtain" aria-hidden="true">
       <div className="page-curtain-mark">
-        <span className="page-curtain-dot">H</span>
+        <span className="page-curtain-dot">
+          <img src="/images/logo-icon.png" alt="" />
+        </span>
         <span className="page-curtain-word">
           <span className="page-curtain-primary">Home-Office Apartments</span>
           <span className="page-curtain-sub">and Living<em>Spring</em> Gardens</span>
