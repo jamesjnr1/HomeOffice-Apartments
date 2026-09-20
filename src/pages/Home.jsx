@@ -17,8 +17,7 @@ export default function Home() {
         <div className="container hero-v2-content">
           <div className="hero-v2-inner">
             <h1 className="hero-v2-title">
-              A quiet place to<br />
-              work and live.
+              A quiet place for hideout, retreat or work.
             </h1>
             <p className="hero-v2-lead">
               Home-Office Apartments — thoughtfully finished for how you actually spend your days,
@@ -39,7 +38,10 @@ export default function Home() {
         <div className="container">
           <div className="intro-v2 reveal">
             <span className="eyebrow">A HOME AWAY FROM HOME</span>
-            <h2>Jerusalem stone elegance, a peaceful pergola front yard, and expansive open space for relaxation or memorable events</h2>
+            <h2>
+              <span className="intro-v2-accent">Jerusalem stone elegance</span>, a peaceful
+              pergola front yard, and expansive open space for relaxation or memorable events.
+            </h2>
             <p className="prose">
               Discover self‑contained apartments in a peaceful compound, thoughtfully designed
               for the way you work from home and the way you rest.
