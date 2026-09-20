@@ -2030,16 +2030,18 @@ html.lenis, html.lenis body { height: auto; }
   width: 46px;
   height: 46px;
   border-radius: 999px;
-  border: 1.5px solid rgba(255, 255, 255, .5);
-  color: #fff;
+  background: #faf9f5;
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, .5);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 700;
-  font-size: 18px;
-  letter-spacing: -.02em;
   flex-shrink: 0;
+  padding: 6px;
+}
+.page-curtain-dot img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 /* Same brand wordmark as the site header — just larger, for a moment
    that briefly fills the whole screen */
