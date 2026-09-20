@@ -40,7 +40,7 @@
 //                        registered Arkesel Sender ID). Must be 11
 //                        characters or fewer; Arkesel may require it to
 //                        be pre-registered.
-//   NOTIFY_SMS_TO      — optional, defaults to 0549624125 below (admin's
+//   NOTIFY_SMS_TO      — optional, defaults to 0206301032 below (admin's
 //                        phone, used for type "new_enquiry" only)
 //   SITE_URL           — optional, defaults to
 //                        https://apartments.home-officegroup.com below —
@@ -56,7 +56,7 @@ const SITE_URL = Deno.env.get("SITE_URL") || "https://apartments.home-officegrou
 
 const ARKESEL_API_KEY = Deno.env.get("ARKESEL_API_KEY");
 const ARKESEL_SENDER_ID = Deno.env.get("ARKESEL_SENDER_ID") || "Home-Office";
-const NOTIFY_SMS_TO = Deno.env.get("NOTIFY_SMS_TO") || "0549624125";
+const NOTIFY_SMS_TO = Deno.env.get("NOTIFY_SMS_TO") || "0206301032";
 
 function escapeHtml(value: unknown): string {
   return String(value ?? "").replace(/[&<>"']/g, (c) => ({
@@ -199,10 +199,9 @@ async function sendEnquirySms(e: any): Promise<void> {
     return;
   }
   const dateRange = `${formatDateShort(e.check_in)}-${formatDateShort(e.check_out)}`;
-  const contact = e.phone || e.email || "no contact given";
   const message =
-    `Home-Office Apartments: New enquiry from ${e.name || "a guest"} for ${dateRange} ` +
-    `(${e.guests || "?"} guests). Contact: ${contact}`;
+    `New booking request (Site): ${e.name || "Guest"}, ${dateRange}, ${e.guests || "?"} guest(s). ` +
+    `Confirm: ${SITE_URL}/admin/enquiries`;
 
   try {
     const result = await sendSms(NOTIFY_SMS_TO, message);
