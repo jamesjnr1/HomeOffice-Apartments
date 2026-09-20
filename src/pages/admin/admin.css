@@ -40,6 +40,16 @@ body:has(.auth-photo-admin) .site-footer { display: none !important; }
 }
 .mgmt-shell, .mgmt-shell * { box-sizing: border-box; }
 
+/* Most sizes in this stylesheet are fixed px rather than em/rem, so a
+   straightforward "make it all a bit bigger" needs a rendering-level
+   scale rather than a font-size bump on the shell (which wouldn't
+   cascade proportionally to those px values). Desktop only — the
+   dashboard is already tight on the mobile layout below, and zoom
+   would make that worse, not better. */
+@media (min-width: 901px) {
+  .mgmt-shell { zoom: 1.12; }
+}
+
 /* ── LOADING ── */
 .mgmt-loading {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
