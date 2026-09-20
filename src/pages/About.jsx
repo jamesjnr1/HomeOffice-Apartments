@@ -67,6 +67,36 @@ export default function About() {
               </ul>
             </div>
           </div>
+
+          <div className="two-col directions-block reveal">
+            <div>
+              <span className="eyebrow">GETTING HERE</span>
+              <h2>Find us in Fiapre.</h2>
+              <p className="prose">
+                Home-Office Apartments and LivingSpring Gardens is in Fiapre, Sunyani, Bono Region.
+              </p>
+              <p className="prose">
+                Ghana Post Digital Address: <strong className="mono">BY-0188-6413</strong>
+              </p>
+              <a
+                href="https://www.google.com/maps/dir/?api=1&destination=BY-0188-6413"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-outline"
+              >
+                Get directions <ArrowRight size={16} />
+              </a>
+            </div>
+            <div>
+              <iframe
+                title="Map to Home-Office Apartments"
+                className="directions-map"
+                src="https://www.google.com/maps?q=BY-0188-6413&output=embed"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            </div>
+          </div>
         </div>
       </section>
 
