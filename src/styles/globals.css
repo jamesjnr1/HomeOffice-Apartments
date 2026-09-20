@@ -1574,6 +1574,10 @@ body:has(.auth-split) main { padding: 0; }
   line-height: 1.15;
   margin: 12px 0 20px;
 }
+.intro-v2-accent {
+  color: var(--accent);
+  font-weight: 600;
+}
 .intro-v2 .prose {
   font-size: 17px;
   color: var(--muted);
