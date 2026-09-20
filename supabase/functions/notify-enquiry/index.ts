@@ -36,9 +36,10 @@
 //                        domain in Resend later for better deliverability)
 //   ARKESEL_API_KEY    — from Arkesel (SMS Gateway -> API Keys). If unset,
 //                        the SMS step is skipped (email still sends).
-//   ARKESEL_SENDER_ID  — optional, defaults to "HomeOffice" below. Must
-//                        be an alphanumeric ID of 11 characters or fewer;
-//                        Arkesel may require it to be pre-registered.
+//   ARKESEL_SENDER_ID  — optional, defaults to "Home-Office" below (the
+//                        registered Arkesel Sender ID). Must be 11
+//                        characters or fewer; Arkesel may require it to
+//                        be pre-registered.
 //   NOTIFY_SMS_TO      — optional, defaults to 0549624125 below (admin's
 //                        phone, used for type "new_enquiry" only)
 //   SITE_URL           — optional, defaults to
@@ -54,7 +55,7 @@ const FROM_ADDRESS = Deno.env.get("RESEND_FROM") || "Home-Office Apartments <onb
 const SITE_URL = Deno.env.get("SITE_URL") || "https://apartments.home-officegroup.com";
 
 const ARKESEL_API_KEY = Deno.env.get("ARKESEL_API_KEY");
-const ARKESEL_SENDER_ID = Deno.env.get("ARKESEL_SENDER_ID") || "HomeOffice";
+const ARKESEL_SENDER_ID = Deno.env.get("ARKESEL_SENDER_ID") || "Home-Office";
 const NOTIFY_SMS_TO = Deno.env.get("NOTIFY_SMS_TO") || "0549624125";
 
 function escapeHtml(value: unknown): string {
