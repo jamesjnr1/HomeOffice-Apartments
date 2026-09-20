@@ -1,7 +1,13 @@
-// sync-airbnb-calendar — pulls the Airbnb listing's iCal export feed
-// and stores its busy date ranges in public.external_calendar_blocks,
-// so is_date_range_available() (used by the Book page's proactive
-// availability check) also treats Airbnb-booked dates as unavailable.
+// sync-airbnb-calendar — pulls one or two Airbnb listings' iCal export
+// feeds and stores their busy date ranges in
+// public.external_calendar_blocks, so is_date_range_available() (used
+// by the Book page's proactive availability check) also treats
+// Airbnb-booked dates as unavailable.
+//
+// This property is listed on Airbnb twice (the same physical
+// apartment, two listings) — both feeds are fetched and merged into
+// the same shared pool of blocked dates, since a reservation through
+// either listing occupies the one real apartment.
 //
 // Called on a schedule by a pg_cron job (see
 // supabase/migrations/<timestamp>_airbnb_sync_schedule.sql), not
@@ -10,13 +16,16 @@
 // caller and burn through fetches against Airbnb's calendar export.
 //
 // Required secrets (Project Settings -> Edge Functions -> Secrets):
-//   AIRBNB_ICAL_URL   — the listing's calendar EXPORT url, from Airbnb
-//                       host dashboard: Listing -> Availability ->
-//                       Availability settings -> Sync calendars ->
-//                       Export calendar
-//   SYNC_SECRET       — must exactly match the value stored in
-//                       Supabase Vault as 'airbnb_sync_secret' by the
-//                       migration
+//   AIRBNB_ICAL_URL    — the first listing's calendar EXPORT url, from
+//                        Airbnb host dashboard: Listing -> Availability
+//                        -> Availability settings -> Sync calendars ->
+//                        Export calendar
+//   AIRBNB_ICAL_URL_2  — the second listing's calendar EXPORT url,
+//                        same place, for the other listing. Optional —
+//                        if unset, only the first feed is synced.
+//   SYNC_SECRET        — must exactly match the value stored in
+//                        Supabase Vault as 'airbnb_sync_secret' by the
+//                        migration
 //
 // Also uses the default SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY
 // secrets every edge function gets automatically, to write with a
@@ -26,7 +35,15 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
-const AIRBNB_ICAL_URL = Deno.env.get("AIRBNB_ICAL_URL");
+// Each listing gets its own `source` label ("airbnb" / "airbnb-2") so a
+// listing's rows can be cleaned up independently — if one feed fails
+// to fetch on a given run, its previously-synced blocks must be left
+// alone rather than wrongly treated as stale and deleted, which would
+// briefly reopen those dates for double-booking.
+const AIRBNB_FEEDS = [
+  { source: "airbnb", url: Deno.env.get("AIRBNB_ICAL_URL") },
+  { source: "airbnb-2", url: Deno.env.get("AIRBNB_ICAL_URL_2") },
+].filter((f): f is { source: string; url: string } => !!f.url);
 const SYNC_SECRET = Deno.env.get("SYNC_SECRET");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -93,54 +110,73 @@ Deno.serve(async (req: Request) => {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  if (!AIRBNB_ICAL_URL) {
+  if (AIRBNB_FEEDS.length === 0) {
     console.error("sync-airbnb-calendar: AIRBNB_ICAL_URL is not set");
     return new Response("Not configured", { status: 500 });
   }
 
-  const icsRes = await fetch(AIRBNB_ICAL_URL);
-  if (!icsRes.ok) {
-    console.error("sync-airbnb-calendar: fetch failed", icsRes.status);
-    return new Response("Fetch failed", { status: 502 });
-  }
-  const ics = await icsRes.text();
-  const events = parseEvents(ics).filter((e) => e.end > e.start);
-
   const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
-  if (events.length > 0) {
-    const { error: upsertError } = await supabase
-      .from("external_calendar_blocks")
-      .upsert(
-        events.map((e) => ({
-          source: "airbnb",
-          uid: e.uid,
-          start_date: e.start,
-          end_date: e.end,
-          summary: e.summary,
-          synced_at: new Date().toISOString(),
-        })),
-        { onConflict: "source,uid" }
-      );
-    if (upsertError) {
-      console.error("sync-airbnb-calendar: upsert error", upsertError.message);
-      return new Response("Upsert failed", { status: 500 });
-    }
-  }
+  let totalSynced = 0;
+  let failures = 0;
 
-  // Drop rows for events that disappeared from the feed (e.g. a
-  // cancelled Airbnb reservation) so they stop blocking dates here.
-  // Diffed in JS and deleted by an explicit uid list (rather than a
-  // hand-built NOT IN string) so a UID containing a comma or quote
-  // can't produce a malformed or unintended filter.
-  const currentUids = new Set(events.map((e) => e.uid));
-  const { data: existingRows, error: existingError } = await supabase
-    .from("external_calendar_blocks")
-    .select("uid")
-    .eq("source", "airbnb");
-  if (existingError) {
-    console.error("sync-airbnb-calendar: fetch existing uids error", existingError.message);
-  } else {
+  for (const feed of AIRBNB_FEEDS) {
+    let ics: string;
+    try {
+      const icsRes = await fetch(feed.url);
+      if (!icsRes.ok) {
+        console.error("sync-airbnb-calendar: fetch failed", feed.source, icsRes.status);
+        failures++;
+        continue; // leave this listing's existing rows untouched
+      }
+      ics = await icsRes.text();
+    } catch (err) {
+      console.error("sync-airbnb-calendar: fetch error", feed.source, err);
+      failures++;
+      continue;
+    }
+
+    const events = parseEvents(ics).filter((e) => e.end > e.start);
+    totalSynced += events.length;
+
+    if (events.length > 0) {
+      const { error: upsertError } = await supabase
+        .from("external_calendar_blocks")
+        .upsert(
+          events.map((e) => ({
+            source: feed.source,
+            uid: e.uid,
+            start_date: e.start,
+            end_date: e.end,
+            summary: e.summary,
+            synced_at: new Date().toISOString(),
+          })),
+          { onConflict: "source,uid" }
+        );
+      if (upsertError) {
+        console.error("sync-airbnb-calendar: upsert error", feed.source, upsertError.message);
+        failures++;
+        continue; // don't run cleanup below on a failed upsert
+      }
+    }
+
+    // Drop rows for events that disappeared from this feed (e.g. a
+    // cancelled Airbnb reservation) so they stop blocking dates here.
+    // Scoped to this feed's own `source` label, and to feeds that
+    // fetched successfully — cleanup never runs against a listing
+    // whose fetch/upsert just failed above. Diffed in JS and deleted
+    // by an explicit uid list (rather than a hand-built NOT IN string)
+    // so a UID containing a comma or quote can't produce a malformed
+    // or unintended filter.
+    const currentUids = new Set(events.map((e) => e.uid));
+    const { data: existingRows, error: existingError } = await supabase
+      .from("external_calendar_blocks")
+      .select("uid")
+      .eq("source", feed.source);
+    if (existingError) {
+      console.error("sync-airbnb-calendar: fetch existing uids error", feed.source, existingError.message);
+      continue;
+    }
     const staleUids = (existingRows ?? [])
       .map((r) => r.uid)
       .filter((uid) => !currentUids.has(uid));
@@ -148,15 +184,19 @@ Deno.serve(async (req: Request) => {
       const { error: deleteError } = await supabase
         .from("external_calendar_blocks")
         .delete()
-        .eq("source", "airbnb")
+        .eq("source", feed.source)
         .in("uid", staleUids);
       if (deleteError) {
-        console.error("sync-airbnb-calendar: cleanup delete error", deleteError.message);
+        console.error("sync-airbnb-calendar: cleanup delete error", feed.source, deleteError.message);
       }
     }
   }
 
-  return new Response(JSON.stringify({ synced: events.length }), {
+  if (failures === AIRBNB_FEEDS.length) {
+    return new Response("Fetch failed", { status: 502 });
+  }
+
+  return new Response(JSON.stringify({ synced: totalSynced, failures }), {
     status: 200,
     headers: { "Content-Type": "application/json" },
   });
