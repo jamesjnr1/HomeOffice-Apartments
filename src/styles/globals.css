@@ -17,6 +17,7 @@
   --accent-2:   #1f4d38;
   --accent-soft:#e2ece6;
   --accent-mint:#a7d4bd;
+  --brick:      #a6512b;
   --success:    #2b7a55;
   --danger:     #b3261e;
   --radius:     14px;
@@ -190,6 +191,22 @@ h4 { font-size: 16px; }
   line-height: 1.1;
   color: var(--ink);
   transition: color .3s var(--ease);
+}
+.brand-logo {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+.brand-icon {
+  height: 42px;
+  width: auto;
+  display: block;
+}
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1.1;
 }
 .brand-primary {
   font-family: 'Poppins', sans-serif;
@@ -1575,7 +1592,7 @@ body:has(.auth-split) main { padding: 0; }
   margin: 12px 0 20px;
 }
 .intro-v2-accent {
-  color: var(--accent);
+  color: var(--brick);
   font-weight: 600;
 }
 .intro-v2 .prose {
@@ -2114,6 +2131,7 @@ html, body {
 
 /* Fix: header on very small screens */
 @media (max-width: 380px) {
+  .brand-icon { height: 32px; }
   .brand-primary { font-size: 13px; }
   .brand-sub { font-size: 9px; }
   .container { padding: 0 16px; }
