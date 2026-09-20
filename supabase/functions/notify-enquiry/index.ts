@@ -29,8 +29,8 @@
 //   RESEND_API_KEY   — from resend.com (Dashboard -> API Keys)
 //   WEBHOOK_SECRET    — must exactly match the value stored in Supabase
 //                       Vault as 'enquiry_webhook_secret' by the migration
-//   NOTIFY_TO         — optional, defaults to jamesduah@gmail.com below
-//                       (admin address, used for type "new_enquiry" only)
+//   NOTIFY_TO         — optional, defaults to jamesd@home-officegroup.com
+//                       below (admin address, used for type "new_enquiry" only)
 //   RESEND_FROM       — optional, defaults to Resend's shared onboarding
 //                       address (fine to start with, verify your own
 //                       domain in Resend later for better deliverability)
@@ -39,7 +39,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const WEBHOOK_SECRET = Deno.env.get("WEBHOOK_SECRET");
-const NOTIFY_TO = Deno.env.get("NOTIFY_TO") || "jamesduah@gmail.com";
+const NOTIFY_TO = Deno.env.get("NOTIFY_TO") || "jamesd@home-officegroup.com";
 const FROM_ADDRESS = Deno.env.get("RESEND_FROM") || "Home-Office Apartments <onboarding@resend.dev>";
 
 function escapeHtml(value: unknown): string {

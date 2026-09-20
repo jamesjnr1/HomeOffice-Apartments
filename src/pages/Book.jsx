@@ -42,7 +42,7 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase';
  * told to email directly.
  */
 
-const CONTACT_EMAIL = 'jamesduah@gmail.com';
+const CONTACT_EMAIL = 'jamesd@home-officegroup.com';
 const CONTACT_PHONE = '+233 20 630 1032';
 const WHATSAPP_NUMBER = '233206301032'; // CONTACT_PHONE in E.164, no spaces or +
 

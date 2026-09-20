@@ -108,7 +108,7 @@ export default function Receipt({ booking, guestName, guestEmail, onClose }) {
           <footer className="receipt-foot">
             <p>Thank you for staying with us.</p>
             <p className="receipt-foot-contact">
-              jamesduah@gmail.com · +233 20 630 1032 · +233 54 962 4125
+              jamesd@home-officegroup.com · +233 20 630 1032 · +233 54 962 4125
             </p>
           </footer>
         </div>
