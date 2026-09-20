@@ -265,7 +265,11 @@ Deno.serve(async (req: Request) => {
     return new Response("Fetch failed", { status: 502 });
   }
 
-  return new Response(JSON.stringify({ synced: totalSynced, failures }), {
+  // `feeds` names which listings were actually attempted this run —
+  // never the URLs themselves — so a missing second listing shows up
+  // immediately as ["airbnb"] instead of silently looking identical to
+  // a listing with zero current reservations.
+  return new Response(JSON.stringify({ synced: totalSynced, failures, feeds: AIRBNB_FEEDS.map((f) => f.source) }), {
     status: 200,
     headers: { "Content-Type": "application/json" },
   });
