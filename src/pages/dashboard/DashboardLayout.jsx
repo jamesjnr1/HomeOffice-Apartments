@@ -12,6 +12,7 @@ export default function DashboardLayout() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [unreadMessages, setUnreadMessages] = useState(0);
 
   useEffect(() => {
     let mounted = true;
@@ -26,6 +27,28 @@ export default function DashboardLayout() {
     });
     return () => { mounted = false; sub?.subscription?.unsubscribe(); };
   }, [navigate]);
+
+  // Live unread-message count for the topbar badge — same pattern as
+  // AdminLayout's sidebar badge, just scoped to this guest's own
+  // thread (messages sent by the host that this guest hasn't read yet).
+  useEffect(() => {
+    if (!user?.id) return;
+    const loadUnread = async () => {
+      const { count } = await supabase
+        .from('messages')
+        .select('id', { count: 'exact', head: true })
+        .eq('guest_id', user.id)
+        .eq('from_admin', true)
+        .eq('read_by_guest', false);
+      setUnreadMessages(count || 0);
+    };
+    loadUnread();
+    const sub = supabase
+      .channel(`guest-topbar-unread-${user.id}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'messages', filter: `guest_id=eq.${user.id}` }, loadUnread)
+      .subscribe();
+    return () => { supabase.removeChannel(sub); };
+  }, [user?.id]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -120,6 +143,20 @@ export default function DashboardLayout() {
       )}
 
       <main className="dash-main">
+        <div className="dash-topbar">
+          <div className="dash-topbar-actions">
+            <NavLink to="/dashboard/messages" className="dash-topbar-icon" aria-label="Messages">
+              <MessageSquare size={18} />
+              {unreadMessages > 0 && <span className="dash-topbar-badge">{unreadMessages}</span>}
+            </NavLink>
+            <NavLink to="/dashboard/wishlist" className="dash-topbar-icon" aria-label="Wishlist">
+              <Heart size={18} />
+            </NavLink>
+            <NavLink to="/dashboard/profile" className="dash-topbar-avatar" aria-label="Your profile">
+              <span className="dash-avatar-small">{initial}</span>
+            </NavLink>
+          </div>
+        </div>
         <div className="dash-main-inner">
           <Outlet context={{ user, displayName }} />
         </div>
