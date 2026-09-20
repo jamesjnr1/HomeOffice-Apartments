@@ -7,10 +7,13 @@ export default function Footer() {
       <div className="container">
         <div className="footer-grid">
           <div className="footer-brand-col">
-            <Link to="/" className="brand">
-              <span className="brand-primary">Home-Office Apartments</span>
-              <span className="brand-sub">
-                and Living<span className="brand-accent">Spring</span> Gardens
+            <Link to="/" className="brand brand-logo">
+              <img src="/images/logo-icon.png" alt="" className="brand-icon" />
+              <span className="brand-text">
+                <span className="brand-primary">Home-Office Apartments</span>
+                <span className="brand-sub">
+                  and Living<span className="brand-accent">Spring</span> Gardens
+                </span>
               </span>
             </Link>
             <p className="footer-tag">

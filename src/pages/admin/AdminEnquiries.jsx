@@ -128,6 +128,13 @@ export default function AdminEnquiries() {
     }
   };
 
+  // Once any action has been taken on an enquiry — marked replied or
+  // archived, declined, or turned into a booking — it's locked: no
+  // further row actions (reply/archive/delete) or booking decision
+  // (confirm/decline) are offered. 'new' is the only actionable
+  // status; everything else is a one-way door here.
+  const locked = (e) => e.status !== 'new' || !!e.booking_id;
+
   // Does this (not-yet-booked) enquiry's date range overlap an
   // existing confirmed booking? Advisory only — the database itself
   // is the real backstop (bookings_no_date_overlap), this just lets
@@ -347,9 +354,9 @@ export default function AdminEnquiries() {
                       <td className="mgmt-td-muted">{formatDistanceToNow(new Date(e.created_at), { addSuffix: true })}</td>
                       <td>
                         <div className="mgmt-row-actions" onClick={ev => ev.stopPropagation()}>
-                          <button title="Mark replied" onClick={() => act(e.id,'replied')}><Check size={14}/></button>
-                          <button title="Archive" onClick={() => act(e.id,'archived')}><Archive size={14}/></button>
-                          <button title="Delete" onClick={() => remove(e.id)} className="mgmt-action-danger"><Trash2 size={14}/></button>
+                          <button title={locked(e) ? 'Already actioned' : 'Mark replied'} disabled={locked(e)} onClick={() => act(e.id,'replied')}><Check size={14}/></button>
+                          <button title={locked(e) ? 'Already actioned' : 'Archive'} disabled={locked(e)} onClick={() => act(e.id,'archived')}><Archive size={14}/></button>
+                          <button title={locked(e) ? 'Already actioned' : 'Delete'} disabled={locked(e)} onClick={() => remove(e.id)} className="mgmt-action-danger"><Trash2 size={14}/></button>
                         </div>
                       </td>
                     </tr>
@@ -381,7 +388,11 @@ export default function AdminEnquiries() {
                               <p className="mgmt-td-muted">
                                 Already booked as <strong>{e.bookings.reference}</strong> ({e.bookings.status}).
                               </p>
-                            ) : e.status === 'declined' ? null : (
+                            ) : e.status === 'declined' ? null : locked(e) ? (
+                              <p className="mgmt-td-muted">
+                                Already marked <strong>{e.status}</strong> — no further action on this enquiry.
+                              </p>
+                            ) : (
                               <div className="mgmt-decision-row" onClick={ev => ev.stopPropagation()}>
                                 <div className="mgmt-confirm-booking">
                                   {conflict && (

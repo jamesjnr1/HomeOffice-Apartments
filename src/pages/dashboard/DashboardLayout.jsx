@@ -51,10 +51,13 @@ export default function DashboardLayout() {
     <div className="dash-shell">
       {/* Mobile top bar */}
       <div className="dash-mobile-bar">
-        <a href="/" className="dash-brand">
-          <span className="dash-brand-primary">Home-Office Apartments</span>
-          <span className="dash-brand-sub">
-            and Living<span className="dash-brand-accent">Spring</span> Gardens
+        <a href="/" className="dash-brand dash-brand-logo">
+          <img src="/images/logo-icon.png" alt="" className="dash-brand-icon" />
+          <span className="dash-brand-text">
+            <span className="dash-brand-primary">Home-Office Apartments</span>
+            <span className="dash-brand-sub">
+              and Living<span className="dash-brand-accent">Spring</span> Gardens
+            </span>
           </span>
         </a>
         <button className="dash-menu-btn" onClick={() => setMobileNavOpen(true)} aria-label="Open menu">
@@ -65,10 +68,13 @@ export default function DashboardLayout() {
       {/* Sidebar */}
       <aside className={`dash-sidebar ${mobileNavOpen ? 'open' : ''}`}>
         <div className="dash-sidebar-head">
-          <a href="/" className="dash-brand">
-            <span className="dash-brand-primary">Home-Office Apartments</span>
-            <span className="dash-brand-sub">
-              and Living<span className="dash-brand-accent">Spring</span> Gardens
+          <a href="/" className="dash-brand dash-brand-logo">
+            <img src="/images/logo-icon.png" alt="" className="dash-brand-icon" />
+            <span className="dash-brand-text">
+              <span className="dash-brand-primary">Home-Office Apartments</span>
+              <span className="dash-brand-sub">
+                and Living<span className="dash-brand-accent">Spring</span> Gardens
+              </span>
             </span>
           </a>
           <button className="dash-menu-btn dash-menu-close" onClick={() => setMobileNavOpen(false)} aria-label="Close menu">
