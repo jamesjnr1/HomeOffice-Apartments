@@ -17,8 +17,7 @@ export default function Home() {
         <div className="container hero-v2-content">
           <div className="hero-v2-inner">
             <h1 className="hero-v2-title">
-              A quiet place to<br />
-              work and live.
+              A quiet place for hideout, retreat or work.
             </h1>
             <p className="hero-v2-lead">
               Home-Office Apartments — thoughtfully finished for how you actually spend your days,
