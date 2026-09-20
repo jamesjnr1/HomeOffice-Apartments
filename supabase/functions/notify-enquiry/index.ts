@@ -170,6 +170,26 @@ function toArkeselRecipient(phone: string): string {
   return digits;
 }
 
+// Shared low-level sender — posts one SMS via Arkesel and reports back
+// what actually happened (status + raw body), rather than swallowing
+// it, so a caller that needs to know (the test endpoint below) can.
+async function sendSms(to: string, message: string): Promise<{ ok: boolean; status: number; body: string }> {
+  const res = await fetch("https://sms.arkesel.com/api/v2/sms/send", {
+    method: "POST",
+    headers: {
+      "api-key": ARKESEL_API_KEY!,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      sender: ARKESEL_SENDER_ID,
+      message,
+      recipients: [toArkeselRecipient(to)],
+    }),
+  });
+  const text = await res.text();
+  return { ok: res.ok, status: res.status, body: text };
+}
+
 // Best-effort — a guest's enquiry should never be lost or delayed
 // because the SMS side had a problem. Every failure is logged and
 // swallowed here rather than surfaced to the caller.
@@ -185,21 +205,9 @@ async function sendEnquirySms(e: any): Promise<void> {
     `(${e.guests || "?"} guests). Contact: ${contact}`;
 
   try {
-    const res = await fetch("https://sms.arkesel.com/api/v2/sms/send", {
-      method: "POST",
-      headers: {
-        "api-key": ARKESEL_API_KEY,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        sender: ARKESEL_SENDER_ID,
-        message,
-        recipients: [toArkeselRecipient(NOTIFY_SMS_TO)],
-      }),
-    });
-    if (!res.ok) {
-      const text = await res.text();
-      console.error("notify-enquiry: Arkesel SMS error", res.status, text);
+    const result = await sendSms(NOTIFY_SMS_TO, message);
+    if (!result.ok) {
+      console.error("notify-enquiry: Arkesel SMS error", result.status, result.body);
     }
   } catch (err) {
     console.error("notify-enquiry: Arkesel SMS fetch error", err);
@@ -220,6 +228,32 @@ Deno.serve(async (req: Request) => {
     payload = await req.json();
   } catch {
     return new Response("Bad request", { status: 400 });
+  }
+
+  // A manual, ops-only check: sends one real SMS to an arbitrary number
+  // and reports back exactly what Arkesel said, so a delivery problem
+  // can be diagnosed directly from the response instead of digging
+  // through logs. Never triggered by application code — only ever
+  // called by hand (e.g. via SQL's net.http_post, same auth as above).
+  if (payload?.type === "sms_test") {
+    if (!ARKESEL_API_KEY) {
+      return new Response(JSON.stringify({ error: "ARKESEL_API_KEY is not set" }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    if (!payload?.to) {
+      return new Response(JSON.stringify({ error: "Missing 'to' phone number" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    const message = payload?.message || "Home-Office Apartments: this is a test SMS.";
+    const result = await sendSms(payload.to, message);
+    return new Response(JSON.stringify(result), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
   const type = payload?.type === "declined" ? "declined" : "new_enquiry";
