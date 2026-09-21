@@ -3,6 +3,7 @@ import { Link, useOutletContext } from 'react-router-dom';
 import { format, parseISO } from 'date-fns';
 import { Download, MessageSquare, ArrowRight, MapPin, CreditCard } from 'lucide-react';
 import Receipt from '../../components/Receipt';
+import StatusBadge from '../../components/StatusBadge';
 import { supabase } from '../../lib/supabase';
 import { apartmentName } from '../../lib/apartments';
 
@@ -114,7 +115,7 @@ export default function Bookings() {
             When you book a stay with us, it'll show up here.
           </p>
           <Link to="/book" className="dash-btn dash-btn-primary">
-            Send an enquiry <ArrowRight size={16} />
+            Book a stay <ArrowRight size={16} />
           </Link>
         </div>
       ) : (
@@ -208,16 +209,4 @@ function BookingCard({ booking, onReceipt }) {
       </div>
     </article>
   );
-}
-
-function StatusBadge({ status }) {
-  const map = {
-    confirmed: { className: 'dash-status confirmed', label: 'Confirmed' },
-    awaiting_payment: { className: 'dash-status pending', label: 'Awaiting payment' },
-    pending: { className: 'dash-status pending', label: 'Pending' },
-    completed: { className: 'dash-status completed', label: 'Completed' },
-    cancelled: { className: 'dash-status cancelled', label: 'Cancelled' },
-  };
-  const s = map[status] || map.pending;
-  return <span className={s.className}>{s.label}</span>;
 }

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, parseISO, differenceInCalendarDays } from 'date-fns';
 import { List, CalendarDays, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import Receipt from '../../components/Receipt';
+import StatusBadge from '../../components/StatusBadge';
 import { supabase } from '../../lib/supabase';
 import { APARTMENTS, apartmentName } from '../../lib/apartments';
 
@@ -14,14 +15,19 @@ function sourceApartment(source) {
   return source === 'airbnb-2' ? 'livingspring' : 'home-office';
 }
 
-function statusLabel(status) {
-  return status === 'awaiting_payment' ? 'Awaiting payment' : status;
-}
+// Status filter tabs, most-actionable first — an admin opening this
+// page usually wants "what needs attention" (awaiting payment) before
+// "what's already settled" (confirmed), not one flat list mixing both
+// with Airbnb rows and cancellations.
+const TABS = ['all', 'awaiting_payment', 'confirmed', 'cancelled'];
+const TAB_LABELS = { all: 'All', awaiting_payment: 'Awaiting payment', confirmed: 'Confirmed', cancelled: 'Cancelled' };
 
 /**
- * AdminBookings — real rows from the `bookings` table (see
- * supabase/migrations/20260909150000_create_bookings.sql), created by
- * confirming an enquiry in AdminEnquiries.jsx. Kept live via a
+ * AdminBookings — real rows from the `bookings` table, now mostly
+ * created automatically by the public book-and-pay flow (see
+ * supabase/functions/book-and-pay/index.ts) rather than an admin
+ * manually confirming an enquiry — that manual path still exists for
+ * the enquiries that need it (see AdminEnquiries.jsx). Kept live via a
  * realtime subscription, same pattern as messages/enquiries.
  *
  * Also pulls in `external_calendar_blocks` — the dates
@@ -35,6 +41,7 @@ function statusLabel(status) {
 
 export default function AdminBookings() {
   const [view, setView] = useState('list');
+  const [tab, setTab] = useState('all');
   const [month, setMonth] = useState(new Date());
   const [bookings, setBookings] = useState([]);
   const [airbnbBlocks, setAirbnbBlocks] = useState([]);
@@ -101,15 +108,23 @@ export default function AdminBookings() {
 
   // Every reservation blocking the calendar, from either source, in
   // one list sorted by check-in — what the admin actually wants to
-  // see when asking "what's booked".
+  // see when asking "what's booked". Airbnb rows have no real status
+  // of their own (always "reserved"), so they only ever show under
+  // the "all" tab — the status tabs are a `bookings.status` filter.
   const allReservations = [
     ...bookings.map((b) => ({ kind: 'site', key: b.id, ...b })),
     ...airbnbBlocks.map((x) => ({ kind: 'airbnb', key: x.id, ...x })),
-  ].sort((a, b) => {
-    const ad = a.kind === 'site' ? a.check_in : a.start_date;
-    const bd = b.kind === 'site' ? b.check_in : b.start_date;
-    return bd.localeCompare(ad);
-  });
+  ]
+    .filter((r) => tab === 'all' || (r.kind === 'site' && r.status === tab))
+    .sort((a, b) => {
+      const ad = a.kind === 'site' ? a.check_in : a.start_date;
+      const bd = b.kind === 'site' ? b.check_in : b.start_date;
+      return bd.localeCompare(ad);
+    });
+
+  const counts = Object.fromEntries(TABS.map((t) => [
+    t, t === 'all' ? bookings.length + airbnbBlocks.length : bookings.filter((b) => b.status === t).length,
+  ]));
 
   return (
     <div className="mgmt-page">
@@ -125,11 +140,22 @@ export default function AdminBookings() {
       </div>
 
       {view === 'list' && (
+        <div className="mgmt-tabs">
+          {TABS.map((t) => (
+            <button key={t} className={`mgmt-tab ${tab === t ? 'active' : ''}`} onClick={() => setTab(t)}>
+              {TAB_LABELS[t]}
+              <span className="mgmt-tab-count">{counts[t]}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {view === 'list' && (
         <div className="mgmt-card mgmt-card-flush">
           {loading ? (
             <div className="mgmt-empty"><p>Loading bookings…</p></div>
           ) : allReservations.length === 0 ? (
-            <div className="mgmt-empty"><p>No reservations yet. Confirm one from the Enquiries inbox, or sync Airbnb.</p></div>
+            <div className="mgmt-empty"><p>{tab === 'all' ? 'No reservations yet. Guests can book directly from the site, or sync Airbnb.' : `No ${TAB_LABELS[tab].toLowerCase()} bookings.`}</p></div>
           ) : (
             <div className="mgmt-table-wrap">
               <table className="mgmt-table">
@@ -147,7 +173,7 @@ export default function AdminBookings() {
                       <td>{r.check_out}</td>
                       <td>{r.nights}</td>
                       <td>GHS {Number(r.total).toLocaleString()}</td>
-                      <td><span className={`mgmt-status ${r.status}`}>{statusLabel(r.status)}</span></td>
+                      <td><StatusBadge status={r.status} /></td>
                       <td>
                         <div className="mgmt-row-actions">
                           <button title="Print receipt" onClick={() => setReceiptBooking(r)}>
@@ -166,7 +192,7 @@ export default function AdminBookings() {
                       <td>{r.end_date}</td>
                       <td>{differenceInCalendarDays(parseISO(r.end_date), parseISO(r.start_date))}</td>
                       <td className="mgmt-td-muted">—</td>
-                      <td><span className="mgmt-status mgmt-status-airbnb">reserved</span></td>
+                      <td><StatusBadge status="reserved" /></td>
                       <td></td>
                     </tr>
                   ))}

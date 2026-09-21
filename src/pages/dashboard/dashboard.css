@@ -372,14 +372,8 @@ body:has(.dash-shell) main { padding: 0 !important; }
 }
 .dash-booking-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
-.dash-status {
-  display: inline-block; padding: 3px 10px; border-radius: 999px;
-  font-size: 11.5px; font-weight: 600;
-}
-.dash-status.confirmed { background: #e2ece6; color: #2d6a4f; }
-.dash-status.pending   { background: #fef3c7; color: #b58a4a; }
-.dash-status.completed { background: #f7f8f6; color: #6a706d; }
-.dash-status.cancelled { background: #fbe9e7; color: #b3261e; }
+/* Status pill itself now comes from the shared StatusBadge component
+   (src/components/StatusBadge.jsx + .status-badge* in globals.css). */
 
 /* ── WISHLIST ── */
 .dash-wishlist-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
