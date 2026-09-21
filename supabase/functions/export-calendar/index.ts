@@ -4,6 +4,17 @@
 // calendar), so Airbnb blocks dates already booked directly through
 // this site.
 //
+// Home-Office Apartment and LivingSpring Gardens & Apartment are two
+// separate, independently-bookable units in the same building, each
+// with its OWN Airbnb listing (see supabase/migrations/
+// 20260921090000_split_two_apartments.sql) — so this feed is scoped
+// per apartment via a required ?apartment= query param. Importing the
+// wrong apartment's feed into a listing would incorrectly block that
+// listing's calendar for a booking that's actually for the other unit.
+//
+//   ?apartment=home-office   -> Home-Office Apartment's bookings only
+//   ?apartment=livingspring  -> LivingSpring Gardens & Apartment's only
+//
 // Public and unauthenticated on purpose (verify_jwt disabled) —
 // that's how every calendar-sync integration works: the other side
 // (Airbnb) just does a plain GET with no credentials, on its own
@@ -19,6 +30,8 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+const VALID_APARTMENTS = ["home-office", "livingspring"];
 
 function toIcsDate(d: string): string {
   return d.replaceAll("-", "");
@@ -42,10 +55,19 @@ Deno.serve(async (req: Request) => {
     return new Response("Method not allowed", { status: 405 });
   }
 
+  const apartment = new URL(req.url).searchParams.get("apartment");
+  if (!apartment || !VALID_APARTMENTS.includes(apartment)) {
+    return new Response(
+      `Missing or invalid ?apartment= (expected one of: ${VALID_APARTMENTS.join(", ")})`,
+      { status: 400 }
+    );
+  }
+
   const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
   const { data: bookings, error } = await supabase
     .from("bookings")
     .select("id, check_in, check_out, status")
+    .eq("apartment", apartment)
     .in("status", ["pending", "confirmed", "completed"]);
 
   if (error) {

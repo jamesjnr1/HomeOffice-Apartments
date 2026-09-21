@@ -12,6 +12,7 @@ import {
   Info,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { apartmentName } from '../../lib/apartments';
 
 /**
  * Overview
@@ -41,8 +42,6 @@ import { supabase } from '../../lib/supabase';
  */
 
 const APARTMENT = {
-  id: 'home-office',
-  name: 'Home-Office Apartments',
   location: 'Sunyani, Ghana',
   coverImage: '/images/hero-property.jpg',
 };
@@ -179,7 +178,7 @@ export default function Overview() {
               <div className="dash-next-stay-img">
                 <img
                   src={APARTMENT.coverImage}
-                  alt={APARTMENT.name}
+                  alt={apartmentName(nextStay.apartment)}
                 />
                 <span className="dash-next-stay-badge">
                   <Clock size={12} /> In {daysUntil} day{daysUntil !== 1 ? 's' : ''}
@@ -187,7 +186,7 @@ export default function Overview() {
               </div>
               <div className="dash-next-stay-body">
                 <span className="dash-eyebrow">YOUR NEXT STAY</span>
-                <h2>{APARTMENT.name}</h2>
+                <h2>{apartmentName(nextStay.apartment)}</h2>
                 <div className="dash-loc">
                   <MapPin size={14} />
                   {APARTMENT.location}
