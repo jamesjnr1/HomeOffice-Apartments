@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Mail, Phone, MessageCircle, Check, AlertCircle } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { APARTMENT_LIST, APARTMENTS, DEFAULT_APARTMENT } from '../lib/apartments';
 
 /**
  * Book — enquiry form that actually sends and actually persists.
@@ -49,7 +50,7 @@ const WHATSAPP_NUMBER = '233206301032'; // CONTACT_PHONE in E.164, no spaces or 
 export default function Book() {
   const [form, setForm] = useState({
     name: '', email: '', phone: '', checkIn: '', checkOut: '',
-    guests: '2', message: '',
+    guests: '2', message: '', apartment: DEFAULT_APARTMENT,
   });
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -77,6 +78,7 @@ export default function Book() {
     const { data } = await supabase.rpc('is_date_range_available', {
       check_in: form.checkIn,
       check_out: form.checkOut,
+      apartment: form.apartment,
     });
     setAvailabilityNotice(data === false);
   };
@@ -112,6 +114,7 @@ export default function Book() {
         check_out: form.checkOut,
         guests: Number(form.guests),
         message: form.message || null,
+        apartment: form.apartment,
       });
 
       if (dbError?.message?.includes('DUPLICATE_OPEN_ENQUIRY')) {
@@ -128,7 +131,7 @@ export default function Book() {
       setAvailabilityNotice(false);
       setForm({
         name: '', email: '', phone: '', checkIn: '', checkOut: '',
-        guests: '2', message: '',
+        guests: '2', message: '', apartment: DEFAULT_APARTMENT,
       });
     } catch (err) {
       setError(
@@ -162,6 +165,26 @@ export default function Book() {
                   {error}
                 </div>
               )}
+
+              <div className="field">
+                <label>Which apartment?</label>
+                <select
+                  value={form.apartment}
+                  onChange={(e) => {
+                    setAvailabilityNotice(false);
+                    setForm((f) => ({ ...f, apartment: e.target.value }));
+                  }}
+                  onBlur={checkAvailability}
+                  disabled={loading}
+                >
+                  {APARTMENT_LIST.map((a) => (
+                    <option key={a.value} value={a.value}>{a.name}</option>
+                  ))}
+                </select>
+                <p className="field-note" style={{ marginTop: 6 }}>
+                  Two separate apartments in the same building — book either one, or send a separate enquiry for both.
+                </p>
+              </div>
 
               <div className="field">
                 <label>Your full name</label>
@@ -273,15 +296,18 @@ export default function Book() {
               <div className="side-card">
                 <img
                   src="/images/hero-property.jpg"
-                  alt="Home-Office Apartments"
+                  alt={APARTMENTS[form.apartment].name}
                 />
                 <div className="side-body">
-                  <h3>Home-Office Apartments</h3>
+                  <h3>{APARTMENTS[form.apartment].name}</h3>
                   <p className="text-muted small">LivingSpring Gardens · Sunyani, Ghana</p>
                   <div className="side-divider" />
 
                   <ul className="side-list">
-                    <li><strong>Sleeps up to 4</strong><span>4 bedrooms · 5 beds · 4 baths</span></li>
+                    <li>
+                      <strong>Sleeps up to {APARTMENTS[form.apartment].guests}</strong>
+                      <span>{APARTMENTS[form.apartment].bedrooms} bedrooms · {APARTMENTS[form.apartment].beds} beds · {APARTMENTS[form.apartment].baths} baths</span>
+                    </li>
                     <li><strong>Fully self-contained</strong><span>Kitchen &amp; private verandah</span></li>
                     <li><strong>Central Sunyani</strong><span>Minutes from market &amp; cafés</span></li>
                   </ul>

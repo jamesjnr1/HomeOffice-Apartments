@@ -2,6 +2,7 @@ import { Fragment, useState, useEffect } from 'react';
 import { Check, Reply, Archive, Trash2, CalendarCheck, Ban, AlertTriangle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { supabase } from '../../lib/supabase';
+import { DEFAULT_APARTMENT, apartmentName } from '../../lib/apartments';
 
 /**
  * AdminEnquiries — real submissions from the public Book form, stored
@@ -107,7 +108,7 @@ export default function AdminEnquiries() {
         // row detail is fine here, this page is already admin-only.
         supabase
           .from('bookings')
-          .select('id, reference, status, check_in, check_out')
+          .select('id, reference, status, check_in, check_out, apartment')
           .neq('status', 'cancelled'),
       ]);
 
@@ -136,13 +137,20 @@ export default function AdminEnquiries() {
   const locked = (e) => e.status !== 'new' || !!e.booking_id;
 
   // Does this (not-yet-booked) enquiry's date range overlap an
-  // existing confirmed booking? Advisory only — the database itself
-  // is the real backstop (bookings_no_date_overlap), this just lets
-  // an admin see the conflict before trying instead of hitting an
-  // error after filling in the amount.
+  // existing confirmed booking IN THE SAME APARTMENT? Home-Office
+  // Apartment and LivingSpring Gardens & Apartment are two separate,
+  // independently-bookable units — an overlap in one is irrelevant to
+  // the other. Advisory only — the database itself is the real
+  // backstop (bookings_no_date_overlap), this just lets an admin see
+  // the conflict before trying instead of hitting an error after
+  // filling in the amount. An enquiry with no apartment set yet
+  // (pre-dates this feature) falls back to the same default the
+  // confirm step itself uses, so the warning stays consistent with
+  // what actually happens on confirm.
   const overlap = (e) => {
     if (e.booking_id) return null;
-    return bookings.find(b => rangesOverlap(e.check_in, e.check_out, b.check_in, b.check_out)) || null;
+    const apartment = e.apartment || DEFAULT_APARTMENT;
+    return bookings.find(b => b.apartment === apartment && rangesOverlap(e.check_in, e.check_out, b.check_in, b.check_out)) || null;
   };
 
   const filtered = enquiries.filter(e => tab === 'all' || e.status === tab);
@@ -188,6 +196,7 @@ export default function AdminEnquiries() {
       guest_name: e.name,
       guest_email: e.email,
       guest_phone: e.phone || null,
+      apartment: e.apartment || DEFAULT_APARTMENT,
       check_in: e.check_in,
       check_out: e.check_out,
       guests: e.guests,
@@ -318,7 +327,7 @@ export default function AdminEnquiries() {
           <div className="mgmt-table-wrap">
             <table className="mgmt-table">
               <thead>
-                <tr><th>Guest</th><th>Dates</th><th>Guests</th><th>Status</th><th>Received</th><th></th></tr>
+                <tr><th>Guest</th><th>Apartment</th><th>Dates</th><th>Guests</th><th>Status</th><th>Received</th><th></th></tr>
               </thead>
               <tbody>
                 {filtered.map(e => {
@@ -330,6 +339,7 @@ export default function AdminEnquiries() {
                       onClick={() => { setExpanded(expanded === e.id ? null : e.id); setBookError(''); }}
                     >
                       <td><div className="mgmt-td-primary">{e.name}</div><div className="mgmt-td-sub">{e.email}</div></td>
+                      <td className="mgmt-td-sub">{apartmentName(e.apartment || DEFAULT_APARTMENT)}</td>
                       <td>{e.check_in} → {e.check_out}</td>
                       <td>{e.guests}</td>
                       <td>
