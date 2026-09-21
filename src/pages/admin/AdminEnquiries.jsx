@@ -372,7 +372,12 @@ export default function AdminEnquiries() {
                               </p>
                             )}
                             <div className="mgmt-expanded-actions">
-                              <a className="mgmt-btn mgmt-btn-primary" href={`mailto:${e.email}?subject=Re: Your enquiry — Home-Office Apartments`}>
+                              <a
+                                className="mgmt-btn mgmt-btn-primary"
+                                href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(e.email)}&su=${encodeURIComponent('Re: Your enquiry — Home-Office Apartments')}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
                                 <Reply size={14}/> Reply by email
                               </a>
                               {e.phone && (
