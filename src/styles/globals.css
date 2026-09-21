@@ -69,6 +69,7 @@ button { font: inherit; cursor: pointer; }
   margin: 0 0 16px;
 }
 .eyebrow-light { color: rgba(255,255,255,.85); }
+.eyebrow-icon { display: inline-flex; align-items: center; gap: 6px; color: var(--accent); }
 
 h1, h2, h3, h4 {
   margin: 0 0 .5em;
@@ -415,6 +416,52 @@ h4 { font-size: 16px; }
   color: var(--accent);
 }
 .feature-icon svg { width: 22px; height: 22px; stroke-width: 1.6; }
+
+/* ---------------- PHOTO ROW ---------------- */
+/* Three evenly-spaced photos in a row — used on About for a quick
+   visual tour, inspired by the gallery row on royalirenichotel.com's
+   about page (their layout, our own photos and content throughout). */
+.photo-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 32px;
+}
+.photo-row img {
+  width: 100%;
+  aspect-ratio: 4/3;
+  object-fit: cover;
+  border-radius: 16px;
+}
+@media (max-width: 700px) {
+  .photo-row { grid-template-columns: 1fr; }
+}
+
+/* ---------------- FACILITIES ---------------- */
+/* Icon + label cards, styled after the "Most Popular Facilities" grid
+   on royalirenichotel.com's about page — reuses .feature-icon's badge
+   look rather than a new icon system, since this project's icons are
+   already Lucide throughout. */
+.facility-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 28px;
+}
+@media (max-width: 800px) { .facility-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 500px) { .facility-grid { grid-template-columns: 1fr; } }
+.facility-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--bg);
+}
+.facility-card .feature-icon { width: 40px; height: 40px; flex-shrink: 0; }
+.facility-card .feature-icon svg { width: 20px; height: 20px; }
+.facility-card span { font-weight: 600; font-size: 14.5px; }
 
 /* ---------------- RATE CARDS ---------------- */
 .rate-cards {

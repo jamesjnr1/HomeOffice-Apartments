@@ -1,5 +1,19 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Wifi, Utensils, Tv, Laptop, Trees, BedDouble } from 'lucide-react';
+import StatCard from '../components/StatCard';
+
+// Only amenities already promised elsewhere on the site (Home.jsx,
+// Book.jsx) — never inventing a facility (AC, parking, etc.) that
+// isn't actually established as real, now that guests can pay for a
+// stay automatically with no human checking the claim first.
+const FACILITIES = [
+  { icon: Wifi, label: 'Fast Wi-Fi' },
+  { icon: Laptop, label: 'Dedicated desk' },
+  { icon: Utensils, label: 'Modern kitchen' },
+  { icon: Tv, label: 'Smart TV' },
+  { icon: BedDouble, label: 'Comfortable bedrooms' },
+  { icon: Trees, label: 'Private garden access' },
+];
 
 export default function About() {
   return (
@@ -39,6 +53,42 @@ export default function About() {
                 className="rounded-img"
               />
             </div>
+          </div>
+
+          {/* A quick visual tour — three photos in a row, same idea as
+              the gallery row on royalirenichotel.com's about page. */}
+          <div className="photo-row reveal">
+            <img src="/images/exterior-1.jpg" alt="Exterior of Home-Office Apartments" />
+            <img src="/images/living-room-1.jpg" alt="Living room" />
+            <img src="/images/kitchen.jpg" alt="Kitchen" />
+          </div>
+
+          <div className="stat-band reveal" style={{ marginTop: 40 }}>
+            <StatCard label="Apartments" value="2" suffix="Independently bookable" />
+            <StatCard label="Bedrooms" value="2" suffix="Per apartment" />
+            <StatCard label="Sleeps up to" value="4" suffix="Per apartment" />
+            <StatCard label="Location" value="Fiapre" suffix="Sunyani, Bono Region" />
+          </div>
+        </div>
+      </section>
+
+      {/* Facilities — icon + label cards, same idea as the "Most
+          Popular Facilities" grid on royalirenichotel.com's about
+          page. Only amenities already established elsewhere on this
+          site — see the FACILITIES list above. */}
+      <section className="section section-cream">
+        <div className="container">
+          <div className="section-head-left reveal">
+            <span className="eyebrow eyebrow-icon"><CheckCircle2 size={14} /> WHAT'S INCLUDED</span>
+            <h2>Every stay, every apartment.</h2>
+          </div>
+          <div className="facility-grid reveal">
+            {FACILITIES.map(({ icon: Icon, label }) => (
+              <div className="facility-card" key={label}>
+                <span className="feature-icon"><Icon /></span>
+                <span>{label}</span>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -104,9 +154,9 @@ export default function About() {
         <div className="container">
           <div className="cta-content reveal">
             <h2>Come stay with us.</h2>
-            <p className="lead lead-light">We usually reply to enquiries within a day.</p>
+            <p className="lead lead-light">Check your dates — if they're free, you can pay and lock them in right away.</p>
             <Link to="/book" className="btn btn-primary btn-lg">
-              Send an enquiry <ArrowRight size={16} />
+              Book & pay now <ArrowRight size={16} />
             </Link>
           </div>
         </div>

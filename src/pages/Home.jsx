@@ -103,8 +103,8 @@ export default function Home() {
         <div className="container">
           <div className="cta-content reveal">
             <h2>Ready to plan your stay?</h2>
-            <p className="lead lead-light">Enquire about availability. We usually reply within a day.</p>
-            <Link to="/book" className="btn btn-primary btn-lg">Send an enquiry</Link>
+            <p className="lead lead-light">Check your dates — if they're free, pay now and lock them in.</p>
+            <Link to="/book" className="btn btn-primary btn-lg">Book & pay now</Link>
           </div>
         </div>
       </section>

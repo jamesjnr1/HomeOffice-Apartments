@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
+import StatCard from '../components/StatCard';
+import { NIGHTLY_RATE_GHS, MULTI_NIGHT_DISCOUNT_GHS, LONG_STAY_DISCOUNT_PCT } from '../lib/pricing';
 
 export default function Apartments() {
   return (
@@ -41,19 +43,19 @@ export default function Apartments() {
           <div className="rate-cards">
             <RateCard
               eyebrow="Standard"
-              price="$41"
+              price={`GHS ${NIGHTLY_RATE_GHS}`}
               unit="/ night"
               desc="The base rate per apartment (2 bedrooms), all-inclusive of the amenities listed above."
             />
             <RateCard
               eyebrow="5-night stays"
-              price="$10"
+              price={`GHS ${MULTI_NIGHT_DISCOUNT_GHS}`}
               unit="off"
-              desc="Book 5 nights or more and save $10 off your total."
+              desc="Book 5 nights or more and save on your total."
             />
             <RateCard
               eyebrow="28–30 night stays"
-              price="20%"
+              price={`${LONG_STAY_DISCOUNT_PCT * 100}%`}
               unit="off"
               desc="Book a full month and save 20% off your total."
               featured
@@ -66,9 +68,9 @@ export default function Apartments() {
         <div className="container">
           <div className="cta-content reveal">
             <h2>Come and see the space.</h2>
-            <p className="lead lead-light">Enquire about dates, rates, and long stays.</p>
+            <p className="lead lead-light">Check your dates — if they're free, you can pay and lock them in right away.</p>
             <Link to="/book" className="btn btn-primary btn-lg">
-              Send an enquiry <ArrowRight size={16} />
+              Book & pay now <ArrowRight size={16} />
             </Link>
           </div>
         </div>
@@ -87,16 +89,6 @@ function RateCard({ eyebrow, price, unit, desc, featured }) {
         <span className="rate-card-unit">{unit}</span>
       </div>
       <p className="rate-card-desc">{desc}</p>
-    </div>
-  );
-}
-
-function StatCard({ label, value, suffix }) {
-  return (
-    <div className="stat-card">
-      <div className="stat-value">{value}</div>
-      <div className="stat-label">{label}</div>
-      {suffix && <div className="stat-suffix">{suffix}</div>}
     </div>
   );
 }
