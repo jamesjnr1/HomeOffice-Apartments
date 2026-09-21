@@ -1,4 +1,5 @@
-// notify-enquiry — sends the enquiry notifications for both directions:
+// notify-enquiry — sends the enquiry/booking notifications for three
+// directions:
 //   type "new_enquiry" (default, back-compat with the original single
 //   purpose of this function) — emails the admin, and texts the admin's
 //   phone via Arkesel, the moment a new row lands in `enquiries`,
@@ -7,11 +8,17 @@
 //   enquiry (e.g. the dates they asked for are already reserved), so
 //   they hear back even if they don't have an account to see it on
 //   their dashboard.
+//   type "confirmed" — emails the GUEST the moment an admin turns their
+//   enquiry into a real booking (AdminEnquiries.jsx's "Confirm
+//   booking"), with the reference/dates/total for their records. Never
+//   texts — the SMS alert is for the admin only, on the enquiry side.
 //
-// Called by Postgres triggers (public.notify_new_enquiry for inserts,
-// public.notify_enquiry_declined for the decline case — see
-// supabase/migrations/20260909220000_notify_enquiry_by_email.sql and
-// 20260910100200_notify_enquiry_declined.sql), not directly by the
+// Called by Postgres triggers (public.notify_new_enquiry for enquiry
+// inserts, public.notify_enquiry_declined for the decline case,
+// public.notify_booking_confirmed for booking inserts — see
+// supabase/migrations/20260909220000_notify_enquiry_by_email.sql,
+// 20260910100200_notify_enquiry_declined.sql, and
+// 20260921100000_notify_booking_confirmed.sql), not directly by the
 // browser — the guest's/admin's request never touches this function,
 // so a flaky connection can no longer be the reason a notification
 // goes unnoticed. The trigger fires from the database write itself,
@@ -146,6 +153,71 @@ function newEnquiryEmail(e: any) {
   return { to: NOTIFY_TO, subject, html, replyTo: e.email || undefined };
 }
 
+// Home-Office Apartment and LivingSpring Gardens & Apartment are two
+// separate, independently-bookable units — bookings.apartment stores
+// one of these two values directly (see supabase/migrations/
+// 20260921090000_split_two_apartments.sql).
+const APARTMENT_NAMES: Record<string, string> = {
+  "home-office": "Home-Office Apartment",
+  livingspring: "LivingSpring Gardens & Apartment",
+};
+
+function confirmedEmail(b: any) {
+  const subject = `Booking confirmed — ${b.check_in ?? "?"} → ${b.check_out ?? "?"}`;
+  const nights = nightsBetween(b.check_in, b.check_out);
+  const nightsLabel = nights !== null ? ` (${nights} night${nights === 1 ? "" : "s"})` : "";
+  const apartmentLabel = APARTMENT_NAMES[b.apartment] || "Home-Office Apartments";
+
+  const html = `
+    <!doctype html>
+    <html>
+      <body style="margin:0;padding:0;background:#f4f5f3;font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;color:#1f2b26;">
+        <div style="max-width:560px;margin:0 auto;padding:32px 16px;">
+          <div style="background:#2d6a4f;border-radius:12px 12px 0 0;padding:22px 28px;">
+            <div style="color:#fff;font-size:17px;font-weight:700;letter-spacing:-.01em;">Home-Office Apartments</div>
+            <div style="color:#cfe3d7;font-size:12.5px;margin-top:2px;">Booking confirmed</div>
+          </div>
+          <div style="background:#fff;border:1px solid #e8ebe8;border-top:0;border-radius:0 0 12px 12px;padding:28px;">
+            <h1 style="margin:0 0 12px;font-size:19px;font-weight:600;">You're all set, ${escapeHtml(b.guest_name) || "there"}</h1>
+            <p style="margin:0 0 20px;font-size:14px;line-height:1.5;color:#4a5450;">
+              Your stay at ${escapeHtml(apartmentLabel)} is confirmed. Here are the details for your records.
+            </p>
+
+            <table style="width:100%;border-collapse:collapse;font-size:14px;background:#f4f5f3;border-radius:10px;">
+              <tr>
+                <td style="padding:14px 16px 4px;color:#6a706d;width:100px;">Reference</td>
+                <td style="padding:14px 16px 4px;font-weight:600;">${escapeHtml(b.reference)}</td>
+              </tr>
+              <tr>
+                <td style="padding:4px 16px;color:#6a706d;">Apartment</td>
+                <td style="padding:4px 16px;font-weight:600;">${escapeHtml(apartmentLabel)}</td>
+              </tr>
+              <tr>
+                <td style="padding:4px 16px;color:#6a706d;">Dates</td>
+                <td style="padding:4px 16px;font-weight:600;">${formatDateLong(b.check_in)} → ${formatDateLong(b.check_out)}${nightsLabel}</td>
+              </tr>
+              <tr>
+                <td style="padding:4px 16px;color:#6a706d;">Guests</td>
+                <td style="padding:4px 16px;font-weight:600;">${escapeHtml(b.guests) || "—"}</td>
+              </tr>
+              <tr>
+                <td style="padding:4px 16px 14px;color:#6a706d;">Total</td>
+                <td style="padding:4px 16px 14px;font-weight:600;">GHS ${Number(b.total).toLocaleString()}</td>
+              </tr>
+            </table>
+
+            <p style="margin:22px 0 0;color:#9aa19d;font-size:12px;">Questions before you arrive? Just reply to this email.</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+  // Reply-to is the admin's own notify address — this email goes TO
+  // the guest, so a reply from them should land back with the admin,
+  // same as declinedEmail below.
+  return { to: b.guest_email, subject, html, replyTo: NOTIFY_TO };
+}
+
 function declinedEmail(e: any) {
   const subject = `About your enquiry — ${e.check_in ?? "?"} → ${e.check_out ?? "?"}`;
   const html = `
@@ -255,7 +327,10 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  const type = payload?.type === "declined" ? "declined" : "new_enquiry";
+  const type =
+    payload?.type === "declined" ? "declined" :
+    payload?.type === "confirmed" ? "confirmed" :
+    "new_enquiry";
   const e = payload?.record ?? payload ?? {};
 
   if (!RESEND_API_KEY) {
@@ -263,12 +338,22 @@ Deno.serve(async (req: Request) => {
     return new Response("Email not configured", { status: 500 });
   }
 
+  // "declined" reads the guest's address off enquiries.email;
+  // "confirmed" off bookings.guest_email — different column names,
+  // same guest-facing purpose.
   if (type === "declined" && !e.email) {
     console.error("notify-enquiry: declined event with no guest email, nothing to send to");
     return new Response("No recipient", { status: 400 });
   }
+  if (type === "confirmed" && !e.guest_email) {
+    console.error("notify-enquiry: confirmed event with no guest email, nothing to send to");
+    return new Response("No recipient", { status: 400 });
+  }
 
-  const { to, subject, html, replyTo } = type === "declined" ? declinedEmail(e) : newEnquiryEmail(e);
+  const { to, subject, html, replyTo } =
+    type === "declined" ? declinedEmail(e) :
+    type === "confirmed" ? confirmedEmail(e) :
+    newEnquiryEmail(e);
 
   const emailPromise = fetch("https://api.resend.com/emails", {
     method: "POST",
