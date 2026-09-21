@@ -375,6 +375,21 @@ body:has(.dash-shell) main { padding: 0 !important; }
 /* Status pill itself now comes from the shared StatusBadge component
    (src/components/StatusBadge.jsx + .status-badge* in globals.css). */
 
+/* ── REVIEWS (on a trip card) ── */
+.star-rating { display: inline-flex; gap: 2px; align-items: center; }
+.dash-review-existing {
+  margin-top: 14px; padding-top: 14px; border-top: 1px solid #f0f2ef;
+}
+.dash-review-existing p { margin: 6px 0 0; font-size: 13.5px; color: #4a5450; line-height: 1.5; }
+.dash-review-form {
+  margin-top: 14px; padding: 14px; background: #f7f8f6; border-radius: 10px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.dash-review-form textarea {
+  width: 100%; border: 1px solid #e8ebe8; border-radius: 8px; padding: 8px 10px;
+  font: inherit; font-size: 13.5px; resize: vertical;
+}
+
 /* ── WISHLIST ── */
 .dash-wishlist-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
 @media (max-width: 700px) { .dash-wishlist-grid { grid-template-columns: 1fr; } }

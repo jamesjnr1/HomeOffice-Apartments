@@ -1,9 +1,10 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
 import { format, parseISO } from 'date-fns';
-import { Download, MessageSquare, ArrowRight, MapPin, CreditCard } from 'lucide-react';
+import { Download, MessageSquare, ArrowRight, MapPin, CreditCard, Star } from 'lucide-react';
 import Receipt from '../../components/Receipt';
 import StatusBadge from '../../components/StatusBadge';
+import StarRating from '../../components/StarRating';
 import { supabase } from '../../lib/supabase';
 import { apartmentName } from '../../lib/apartments';
 
@@ -17,6 +18,14 @@ import { apartmentName } from '../../lib/apartments';
  * separate units in the same building, so the name shown per booking
  * comes from that row's own `apartment` column — the location/photo
  * stay fixed since both units are in the same compound.
+ *
+ * Reviews: once a booking is `completed` (a daily job flips it from
+ * `confirmed` once check_out has passed — see supabase/migrations/
+ * 20260921130000_reviews_and_guest_accounts.sql), this page offers a
+ * "Leave a review" form right on the trip card, same idea as Airbnb's
+ * post-stay review prompt (also emailed — see notify-enquiry's
+ * "review_request" type). One review per booking, enforced by a
+ * unique constraint and RLS, not just this UI.
  */
 
 const APARTMENT = {
@@ -28,16 +37,19 @@ export default function Bookings() {
   const { user, displayName } = useOutletContext();
   const [tab, setTab] = useState('upcoming');
   const [bookings, setBookings] = useState([]);
+  const [reviews, setReviews] = useState({}); // booking_id -> review row
   const [loading, setLoading] = useState(true);
   const [receiptBooking, setReceiptBooking] = useState(null);
 
   useEffect(() => {
     if (!user?.id) return;
     loadBookings();
+    loadReviews();
 
     const sub = supabase
       .channel(`guest-bookings-${user.id}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings', filter: `guest_id=eq.${user.id}` }, loadBookings)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'reviews', filter: `guest_id=eq.${user.id}` }, loadReviews)
       .subscribe();
 
     return () => { supabase.removeChannel(sub); };
@@ -65,6 +77,11 @@ export default function Bookings() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const loadReviews = async () => {
+    const { data } = await supabase.from('reviews').select('*').eq('guest_id', user.id);
+    if (data) setReviews(Object.fromEntries(data.map((r) => [r.booking_id, r])));
   };
 
   const filtered = useMemo(() => {
@@ -121,7 +138,13 @@ export default function Bookings() {
       ) : (
         <div className="dash-booking-list">
           {filtered.map((b) => (
-            <BookingCard key={b.reference} booking={b} onReceipt={() => setReceiptBooking(b)} />
+            <BookingCard
+              key={b.reference}
+              booking={b}
+              review={reviews[b.id]}
+              onReceipt={() => setReceiptBooking(b)}
+              onReviewSaved={loadReviews}
+            />
           ))}
         </div>
       )}
@@ -147,8 +170,14 @@ function TabBtn({ active, onClick, count, children }) {
   );
 }
 
-function BookingCard({ booking, onReceipt }) {
+function BookingCard({ booking, review, onReceipt, onReviewSaved }) {
   const b = booking;
+  // A guest can leave a review the moment they've checked out, even
+  // if the daily job hasn't flipped the status to `completed` yet —
+  // mirrors the same check the reviews_insert_own RLS policy makes,
+  // so this button never promises something the database will reject.
+  const canReview = !review && b.status !== 'cancelled' && b.checkOut <= new Date();
+
   return (
     <article className="dash-booking">
       <img
@@ -206,7 +235,77 @@ function BookingCard({ booking, onReceipt }) {
             <MessageSquare size={14} /> Message host
           </Link>
         </div>
+
+        {review ? (
+          <div className="dash-review-existing">
+            <StarRating value={review.rating} size={14} />
+            {review.comment && <p>{review.comment}</p>}
+          </div>
+        ) : canReview ? (
+          <ReviewForm booking={b} onSaved={onReviewSaved} />
+        ) : null}
       </div>
     </article>
+  );
+}
+
+function ReviewForm({ booking, onSaved }) {
+  const [open, setOpen] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  const submit = async () => {
+    if (!rating) {
+      setError('Pick a star rating first.');
+      return;
+    }
+    setError('');
+    setSaving(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    const { error: insertError } = await supabase.from('reviews').insert({
+      booking_id: booking.id,
+      guest_id: user.id,
+      guest_name: booking.guest_name,
+      apartment: booking.apartment,
+      rating,
+      comment: comment.trim() || null,
+    });
+    setSaving(false);
+    if (insertError) {
+      setError("Couldn't save your review. Please try again.");
+      return;
+    }
+    onSaved();
+  };
+
+  if (!open) {
+    return (
+      <button className="dash-btn dash-btn-outline dash-btn-sm" style={{ marginTop: 12 }} onClick={() => setOpen(true)}>
+        <Star size={14} /> Leave a review
+      </button>
+    );
+  }
+
+  return (
+    <div className="dash-review-form">
+      {error && <p className="form-error" style={{ margin: '0 0 10px' }}>{error}</p>}
+      <StarRating value={rating} onChange={setRating} size={22} />
+      <textarea
+        rows={3}
+        value={comment}
+        onChange={(e) => setComment(e.target.value)}
+        placeholder="How was your stay? (optional)"
+      />
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button className="dash-btn dash-btn-primary dash-btn-sm" disabled={saving} onClick={submit}>
+          {saving ? 'Saving…' : 'Submit review'}
+        </button>
+        <button className="dash-btn dash-btn-ghost dash-btn-sm" onClick={() => setOpen(false)}>
+          Cancel
+        </button>
+      </div>
+    </div>
   );
 }

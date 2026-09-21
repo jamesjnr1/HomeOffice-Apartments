@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import {
   LayoutDashboard, Inbox, CalendarDays, Users,
   MessageSquare, Tag, TrendingUp, Settings as Cog,
-  LogOut, Menu, X, ArrowLeft, BarChart3,
+  LogOut, Menu, X, ArrowLeft, BarChart3, Star,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import './admin.css';
@@ -96,6 +96,7 @@ export default function AdminLayout() {
     { to: '/admin/enquiries', icon: Inbox, label: 'Enquiries', badge: newEnquiries || null },
     { to: '/admin/bookings', icon: CalendarDays, label: 'Bookings' },
     { to: '/admin/guests', icon: Users, label: 'Guests' },
+    { to: '/admin/reviews', icon: Star, label: 'Reviews' },
     { to: '/admin/messages', icon: MessageSquare, label: 'Messages', badge: unreadMessages || null },
     { to: '/admin/rates', icon: Tag, label: 'Rates & availability' },
     { to: '/admin/analytics', icon: BarChart3, label: 'Analytics' },

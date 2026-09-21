@@ -1,4 +1,4 @@
-// notify-enquiry — sends the enquiry/booking notifications for four
+// notify-enquiry — sends the enquiry/booking notifications for six
 // directions:
 //   type "new_enquiry" (default, back-compat with the original single
 //   purpose of this function) — emails the admin, and texts the admin's
@@ -17,14 +17,30 @@
 //   admin confirms/marks one paid directly, with the
 //   reference/dates/total for their records. Never texts — the SMS
 //   alert is for the admin only, on the enquiry side.
+//   type "welcome_account" — emails a GUEST a "set your password" link
+//   the moment book-and-pay auto-creates an account for them (every
+//   guest who completes a real booking gets one automatically, so
+//   their stay shows up in a dashboard even if they never explicitly
+//   signed up — see supabase/functions/book-and-pay/index.ts). Called
+//   directly from that function, not from a Postgres trigger, since
+//   account creation isn't a row in any table this project already
+//   has a trigger on.
+//   type "review_request" — emails the GUEST once their stay is over,
+//   asking them to leave a review (see supabase/migrations/20260921130000_
+//   reviews_and_guest_accounts.sql — a daily job marks bookings
+//   `completed` once check_out has passed, and that transition is what
+//   fires this).
 //
 // Called by Postgres triggers (public.notify_new_enquiry for enquiry
 // inserts, public.notify_enquiry_declined for the decline case,
-// public.notify_payment_requested and public.notify_booking_confirmed
-// for booking updates — see supabase/migrations/20260909220000_notify_
-// enquiry_by_email.sql, 20260910100200_notify_enquiry_declined.sql, and
-// 20260921120000_payment_gated_bookings.sql), not directly by the
-// browser — the guest's/admin's request never touches this function,
+// public.notify_payment_requested, public.notify_booking_confirmed, and
+// public.notify_review_request for booking updates — see
+// supabase/migrations/20260909220000_notify_enquiry_by_email.sql,
+// 20260910100200_notify_enquiry_declined.sql, 20260921120000_payment_
+// gated_bookings.sql, and 20260921130000_reviews_and_guest_accounts.sql),
+// plus one direct call from book-and-pay for "welcome_account" — either
+// way, never directly by the browser — the guest's/admin's request
+// never touches this function,
 // so a flaky connection can no longer be the reason a notification
 // goes unnoticed. The trigger fires from the database write itself,
 // which is strictly more reliable than a second request from a
@@ -274,6 +290,59 @@ function paymentRequestedEmail(b: any) {
   return { to: b.guest_email, subject, html, replyTo: NOTIFY_TO };
 }
 
+function welcomeAccountEmail(b: any) {
+  const subject = `You're set up — manage your stay anytime`;
+  const html = `
+    <!doctype html>
+    <html>
+      <body style="margin:0;padding:0;background:#f4f5f3;font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;color:#1f2b26;">
+        <div style="max-width:560px;margin:0 auto;padding:32px 16px;">
+          <div style="background:#2d6a4f;border-radius:12px 12px 0 0;padding:22px 28px;">
+            <div style="color:#fff;font-size:17px;font-weight:700;letter-spacing:-.01em;">Home-Office Apartments</div>
+            <div style="color:#cfe3d7;font-size:12.5px;margin-top:2px;">Your account is ready</div>
+          </div>
+          <div style="background:#fff;border:1px solid #e8ebe8;border-top:0;border-radius:0 0 12px 12px;padding:28px;">
+            <h1 style="margin:0 0 12px;font-size:19px;font-weight:600;">Hi ${escapeHtml(b.guest_name) || "there"},</h1>
+            <p style="margin:0 0 20px;font-size:14px;line-height:1.5;color:#4a5450;">
+              We've set up an account for you with this email so your booking, receipts, and messages are all in one place — no need to fill in your details again next time.
+            </p>
+            <a href="${escapeHtml(b.action_link)}" style="display:inline-block;background:#2d6a4f;color:#fff;text-decoration:none;padding:11px 22px;border-radius:8px;font-weight:600;font-size:14px;">Set a password &amp; view your dashboard →</a>
+            <p style="margin:22px 0 0;color:#9aa19d;font-size:12px;">This link signs you in directly — set a password there so you can log back in anytime. Questions? Just reply to this email.</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+  return { to: b.guest_email, subject, html, replyTo: NOTIFY_TO };
+}
+
+function reviewRequestEmail(b: any) {
+  const subject = `How was your stay at ${APARTMENT_NAMES[b.apartment] || "Home-Office Apartments"}?`;
+  const apartmentLabel = APARTMENT_NAMES[b.apartment] || "Home-Office Apartments";
+  const html = `
+    <!doctype html>
+    <html>
+      <body style="margin:0;padding:0;background:#f4f5f3;font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;color:#1f2b26;">
+        <div style="max-width:560px;margin:0 auto;padding:32px 16px;">
+          <div style="background:#2d6a4f;border-radius:12px 12px 0 0;padding:22px 28px;">
+            <div style="color:#fff;font-size:17px;font-weight:700;letter-spacing:-.01em;">Home-Office Apartments</div>
+            <div style="color:#cfe3d7;font-size:12.5px;margin-top:2px;">Thanks for staying with us</div>
+          </div>
+          <div style="background:#fff;border:1px solid #e8ebe8;border-top:0;border-radius:0 0 12px 12px;padding:28px;">
+            <h1 style="margin:0 0 12px;font-size:19px;font-weight:600;">How was ${escapeHtml(apartmentLabel)}, ${escapeHtml(b.guest_name) || "there"}?</h1>
+            <p style="margin:0 0 20px;font-size:14px;line-height:1.5;color:#4a5450;">
+              We hope you had a great stay (${formatDateLong(b.check_in)} → ${formatDateLong(b.check_out)}). A quick review helps other guests, and helps us too — it only takes a minute.
+            </p>
+            <a href="${SITE_URL}/dashboard/bookings" style="display:inline-block;background:#2d6a4f;color:#fff;text-decoration:none;padding:11px 22px;border-radius:8px;font-weight:600;font-size:14px;">Leave a review →</a>
+            <p style="margin:22px 0 0;color:#9aa19d;font-size:12px;">Log in with the email you booked with — your review is linked right to your trip. Thanks again for staying with us.</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+  return { to: b.guest_email, subject, html, replyTo: NOTIFY_TO };
+}
+
 function declinedEmail(e: any) {
   const subject = `About your enquiry — ${e.check_in ?? "?"} → ${e.check_out ?? "?"}`;
   const html = `
@@ -387,6 +456,8 @@ Deno.serve(async (req: Request) => {
     payload?.type === "declined" ? "declined" :
     payload?.type === "payment_requested" ? "payment_requested" :
     payload?.type === "confirmed" ? "confirmed" :
+    payload?.type === "welcome_account" ? "welcome_account" :
+    payload?.type === "review_request" ? "review_request" :
     "new_enquiry";
   const e = payload?.record ?? payload ?? {};
 
@@ -396,13 +467,14 @@ Deno.serve(async (req: Request) => {
   }
 
   // "declined" reads the guest's address off enquiries.email;
-  // "payment_requested"/"confirmed" off bookings.guest_email —
-  // different column names, same guest-facing purpose.
+  // "payment_requested"/"confirmed"/"welcome_account"/"review_request"
+  // off bookings.guest_email — different column names, same
+  // guest-facing purpose.
   if (type === "declined" && !e.email) {
     console.error("notify-enquiry: declined event with no guest email, nothing to send to");
     return new Response("No recipient", { status: 400 });
   }
-  if ((type === "payment_requested" || type === "confirmed") && !e.guest_email) {
+  if (["payment_requested", "confirmed", "welcome_account", "review_request"].includes(type) && !e.guest_email) {
     console.error(`notify-enquiry: ${type} event with no guest email, nothing to send to`);
     return new Response("No recipient", { status: 400 });
   }
@@ -410,11 +482,17 @@ Deno.serve(async (req: Request) => {
     console.error("notify-enquiry: payment_requested event with no payment_url");
     return new Response("Missing payment link", { status: 400 });
   }
+  if (type === "welcome_account" && !e.action_link) {
+    console.error("notify-enquiry: welcome_account event with no action_link");
+    return new Response("Missing account link", { status: 400 });
+  }
 
   const { to, subject, html, replyTo } =
     type === "declined" ? declinedEmail(e) :
     type === "payment_requested" ? paymentRequestedEmail(e) :
     type === "confirmed" ? confirmedEmail(e) :
+    type === "welcome_account" ? welcomeAccountEmail(e) :
+    type === "review_request" ? reviewRequestEmail(e) :
     newEnquiryEmail(e);
 
   const emailPromise = fetch("https://api.resend.com/emails", {

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
+import ReviewsSection from '../components/ReviewsSection';
 
 export default function Apartments() {
   return (
@@ -61,6 +62,8 @@ export default function Apartments() {
           </div>
         </div>
       </section>
+
+      <ReviewsSection />
 
       <section className="section cta-band">
         <div className="container">
