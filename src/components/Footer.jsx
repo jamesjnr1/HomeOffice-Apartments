@@ -49,12 +49,12 @@ export default function Footer() {
               <Phone size={14} /> +233 54 962 4125
             </a>
             <a
-              href="https://www.google.com/maps/dir/?api=1&destination=BY-0188-6413"
+              href="https://www.google.com/maps/search/?api=1&query=Fiapre%2C+Sunyani%2C+Ghana"
               target="_blank"
               rel="noopener noreferrer"
               className="footer-loc"
             >
-              <MapPin size={14} /> Fiapre, Sunyani &mdash; BY-0188-6413
+              <MapPin size={14} /> Fiapre, Sunyani
             </a>
             <a href="#" className="footer-social" aria-label="Instagram">
               <Instagram size={14} /> Instagram
