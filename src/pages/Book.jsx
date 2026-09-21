@@ -1,46 +1,34 @@
-import { useState } from 'react';
-import { Mail, Phone, MessageCircle, Check, AlertCircle } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Mail, Phone, MessageCircle, Check, AlertCircle, CreditCard, Loader2 } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { APARTMENT_LIST, APARTMENTS, DEFAULT_APARTMENT } from '../lib/apartments';
+import { NIGHTLY_RATE_GHS, MULTI_NIGHT_DISCOUNT_GHS, LONG_STAY_DISCOUNT_PCT, nightsBetween, calculateTotal } from '../lib/pricing';
 
 /**
- * Book — enquiry form that actually sends and actually persists.
+ * Book — the public booking page. Two ways to reach out:
  *
- * Duplicate enquiries: while a guest has an enquiry that hasn't turned
- * into a booking yet (marking it replied or archived does NOT release
- * this — only AdminEnquiries.jsx's "Confirm booking" does), for less
- * than 3 days, a second submission from the same email is rejected by
- * a database trigger (see supabase/migrations/20260909210000_block_
- * until_booked_not_just_replied.sql) — caught below and turned into a
- * friendly message. The 3-day window is deliberate: if an enquiry is
- * ever missed entirely, the guest isn't locked out forever waiting on
- * someone to notice. As soon as the email field loses focus,
- * has_open_enquiry() is also checked proactively so a guest with a
- * pending enquiry finds out before filling in the rest of the form,
- * not after.
+ * "Book & pay now" — the fast path. Calls the book-and-pay edge
+ * function (see supabase/functions/book-and-pay/index.ts), which
+ * checks the dates are actually free (against this site's own
+ * bookings AND the Airbnb-synced calendar), computes the real GHS
+ * total itself, creates the booking, opens a Paystack checkout, and
+ * hands back the checkout URL — the browser redirects straight there.
+ * No admin step for the common case: if the dates are free, payment is
+ * the only thing standing between "Book & pay now" and a confirmed
+ * stay. If the dates turn out NOT to be free (or a race loses to
+ * another booking at the last moment), the edge function falls back
+ * to filing a plain enquiry instead, and this page shows the same
+ * "Enquiry sent" confirmation as the question-only path below.
  *
- * Availability: once both dates are picked, is_date_range_available()
- * (see supabase/migrations/20260910100100_prevent_overlapping_
- * bookings.sql) is also checked proactively — same privacy-safe,
- * boolean-only RPC shape as has_open_enquiry, so it never exposes who
- * else is staying when. This is only ever a heads-up, never a block:
- * the admin still makes the real call (see AdminEnquiries.jsx's
- * Confirm/Decline), since dates can free up or the admin may know
- * something the calendar doesn't yet.
+ * "Send a question instead" — for anyone not ready to commit to dates
+ * (custom requests, long-stay negotiation, etc.) — a plain enquiry,
+ * inserted directly into `enquiries` exactly as before. Same duplicate-
+ * enquiry guard (has_open_enquiry / the 3-day resubmit window) applies
+ * here, not to the pay-now path.
  *
- * On submit: saves the enquiry to Supabase (table: enquiries) — this
- * is the single source of truth other pages (admin Enquiries inbox,
- * overview stats, the sidebar badge) read from. That insert is also
- * what triggers the admin email notification server-side (see
- * supabase/migrations/20260909220000_notify_enquiry_by_email.sql and
- * supabase/functions/notify-enquiry) — this used to be a second,
- * separate POST to Formspree from the guest's own browser, which
- * meant a flaky guest connection could silently mean the notification
- * never arrived even though the enquiry itself saved fine. Now
- * there's exactly one write, and the notification is guaranteed by
- * the database itself rather than by the guest's browser completing a
- * second request. If Supabase isn't configured at all, guests are
- * told to email directly.
+ * Live price estimate: computed client-side from src/lib/pricing.js
+ * purely for display — the edge function keeps its own copy of the
+ * exact same math as the real source of truth for what's charged.
  */
 
 const CONTACT_EMAIL = 'jamesd@home-officegroup.com';
@@ -53,25 +41,24 @@ export default function Book() {
     guests: '2', message: '', apartment: DEFAULT_APARTMENT,
   });
   const [sent, setSent] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [booking, setBooking] = useState(false);
+  const [sendingEnquiry, setSendingEnquiry] = useState(false);
   const [error, setError] = useState('');
   const [pendingNotice, setPendingNotice] = useState(false);
   const [availabilityNotice, setAvailabilityNotice] = useState(false);
 
+  const loading = booking || sendingEnquiry;
   const update = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
-  // Proactive check as soon as the guest moves on from the email
-  // field — so they find out about a pending enquiry before filling
-  // in the rest of the form, not after submitting it.
+  const nights = useMemo(() => nightsBetween(form.checkIn, form.checkOut), [form.checkIn, form.checkOut]);
+  const total = useMemo(() => calculateTotal(nights), [nights]);
+
   const checkPendingEnquiry = async () => {
     if (!isSupabaseConfigured || !form.email.trim()) return;
     const { data } = await supabase.rpc('has_open_enquiry', { check_email: form.email.trim() });
     setPendingNotice(!!data);
   };
 
-  // Same idea, for dates: once both are picked, check them against
-  // existing bookings. Purely a heads-up (see doc comment above) —
-  // never blocks the form.
   const checkAvailability = async () => {
     if (!isSupabaseConfigured || !form.checkIn || !form.checkOut) { setAvailabilityNotice(false); return; }
     if (new Date(form.checkOut) <= new Date(form.checkIn)) { setAvailabilityNotice(false); return; }
@@ -83,28 +70,79 @@ export default function Book() {
     setAvailabilityNotice(data === false);
   };
 
-  const submit = async (e) => {
-    e.preventDefault();
-    setError('');
-
-    // Validation
+  const validate = () => {
     if (!form.name.trim() || !form.email.trim() || !form.checkIn || !form.checkOut) {
       setError('Please fill in your name, email, and dates.');
-      return;
+      return false;
     }
     if (new Date(form.checkOut) <= new Date(form.checkIn)) {
       setError('Check-out must be after check-in.');
-      return;
+      return false;
     }
-
     if (!isSupabaseConfigured) {
-      setError(
-        `Enquiries aren't wired up yet. Please email ${CONTACT_EMAIL} directly and we'll get right back to you.`
-      );
-      return;
+      setError(`Booking isn't wired up yet. Please email ${CONTACT_EMAIL} directly and we'll get right back to you.`);
+      return false;
     }
+    return true;
+  };
 
-    setLoading(true);
+  const resetForm = () => {
+    setPendingNotice(false);
+    setAvailabilityNotice(false);
+    setForm({ name: '', email: '', phone: '', checkIn: '', checkOut: '', guests: '2', message: '', apartment: DEFAULT_APARTMENT });
+  };
+
+  // The fast path: check dates are free, pay, done. Redirects the
+  // whole page to Paystack's checkout on success — nothing left to
+  // render here in that case. Falls back to a plain enquiry (same
+  // "Enquiry sent" confirmation as the question-only path) if the
+  // edge function finds the dates aren't actually available.
+  const bookAndPay = async (e) => {
+    e.preventDefault();
+    setError('');
+    if (!validate()) return;
+
+    setBooking(true);
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke('book-and-pay', {
+        body: {
+          name: form.name, email: form.email, phone: form.phone || null,
+          checkIn: form.checkIn, checkOut: form.checkOut,
+          guests: Number(form.guests), message: form.message || null,
+          apartment: form.apartment,
+        },
+      });
+
+      if (fnError || !data?.ok) {
+        setError(data?.error || "Sorry — we couldn't process that. Please try again, or send us a question instead.");
+        setBooking(false);
+        return;
+      }
+
+      if (data.mode === 'paid') {
+        window.location.href = data.authorization_url;
+        return; // leaving the page — no need to reset loading state
+      }
+
+      // mode === 'enquiry': dates weren't actually available, filed as
+      // an enquiry instead.
+      setSent(true);
+      resetForm();
+    } catch {
+      setError(`Sorry — we couldn't process that. Please try again, or email ${CONTACT_EMAIL} directly.`);
+    } finally {
+      setBooking(false);
+    }
+  };
+
+  // The question-only path — unchanged from before: a plain enquiry,
+  // no payment involved, admin follows up personally.
+  const sendEnquiry = async (e) => {
+    e.preventDefault();
+    setError('');
+    if (!validate()) return;
+
+    setSendingEnquiry(true);
     try {
       const { error: dbError } = await supabase.from('enquiries').insert({
         name: form.name,
@@ -118,27 +156,18 @@ export default function Book() {
       });
 
       if (dbError?.message?.includes('DUPLICATE_OPEN_ENQUIRY')) {
-        setError(
-          `You already have an enquiry with us that we're still working on — we'll be in touch soon! Email ${CONTACT_EMAIL} if it's urgent.`
-        );
-        setLoading(false);
+        setError(`You already have an enquiry with us that we're still working on — we'll be in touch soon! Email ${CONTACT_EMAIL} if it's urgent.`);
+        setSendingEnquiry(false);
         return;
       }
       if (dbError) throw dbError;
 
       setSent(true);
-      setPendingNotice(false);
-      setAvailabilityNotice(false);
-      setForm({
-        name: '', email: '', phone: '', checkIn: '', checkOut: '',
-        guests: '2', message: '', apartment: DEFAULT_APARTMENT,
-      });
-    } catch (err) {
-      setError(
-        `Sorry — we couldn't send that. Please try again, or email ${CONTACT_EMAIL} directly.`
-      );
+      resetForm();
+    } catch {
+      setError(`Sorry — we couldn't send that. Please try again, or email ${CONTACT_EMAIL} directly.`);
     } finally {
-      setLoading(false);
+      setSendingEnquiry(false);
     }
   };
 
@@ -146,10 +175,10 @@ export default function Book() {
     <>
       <section className="page-header page-header-v2">
         <div className="container">
-          <span className="eyebrow">ENQUIRE</span>
+          <span className="eyebrow">BOOK</span>
           <h1>Plan your stay.</h1>
           <p className="lead">
-            Tell us when you'd like to visit. We'll come back with availability and rates within a day.
+            Pick your dates — if they're free, you can pay and lock them in right now.
           </p>
         </div>
       </section>
@@ -158,7 +187,7 @@ export default function Book() {
         <div className="container">
           <div className="book-grid">
             {/* Form */}
-            <form className="book-form" onSubmit={submit} noValidate>
+            <form className="book-form" noValidate>
               {error && (
                 <div className="form-error" role="alert">
                   <AlertCircle size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} />
@@ -253,8 +282,8 @@ export default function Book() {
                 </div>
               </div>
               {availabilityNotice && (
-                <p className="field-note">
-                  Heads up — those dates may already be booked. We'll confirm availability when we reply, or feel free to try different dates.
+                <p className="field-note field-note-warn">
+                  Heads up — those dates look taken. "Book & pay now" will likely fall back to an enquiry instead, or try different dates.
                 </p>
               )}
 
@@ -269,7 +298,7 @@ export default function Book() {
               </div>
 
               <div className="field">
-                <label>Anything we should know?</label>
+                <label>Anything we should know? (optional)</label>
                 <textarea
                   rows={4}
                   value={form.message}
@@ -279,15 +308,36 @@ export default function Book() {
                 />
               </div>
 
+              {nights > 0 && (
+                <div className="book-price-estimate">
+                  <span>{nights} night{nights === 1 ? '' : 's'} × GHS {NIGHTLY_RATE_GHS}</span>
+                  <strong>GHS {total.toLocaleString()}</strong>
+                </div>
+              )}
+
               <button
                 type="submit"
                 className="btn btn-primary btn-lg btn-block"
                 disabled={loading}
+                onClick={bookAndPay}
               >
-                {loading ? 'Sending…' : 'Send enquiry'}
+                {booking ? (
+                  <><Loader2 size={16} className="spin" style={{ marginRight: 6, verticalAlign: -3 }} /> Checking availability…</>
+                ) : (
+                  <><CreditCard size={16} style={{ marginRight: 6, verticalAlign: -3 }} /> Book & pay now{nights > 0 ? ` — GHS ${total.toLocaleString()}` : ''}</>
+                )}
+              </button>
+              <button
+                type="button"
+                className="btn btn-outline btn-block"
+                style={{ marginTop: 10 }}
+                disabled={loading}
+                onClick={sendEnquiry}
+              >
+                {sendingEnquiry ? 'Sending…' : 'Not ready to book? Send a question instead'}
               </button>
               <p className="fine-print">
-                By sending this enquiry, you'll receive a reply at the email above. We don't share your details.
+                Paying now locks in your dates immediately via Paystack (card or Mobile Money). We don't share your details.
               </p>
             </form>
 
@@ -315,9 +365,9 @@ export default function Book() {
                   <div className="side-divider" />
                   <h4>Rates</h4>
                   <ul className="side-list">
-                    <li><strong>$41 / night</strong><span>Base rate per apartment</span></li>
-                    <li><strong>$10 off</strong><span>When booked for 5 nights</span></li>
-                    <li><strong>20% off</strong><span>When booked for 28–30 nights</span></li>
+                    <li><strong>GHS {NIGHTLY_RATE_GHS} / night</strong><span>Base rate per apartment</span></li>
+                    <li><strong>GHS {MULTI_NIGHT_DISCOUNT_GHS} off</strong><span>When booked for 5+ nights</span></li>
+                    <li><strong>{LONG_STAY_DISCOUNT_PCT * 100}% off</strong><span>When booked for 28–30 nights</span></li>
                   </ul>
 
                   <div className="side-divider" />
@@ -343,7 +393,7 @@ export default function Book() {
         </div>
       </section>
 
-      {/* Success modal */}
+      {/* Success modal (question-only path, or a book-and-pay fallback) */}
       {sent && (
         <div className="modal" onClick={() => setSent(false)}>
           <div className="modal-card" onClick={(e) => e.stopPropagation()}>

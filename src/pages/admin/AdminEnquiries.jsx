@@ -3,6 +3,7 @@ import { Check, Reply, Archive, Trash2, CalendarCheck, Ban, AlertTriangle, Send,
 import { formatDistanceToNow } from 'date-fns';
 import { supabase } from '../../lib/supabase';
 import { DEFAULT_APARTMENT, apartmentName } from '../../lib/apartments';
+import StatusBadge from '../../components/StatusBadge';
 
 /**
  * AdminEnquiries — real submissions from the public Book form, stored
@@ -66,10 +67,10 @@ function rangesOverlap(aStart, aEnd, bStart, bEnd) {
 function urgency(e) {
   if (e.booking_id || e.status === 'declined') return null;
   const remaining = RESUBMIT_WINDOW_MS - (Date.now() - new Date(e.created_at).getTime());
-  if (remaining <= 0) return { label: 'Overdue · guest can resubmit', className: 'cancelled' };
+  if (remaining <= 0) return { label: 'Overdue · guest can resubmit', tone: 'bad' };
   if (remaining <= 24 * 60 * 60 * 1000) {
     const hrs = Math.max(1, Math.round(remaining / (60 * 60 * 1000)));
-    return { label: `Resubmit window opens in ${hrs}h`, className: 'pending' };
+    return { label: `Resubmit window opens in ${hrs}h`, tone: 'warn' };
   }
   return null;
 }
@@ -410,23 +411,23 @@ export default function AdminEnquiries() {
                       <td>{e.check_in} → {e.check_out}</td>
                       <td>{e.guests}</td>
                       <td>
-                        <span className={`mgmt-status ${e.status}`}>{e.status}</span>
-                        {e.bookings && (
-                          <span className={`mgmt-status ${e.bookings.status === 'confirmed' ? 'confirmed' : 'pending'}`} style={{ marginLeft: 6 }}>
-                            {e.bookings.status === 'awaiting_payment' ? 'Awaiting payment' : 'Booked'} · {e.bookings.reference}
-                          </span>
-                        )}
-                        {urgency(e) && (
-                          <span className={`mgmt-status ${urgency(e).className}`} style={{ marginLeft: 6 }}>
-                            {urgency(e).label}
-                          </span>
-                        )}
-                        {conflict && (
-                          <span className="mgmt-status cancelled" style={{ marginLeft: 6 }} title={`Overlaps ${conflict.reference}`}>
-                            <AlertTriangle size={11} style={{ verticalAlign: -1, marginRight: 3 }} />
-                            Dates taken · {conflict.reference}
-                          </span>
-                        )}
+                        <div className="mgmt-status-cell">
+                          {e.bookings ? (
+                            <>
+                              <StatusBadge status={e.bookings.status} />
+                              <span className="mgmt-td-mono mgmt-td-muted">{e.bookings.reference}</span>
+                            </>
+                          ) : (
+                            <StatusBadge status={e.status} />
+                          )}
+                          {urgency(e) && <StatusBadge label={urgency(e).label} tone={urgency(e).tone} />}
+                          {conflict && (
+                            <span className="status-badge status-badge-bad" title={`Overlaps ${conflict.reference}`}>
+                              <AlertTriangle size={11} />
+                              Dates taken · {conflict.reference}
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="mgmt-td-muted">{formatDistanceToNow(new Date(e.created_at), { addSuffix: true })}</td>
                       <td>
@@ -504,8 +505,8 @@ export default function AdminEnquiries() {
                                 )}
                               </div>
                             ) : e.bookings ? (
-                              <p className="mgmt-td-muted">
-                                Already booked as <strong>{e.bookings.reference}</strong> ({e.bookings.status}).
+                              <p className="mgmt-td-muted mgmt-status-cell">
+                                Booked as <strong>{e.bookings.reference}</strong> <StatusBadge status={e.bookings.status} />
                               </p>
                             ) : e.status === 'declined' ? null : locked(e) ? (
                               <p className="mgmt-td-muted">
