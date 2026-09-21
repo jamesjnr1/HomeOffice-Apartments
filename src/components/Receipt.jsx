@@ -1,5 +1,6 @@
 import { format } from 'date-fns';
 import { X, Printer } from 'lucide-react';
+import { apartmentName } from '../lib/apartments';
 
 /**
  * Receipt — a printable booking receipt, used from the guest dashboard
@@ -12,8 +13,8 @@ import { X, Printer } from 'lucide-react';
  * "Save as PDF" — produces a clean, single-page receipt.
  *
  * Expected `booking` shape:
- *   { reference, checkIn: Date, checkOut: Date, nights, guests, total, status }
- * `guestName` / `guestEmail` are optional — omitted lines are skipped.
+ *   { reference, checkIn: Date, checkOut: Date, nights, guests, total, status, apartment? }
+ * `guestName` / `guestEmail` / `apartment` are optional — omitted lines are skipped.
  */
 export default function Receipt({ booking, guestName, guestEmail, onClose }) {
   if (!booking) return null;
@@ -54,6 +55,12 @@ export default function Receipt({ booking, guestName, guestEmail, onClose }) {
               <span className="receipt-label">Reference</span>
               <span className="receipt-value receipt-mono">{b.reference}</span>
             </div>
+            {b.apartment && (
+              <div>
+                <span className="receipt-label">Apartment</span>
+                <span className="receipt-value">{apartmentName(b.apartment)}</span>
+              </div>
+            )}
             <div>
               <span className="receipt-label">Status</span>
               <span className="receipt-value">{formatStatus(b.status)}</span>

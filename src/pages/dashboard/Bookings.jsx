@@ -1,9 +1,10 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
 import { format, parseISO } from 'date-fns';
-import { Download, MessageSquare, ArrowRight, MapPin } from 'lucide-react';
+import { Download, MessageSquare, ArrowRight, MapPin, CreditCard } from 'lucide-react';
 import Receipt from '../../components/Receipt';
 import { supabase } from '../../lib/supabase';
+import { apartmentName } from '../../lib/apartments';
 
 /**
  * Bookings — real rows from the `bookings` table, scoped to this
@@ -11,14 +12,13 @@ import { supabase } from '../../lib/supabase';
  * here if the enquiry's email matched an existing account at the
  * moment an admin confirmed it — see AdminEnquiries.jsx.
  *
- * The site represents ONLY Home-Office Apartments, a single
- * 4-bedroom self-contained property, so the photo/location shown
- * alongside each booking is the same fixed APARTMENT constant rather
- * than per-row data.
+ * Home-Office Apartment and LivingSpring Gardens & Apartment are two
+ * separate units in the same building, so the name shown per booking
+ * comes from that row's own `apartment` column — the location/photo
+ * stay fixed since both units are in the same compound.
  */
 
 const APARTMENT = {
-  name: 'Home-Office Apartments',
   location: 'Sunyani, Ghana',
   coverImage: '/images/hero-property.jpg',
 };
@@ -152,13 +152,13 @@ function BookingCard({ booking, onReceipt }) {
     <article className="dash-booking">
       <img
         src={APARTMENT.coverImage}
-        alt={APARTMENT.name}
+        alt={apartmentName(b.apartment)}
         className="dash-booking-img"
       />
       <div className="dash-booking-body">
         <div className="dash-booking-top">
           <div>
-            <h3>{APARTMENT.name}</h3>
+            <h3>{apartmentName(b.apartment)}</h3>
             <div className="dash-loc">
               <MapPin size={12} />
               {APARTMENT.location}
@@ -193,6 +193,11 @@ function BookingCard({ booking, onReceipt }) {
         </div>
 
         <div className="dash-booking-actions">
+          {b.status === 'awaiting_payment' && b.payment_url && (
+            <a href={b.payment_url} target="_blank" rel="noopener noreferrer" className="dash-btn dash-btn-primary dash-btn-sm">
+              <CreditCard size={14} /> Pay now
+            </a>
+          )}
           <button className="dash-btn dash-btn-ghost dash-btn-sm" onClick={onReceipt}>
             <Download size={14} /> Receipt
           </button>
@@ -208,6 +213,7 @@ function BookingCard({ booking, onReceipt }) {
 function StatusBadge({ status }) {
   const map = {
     confirmed: { className: 'dash-status confirmed', label: 'Confirmed' },
+    awaiting_payment: { className: 'dash-status pending', label: 'Awaiting payment' },
     pending: { className: 'dash-status pending', label: 'Pending' },
     completed: { className: 'dash-status completed', label: 'Completed' },
     cancelled: { className: 'dash-status cancelled', label: 'Cancelled' },

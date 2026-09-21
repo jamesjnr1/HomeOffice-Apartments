@@ -4,10 +4,13 @@
 // by the Book page's proactive availability check) also treats
 // Airbnb-booked dates as unavailable.
 //
-// This property is listed on Airbnb twice (the same physical
-// apartment, two listings) — both feeds are fetched and merged into
-// the same shared pool of blocked dates, since a reservation through
-// either listing occupies the one real apartment.
+// Home-Office Apartment and LivingSpring Gardens & Apartment are two
+// SEPARATE, independently-bookable units in the same building, each
+// with its own Airbnb listing/feed (see supabase/migrations/
+// 20260921090000_split_two_apartments.sql for the full correction —
+// an earlier version of this comment wrongly assumed one physical
+// apartment double-listed on Airbnb). Each feed's rows are tagged with
+// their own `source` and never cross-block the other unit's dates.
 //
 // Called on a schedule by a pg_cron job (see
 // supabase/migrations/<timestamp>_airbnb_sync_schedule.sql), not
@@ -127,12 +130,24 @@ function toArkeselRecipient(phone: string): string {
   return digits;
 }
 
+// Home-Office Apartment and LivingSpring Gardens & Apartment are two
+// separate, independently-bookable units in the same building, each
+// with its own Airbnb listing/feed (see supabase/migrations/
+// 20260921090000_split_two_apartments.sql) — name the actual unit in
+// the text instead of a generic "Airbnb", so the admin knows which
+// one without needing to open the dashboard.
+const APARTMENT_NAMES: Record<string, string> = {
+  airbnb: "Home-Office Apartment",
+  "airbnb-2": "LivingSpring Gardens & Apartment",
+};
+
 // Best-effort, same as notify-enquiry's own SMS step — a sync run
 // should never fail or roll back over a text message not going out.
-async function sendNewBookingSms(range: BusyRange): Promise<void> {
+async function sendNewBookingSms(range: BusyRange, source: string): Promise<void> {
   if (!ARKESEL_API_KEY) return;
+  const apartmentLabel = APARTMENT_NAMES[source] || "Airbnb";
   const message =
-    `New booking (Airbnb): ${formatDateShort(range.start)}-${formatDateShort(range.end)}` +
+    `New booking (${apartmentLabel}): ${formatDateShort(range.start)}-${formatDateShort(range.end)}` +
     (range.summary ? ` (${range.summary})` : "");
   try {
     const res = await fetch("https://sms.arkesel.com/api/v2/sms/send", {
@@ -236,7 +251,7 @@ Deno.serve(async (req: Request) => {
     // 3-hourly resync of ones already known, only the first time a UID
     // shows up in this feed.
     for (const e of newEvents) {
-      await sendNewBookingSms(e);
+      await sendNewBookingSms(e, feed.source);
     }
 
     // Drop rows for events that disappeared from this feed (e.g. a

@@ -3,6 +3,20 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, parseISO, 
 import { List, CalendarDays, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import Receipt from '../../components/Receipt';
 import { supabase } from '../../lib/supabase';
+import { APARTMENTS, apartmentName } from '../../lib/apartments';
+
+// external_calendar_blocks doesn't have its own apartment column — the
+// mapping is the Airbnb source label itself (see supabase/migrations/
+// 20260921090000_split_two_apartments.sql): the first listing synced
+// ('airbnb') is Home-Office Apartment, the second ('airbnb-2') is
+// LivingSpring Gardens & Apartment.
+function sourceApartment(source) {
+  return source === 'airbnb-2' ? 'livingspring' : 'home-office';
+}
+
+function statusLabel(status) {
+  return status === 'awaiting_payment' ? 'Awaiting payment' : status;
+}
 
 /**
  * AdminBookings — real rows from the `bookings` table (see
@@ -120,19 +134,20 @@ export default function AdminBookings() {
             <div className="mgmt-table-wrap">
               <table className="mgmt-table">
                 <thead>
-                  <tr><th>Source</th><th>Ref</th><th>Guest</th><th>Check-in</th><th>Check-out</th><th>Nights</th><th>Total</th><th>Status</th><th></th></tr>
+                  <tr><th>Source</th><th>Apartment</th><th>Ref</th><th>Guest</th><th>Check-in</th><th>Check-out</th><th>Nights</th><th>Total</th><th>Status</th><th></th></tr>
                 </thead>
                 <tbody>
                   {allReservations.map((r) => r.kind === 'site' ? (
                     <tr key={r.key}>
                       <td><span className="mgmt-source mgmt-source-site">Site</span></td>
+                      <td className="mgmt-td-sub">{apartmentName(r.apartment)}</td>
                       <td className="mgmt-td-mono">{r.reference}</td>
                       <td><div className="mgmt-td-primary">{r.guest_name}</div><div className="mgmt-td-sub">{r.guest_email}</div></td>
                       <td>{r.check_in}</td>
                       <td>{r.check_out}</td>
                       <td>{r.nights}</td>
                       <td>GHS {Number(r.total).toLocaleString()}</td>
-                      <td><span className={`mgmt-status ${r.status}`}>{r.status}</span></td>
+                      <td><span className={`mgmt-status ${r.status}`}>{statusLabel(r.status)}</span></td>
                       <td>
                         <div className="mgmt-row-actions">
                           <button title="Print receipt" onClick={() => setReceiptBooking(r)}>
@@ -144,6 +159,7 @@ export default function AdminBookings() {
                   ) : (
                     <tr key={r.key}>
                       <td><span className="mgmt-source mgmt-source-airbnb">Airbnb</span></td>
+                      <td className="mgmt-td-sub">{apartmentName(sourceApartment(r.source))}</td>
                       <td className="mgmt-td-mono mgmt-td-muted">—</td>
                       <td><div className="mgmt-td-primary mgmt-td-muted">Airbnb guest</div><div className="mgmt-td-sub">{r.summary}</div></td>
                       <td>{r.start_date}</td>
@@ -184,13 +200,13 @@ export default function AdminBookings() {
                 <div key={day.toISOString()} className={`mgmt-cal-day ${bks.length || abs.length ? 'has-booking' : ''}`}>
                   <span className="mgmt-cal-num">{format(day, 'd')}</span>
                   {bks.map(b => (
-                    <span key={b.id} className="mgmt-cal-event" style={{ background: 'var(--accent)' }}>
-                      {b.guest_name.split(' ')[0]}
+                    <span key={b.id} className="mgmt-cal-event" style={{ background: 'var(--accent)' }} title={apartmentName(b.apartment)}>
+                      {b.guest_name.split(' ')[0]} · {APARTMENTS[b.apartment]?.shortName}
                     </span>
                   ))}
                   {abs.map(x => (
-                    <span key={x.id} className="mgmt-cal-event" style={{ background: 'var(--airbnb)' }}>
-                      Airbnb
+                    <span key={x.id} className="mgmt-cal-event" style={{ background: 'var(--airbnb)' }} title={apartmentName(sourceApartment(x.source))}>
+                      Airbnb · {APARTMENTS[sourceApartment(x.source)]?.shortName}
                     </span>
                   ))}
                 </div>
@@ -210,6 +226,7 @@ export default function AdminBookings() {
             guests: receiptBooking.guests,
             total: receiptBooking.total,
             status: receiptBooking.status,
+            apartment: receiptBooking.apartment,
           }}
           guestName={receiptBooking.guest_name}
           guestEmail={receiptBooking.guest_email}
