@@ -75,11 +75,8 @@ export default function About() {
               <p className="prose">
                 Home-Office Apartments and LivingSpring Gardens is in Fiapre, Sunyani, Bono Region.
               </p>
-              <p className="prose">
-                Ghana Post Digital Address: <strong className="mono">BY-0188-6413</strong>
-              </p>
               <a
-                href="https://www.google.com/maps/dir/?api=1&destination=BY-0188-6413"
+                href="https://www.google.com/maps/search/?api=1&query=Fiapre%2C+Sunyani%2C+Ghana"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn-outline"
@@ -91,7 +88,7 @@ export default function About() {
               <iframe
                 title="Map to Home-Office Apartments"
                 className="directions-map"
-                src="https://www.google.com/maps?q=BY-0188-6413&output=embed"
+                src="https://www.google.com/maps?q=Fiapre,+Sunyani,+Ghana&output=embed"
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
               />
