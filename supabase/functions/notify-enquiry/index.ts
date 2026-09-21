@@ -1,4 +1,4 @@
-// notify-enquiry — sends the enquiry/booking notifications for three
+// notify-enquiry — sends the enquiry/booking notifications for four
 // directions:
 //   type "new_enquiry" (default, back-compat with the original single
 //   purpose of this function) — emails the admin, and texts the admin's
@@ -8,17 +8,22 @@
 //   enquiry (e.g. the dates they asked for are already reserved), so
 //   they hear back even if they don't have an account to see it on
 //   their dashboard.
-//   type "confirmed" — emails the GUEST the moment an admin turns their
-//   enquiry into a real booking (AdminEnquiries.jsx's "Confirm
-//   booking"), with the reference/dates/total for their records. Never
-//   texts — the SMS alert is for the admin only, on the enquiry side.
+//   type "payment_requested" — emails the GUEST a Paystack checkout
+//   link the moment one is generated for their booking (see
+//   supabase/functions/paystack-init) — the booking sits as
+//   `awaiting_payment` until they pay.
+//   type "confirmed" — emails the GUEST the moment their booking's
+//   payment is verified (supabase/functions/paystack-webhook), or an
+//   admin confirms/marks one paid directly, with the
+//   reference/dates/total for their records. Never texts — the SMS
+//   alert is for the admin only, on the enquiry side.
 //
 // Called by Postgres triggers (public.notify_new_enquiry for enquiry
 // inserts, public.notify_enquiry_declined for the decline case,
-// public.notify_booking_confirmed for booking inserts — see
-// supabase/migrations/20260909220000_notify_enquiry_by_email.sql,
-// 20260910100200_notify_enquiry_declined.sql, and
-// 20260921100000_notify_booking_confirmed.sql), not directly by the
+// public.notify_payment_requested and public.notify_booking_confirmed
+// for booking updates — see supabase/migrations/20260909220000_notify_
+// enquiry_by_email.sql, 20260910100200_notify_enquiry_declined.sql, and
+// 20260921120000_payment_gated_bookings.sql), not directly by the
 // browser — the guest's/admin's request never touches this function,
 // so a flaky connection can no longer be the reason a notification
 // goes unnoticed. The trigger fires from the database write itself,
@@ -218,6 +223,57 @@ function confirmedEmail(b: any) {
   return { to: b.guest_email, subject, html, replyTo: NOTIFY_TO };
 }
 
+function paymentRequestedEmail(b: any) {
+  const subject = `Complete your payment — ${b.check_in ?? "?"} → ${b.check_out ?? "?"}`;
+  const nights = nightsBetween(b.check_in, b.check_out);
+  const nightsLabel = nights !== null ? ` (${nights} night${nights === 1 ? "" : "s"})` : "";
+  const apartmentLabel = APARTMENT_NAMES[b.apartment] || "Home-Office Apartments";
+
+  const html = `
+    <!doctype html>
+    <html>
+      <body style="margin:0;padding:0;background:#f4f5f3;font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;color:#1f2b26;">
+        <div style="max-width:560px;margin:0 auto;padding:32px 16px;">
+          <div style="background:#2d6a4f;border-radius:12px 12px 0 0;padding:22px 28px;">
+            <div style="color:#fff;font-size:17px;font-weight:700;letter-spacing:-.01em;">Home-Office Apartments</div>
+            <div style="color:#cfe3d7;font-size:12.5px;margin-top:2px;">One step left — payment</div>
+          </div>
+          <div style="background:#fff;border:1px solid #e8ebe8;border-top:0;border-radius:0 0 12px 12px;padding:28px;">
+            <h1 style="margin:0 0 12px;font-size:19px;font-weight:600;">Almost there, ${escapeHtml(b.guest_name) || "there"}</h1>
+            <p style="margin:0 0 20px;font-size:14px;line-height:1.5;color:#4a5450;">
+              We've held ${escapeHtml(apartmentLabel)} for your dates below. Pay securely with Paystack (card or Mobile Money) to lock it in — your booking is confirmed the moment payment goes through.
+            </p>
+
+            <table style="width:100%;border-collapse:collapse;font-size:14px;background:#f4f5f3;border-radius:10px;">
+              <tr>
+                <td style="padding:14px 16px 4px;color:#6a706d;width:100px;">Reference</td>
+                <td style="padding:14px 16px 4px;font-weight:600;">${escapeHtml(b.reference)}</td>
+              </tr>
+              <tr>
+                <td style="padding:4px 16px;color:#6a706d;">Apartment</td>
+                <td style="padding:4px 16px;font-weight:600;">${escapeHtml(apartmentLabel)}</td>
+              </tr>
+              <tr>
+                <td style="padding:4px 16px;color:#6a706d;">Dates</td>
+                <td style="padding:4px 16px;font-weight:600;">${formatDateLong(b.check_in)} → ${formatDateLong(b.check_out)}${nightsLabel}</td>
+              </tr>
+              <tr>
+                <td style="padding:4px 16px 14px;color:#6a706d;">Amount due</td>
+                <td style="padding:4px 16px 14px;font-weight:600;">GHS ${Number(b.total).toLocaleString()}</td>
+              </tr>
+            </table>
+
+            <a href="${escapeHtml(b.payment_url)}" style="display:inline-block;margin-top:24px;background:#2d6a4f;color:#fff;text-decoration:none;padding:11px 22px;border-radius:8px;font-weight:600;font-size:14px;">Pay now →</a>
+
+            <p style="margin:22px 0 0;color:#9aa19d;font-size:12px;">These dates are held on a first-to-pay basis, so it's best to complete payment soon. Questions? Just reply to this email.</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+  return { to: b.guest_email, subject, html, replyTo: NOTIFY_TO };
+}
+
 function declinedEmail(e: any) {
   const subject = `About your enquiry — ${e.check_in ?? "?"} → ${e.check_out ?? "?"}`;
   const html = `
@@ -329,6 +385,7 @@ Deno.serve(async (req: Request) => {
 
   const type =
     payload?.type === "declined" ? "declined" :
+    payload?.type === "payment_requested" ? "payment_requested" :
     payload?.type === "confirmed" ? "confirmed" :
     "new_enquiry";
   const e = payload?.record ?? payload ?? {};
@@ -339,19 +396,24 @@ Deno.serve(async (req: Request) => {
   }
 
   // "declined" reads the guest's address off enquiries.email;
-  // "confirmed" off bookings.guest_email — different column names,
-  // same guest-facing purpose.
+  // "payment_requested"/"confirmed" off bookings.guest_email —
+  // different column names, same guest-facing purpose.
   if (type === "declined" && !e.email) {
     console.error("notify-enquiry: declined event with no guest email, nothing to send to");
     return new Response("No recipient", { status: 400 });
   }
-  if (type === "confirmed" && !e.guest_email) {
-    console.error("notify-enquiry: confirmed event with no guest email, nothing to send to");
+  if ((type === "payment_requested" || type === "confirmed") && !e.guest_email) {
+    console.error(`notify-enquiry: ${type} event with no guest email, nothing to send to`);
     return new Response("No recipient", { status: 400 });
+  }
+  if (type === "payment_requested" && !e.payment_url) {
+    console.error("notify-enquiry: payment_requested event with no payment_url");
+    return new Response("Missing payment link", { status: 400 });
   }
 
   const { to, subject, html, replyTo } =
     type === "declined" ? declinedEmail(e) :
+    type === "payment_requested" ? paymentRequestedEmail(e) :
     type === "confirmed" ? confirmedEmail(e) :
     newEnquiryEmail(e);
 

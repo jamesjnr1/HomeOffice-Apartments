@@ -14,6 +14,10 @@ function sourceApartment(source) {
   return source === 'airbnb-2' ? 'livingspring' : 'home-office';
 }
 
+function statusLabel(status) {
+  return status === 'awaiting_payment' ? 'Awaiting payment' : status;
+}
+
 /**
  * AdminBookings — real rows from the `bookings` table (see
  * supabase/migrations/20260909150000_create_bookings.sql), created by
@@ -143,7 +147,7 @@ export default function AdminBookings() {
                       <td>{r.check_out}</td>
                       <td>{r.nights}</td>
                       <td>GHS {Number(r.total).toLocaleString()}</td>
-                      <td><span className={`mgmt-status ${r.status}`}>{r.status}</span></td>
+                      <td><span className={`mgmt-status ${r.status}`}>{statusLabel(r.status)}</span></td>
                       <td>
                         <div className="mgmt-row-actions">
                           <button title="Print receipt" onClick={() => setReceiptBooking(r)}>

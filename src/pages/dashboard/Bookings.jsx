@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
 import { format, parseISO } from 'date-fns';
-import { Download, MessageSquare, ArrowRight, MapPin } from 'lucide-react';
+import { Download, MessageSquare, ArrowRight, MapPin, CreditCard } from 'lucide-react';
 import Receipt from '../../components/Receipt';
 import { supabase } from '../../lib/supabase';
 import { apartmentName } from '../../lib/apartments';
@@ -193,6 +193,11 @@ function BookingCard({ booking, onReceipt }) {
         </div>
 
         <div className="dash-booking-actions">
+          {b.status === 'awaiting_payment' && b.payment_url && (
+            <a href={b.payment_url} target="_blank" rel="noopener noreferrer" className="dash-btn dash-btn-primary dash-btn-sm">
+              <CreditCard size={14} /> Pay now
+            </a>
+          )}
           <button className="dash-btn dash-btn-ghost dash-btn-sm" onClick={onReceipt}>
             <Download size={14} /> Receipt
           </button>
@@ -208,6 +213,7 @@ function BookingCard({ booking, onReceipt }) {
 function StatusBadge({ status }) {
   const map = {
     confirmed: { className: 'dash-status confirmed', label: 'Confirmed' },
+    awaiting_payment: { className: 'dash-status pending', label: 'Awaiting payment' },
     pending: { className: 'dash-status pending', label: 'Pending' },
     completed: { className: 'dash-status completed', label: 'Completed' },
     cancelled: { className: 'dash-status cancelled', label: 'Cancelled' },

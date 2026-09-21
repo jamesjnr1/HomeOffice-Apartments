@@ -293,6 +293,7 @@ body:has(.auth-photo-admin) .site-footer { display: none !important; }
 .mgmt-status.archived { background: #f4f5f3; color: #6a706d; }
 .mgmt-status.confirmed { background: #e2ece6; color: #2d6a4f; }
 .mgmt-status.pending { background: #fef3c7; color: #b58a4a; }
+.mgmt-status.awaiting_payment { background: #fef3c7; color: #b58a4a; }
 .mgmt-status.completed { background: #f4f5f3; color: #6a706d; }
 .mgmt-status.cancelled { background: #fbe9e7; color: #b3261e; }
 .mgmt-status.declined { background: #fbe9e7; color: #b3261e; }
