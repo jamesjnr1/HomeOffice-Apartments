@@ -49,8 +49,25 @@
 // call, and nothing is ever charged without the guest completing
 // checkout themselves on Paystack's own page.
 //
+// Guest accounts: every successful booking now gets a real account
+// automatically — not just a best-effort match against an existing
+// one. If no `profiles` row matches the guest's email, this creates a
+// real auth.users account for them (a random, never-shared password —
+// see ensureGuestAccount below) and emails a "set your password" link
+// via notify-enquiry's "welcome_account" type, so their stay shows up
+// in a dashboard with zero extra friction at checkout — no signup
+// form, no password field on the Book page. A returning guest with an
+// existing account is left alone (no duplicate account, no email).
+// Only the successful-payment path creates an account — the plain
+// "Send an enquiry" question path and the unavailable-dates fallback
+// stay anonymous, same as before (enquiries has no guest_id column).
+//
 // Required secrets (shared with paystack-init/paystack-webhook):
 //   PAYSTACK_SECRET_KEY — from the Paystack dashboard.
+//   WEBHOOK_SECRET       — same shared secret notify-enquiry already
+//                         requires (Project Settings -> Edge Functions
+//                         -> Secrets are project-wide, so this is
+//                         already set if notify-enquiry works).
 //   SITE_URL             — optional, same default as elsewhere.
 //
 // SUPABASE_URL, SUPABASE_ANON_KEY, and SUPABASE_SERVICE_ROLE_KEY are
@@ -63,6 +80,7 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const PAYSTACK_SECRET_KEY = Deno.env.get("PAYSTACK_SECRET_KEY");
+const WEBHOOK_SECRET = Deno.env.get("WEBHOOK_SECRET");
 const SITE_URL = Deno.env.get("SITE_URL") || "https://apartments.home-officegroup.com";
 
 const CORS_HEADERS = {
@@ -120,6 +138,73 @@ async function createFallbackEnquiry(anon: ReturnType<typeof createClient>, fiel
     return { ok: false as const, error: "Couldn't send that. Please try again or contact us directly." };
   }
   return { ok: true as const };
+}
+
+// Finds this guest's existing account, or creates one — every guest
+// who completes a real booking ends up with real records (see the
+// header comment above). Never throws: any failure here should delay
+// or lose an email, never the booking or payment itself.
+async function ensureGuestAccount(
+  admin: ReturnType<typeof createClient>,
+  email: string,
+  name: string,
+): Promise<string | null> {
+  const { data: profile } = await admin.from("profiles").select("id").eq("email", email).maybeSingle();
+  if (profile?.id) return profile.id;
+
+  const { data: created, error: createError } = await admin.auth.admin.createUser({
+    email,
+    password: crypto.randomUUID(),
+    email_confirm: true,
+    user_metadata: { full_name: name },
+  });
+  if (createError || !created?.user) {
+    console.error("book-and-pay: auto account creation failed", createError);
+    return null;
+  }
+
+  // The public.profiles row is normally populated by the
+  // on_auth_user_created DB trigger, but that trigger doesn't reliably
+  // fire for admin.createUser() the way it does for a client-side
+  // signup — write it directly here too so a guest's record always
+  // shows up (AdminGuests, dashboard) regardless of that quirk.
+  const { error: profileError } = await admin
+    .from("profiles")
+    .upsert({ id: created.user.id, email, full_name: name }, { onConflict: "id" });
+  if (profileError) {
+    console.error("book-and-pay: profiles upsert failed", profileError);
+  }
+
+  const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
+    type: "recovery",
+    email,
+    options: { redirectTo: `${SITE_URL}/dashboard/profile` },
+  });
+  if (linkError || !linkData?.properties?.action_link) {
+    console.error("book-and-pay: recovery link generation failed", linkError);
+    return created.user.id; // account exists either way; just couldn't email the link
+  }
+
+  if (!WEBHOOK_SECRET) {
+    console.error("book-and-pay: WEBHOOK_SECRET is not set, skipping welcome email");
+    return created.user.id;
+  }
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/notify-enquiry`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-webhook-secret": WEBHOOK_SECRET },
+      body: JSON.stringify({
+        type: "welcome_account",
+        record: { guest_name: name, guest_email: email, action_link: linkData.properties.action_link },
+      }),
+    });
+    if (!res.ok) console.error("book-and-pay: welcome_account email failed", res.status, await res.text());
+  } catch (err) {
+    console.error("book-and-pay: welcome_account email fetch error", err);
+  }
+
+  return created.user.id;
 }
 
 Deno.serve(async (req: Request) => {
@@ -200,10 +285,10 @@ Deno.serve(async (req: Request) => {
   const total = calculateTotal(nights);
   const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-  const { data: profile } = await admin.from("profiles").select("id").eq("email", email).maybeSingle();
+  const guestId = await ensureGuestAccount(admin, email, name);
 
   const bookingRow = {
-    guest_id: profile?.id || null,
+    guest_id: guestId,
     guest_name: name,
     guest_email: email,
     guest_phone: phone,

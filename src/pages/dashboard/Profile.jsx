@@ -11,7 +11,9 @@ import {
   CreditCard,
   Lock,
   Check,
+  AlertCircle,
 } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
 
 /**
  * Profile
@@ -20,7 +22,12 @@ import {
  * TODO(supabase):
  *   - Load: supabase.from('profiles').select('*').eq('user_id', user.id).single()
  *   - Save: supabase.from('profiles').upsert({ user_id: user.id, ...form })
- *   - Password: supabase.auth.updateUser({ password: newPassword })
+ *
+ * Password IS wired up for real (see PasswordSection below) — this is
+ * where a guest who was auto-signed-up at booking time (see
+ * supabase/functions/book-and-pay/index.ts's "welcome_account" email)
+ * actually lands to set one, via a Supabase recovery link that signs
+ * them in and redirects here.
  */
 
 export default function Profile() {
@@ -203,9 +210,7 @@ export default function Profile() {
         {/* Security */}
         <section className="dash-card">
           <h2 className="dash-card-h">Security</h2>
-          <button type="button" className="dash-btn dash-btn-outline dash-btn-sm">
-            <Lock size={14} /> Change password
-          </button>
+          <PasswordSection />
         </section>
 
         {/* Save bar */}
@@ -232,5 +237,98 @@ function Field({ label, icon, children }) {
       </span>
       {children}
     </label>
+  );
+}
+
+// The only part of this page actually wired to Supabase — everything
+// else here is still a local-state mock (see the TODOs above). This
+// one has to work for real: it's where an auto-created guest account
+// (see book-and-pay's "welcome_account" email) actually gets a
+// password set for the first time, via a recovery link that signs
+// them in and lands them here — same call either way, whether that's
+// a first-time password or a change to an existing one.
+function PasswordSection() {
+  const [open, setOpen] = useState(false);
+  const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [done, setDone] = useState(false);
+
+  const submit = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setError('');
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters.');
+      return;
+    }
+    if (password !== confirm) {
+      setError("Passwords don't match.");
+      return;
+    }
+    setSaving(true);
+    const { error: updateError } = await supabase.auth.updateUser({ password });
+    setSaving(false);
+    if (updateError) {
+      setError(updateError.message);
+      return;
+    }
+    setDone(true);
+    setOpen(false);
+    setPassword('');
+    setConfirm('');
+    setTimeout(() => setDone(false), 3000);
+  };
+
+  if (!open) {
+    return (
+      <>
+        <button type="button" className="dash-btn dash-btn-outline dash-btn-sm" onClick={() => setOpen(true)}>
+          <Lock size={14} /> {done ? 'Password updated' : 'Change password'}
+        </button>
+        {done && <p className="dash-text-muted" style={{ marginTop: 8 }}><Check size={13} style={{ verticalAlign: -2 }} /> Your password was updated.</p>}
+      </>
+    );
+  }
+
+  return (
+    <div onClick={(e) => e.stopPropagation()}>
+      {error && (
+        <div className="form-error" style={{ marginBottom: 12 }}>
+          <AlertCircle size={14} style={{ verticalAlign: -2, marginRight: 6 }} />
+          {error}
+        </div>
+      )}
+      <div className="dash-form-grid">
+        <Field label="New password">
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="At least 8 characters"
+            minLength={8}
+            autoFocus
+          />
+        </Field>
+        <Field label="Confirm password">
+          <input
+            type="password"
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            placeholder="Re-enter password"
+            minLength={8}
+          />
+        </Field>
+      </div>
+      <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+        <button type="button" className="dash-btn dash-btn-primary dash-btn-sm" disabled={saving} onClick={submit}>
+          {saving ? 'Saving…' : 'Save password'}
+        </button>
+        <button type="button" className="dash-btn dash-btn-ghost dash-btn-sm" onClick={() => { setOpen(false); setError(''); setPassword(''); setConfirm(''); }}>
+          Cancel
+        </button>
+      </div>
+    </div>
   );
 }
