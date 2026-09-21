@@ -50,16 +50,35 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const PAYSTACK_SECRET_KEY = Deno.env.get("PAYSTACK_SECRET_KEY");
 const SITE_URL = Deno.env.get("SITE_URL") || "https://apartments.home-officegroup.com";
 
+// Unlike every other function in this project, this one is called
+// directly from the browser (AdminEnquiries.jsx's "Send payment
+// link", via supabase.functions.invoke) rather than server-to-server
+// — which means the browser sends a CORS preflight (OPTIONS) request
+// first. Without handling it and echoing these headers on every
+// response, the browser silently blocks the real POST before it ever
+// reaches this function (it shows up in the logs as "OPTIONS | 405",
+// never followed by a POST) and supabase-js surfaces that as a bare
+// FunctionsFetchError with no useful message.
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
 Deno.serve(async (req: Request) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: CORS_HEADERS });
+  }
+
   if (req.method !== "POST") {
-    return new Response("Method not allowed", { status: 405 });
+    return new Response("Method not allowed", { status: 405, headers: CORS_HEADERS });
   }
 
   if (!PAYSTACK_SECRET_KEY) {
     console.error("paystack-init: PAYSTACK_SECRET_KEY is not set");
     return new Response(JSON.stringify({ error: "Payments aren't configured yet" }), {
       status: 500,
-      headers: { "Content-Type": "application/json" },
+      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
     });
   }
 
@@ -69,7 +88,7 @@ Deno.serve(async (req: Request) => {
   } catch {
     return new Response(JSON.stringify({ error: "Bad request" }), {
       status: 400,
-      headers: { "Content-Type": "application/json" },
+      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
     });
   }
 
@@ -77,7 +96,7 @@ Deno.serve(async (req: Request) => {
   if (!bookingId) {
     return new Response(JSON.stringify({ error: "Missing booking_id" }), {
       status: 400,
-      headers: { "Content-Type": "application/json" },
+      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
     });
   }
 
@@ -98,21 +117,21 @@ Deno.serve(async (req: Request) => {
   if (readError || !booking) {
     return new Response(JSON.stringify({ error: "Booking not found, or you don't have access to it" }), {
       status: 403,
-      headers: { "Content-Type": "application/json" },
+      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
     });
   }
 
   if (booking.status !== "awaiting_payment") {
     return new Response(JSON.stringify({ error: `Booking is '${booking.status}', not awaiting payment` }), {
       status: 409,
-      headers: { "Content-Type": "application/json" },
+      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
     });
   }
 
   if (!booking.guest_email) {
     return new Response(JSON.stringify({ error: "This booking has no guest email to send a payment link to" }), {
       status: 400,
-      headers: { "Content-Type": "application/json" },
+      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
     });
   }
 
@@ -139,7 +158,7 @@ Deno.serve(async (req: Request) => {
     console.error("paystack-init: Paystack error", initRes.status, initJson);
     return new Response(JSON.stringify({ error: "Paystack couldn't start this payment. Please try again." }), {
       status: 502,
-      headers: { "Content-Type": "application/json" },
+      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
     });
   }
 
@@ -159,12 +178,12 @@ Deno.serve(async (req: Request) => {
     console.error("paystack-init: failed to save payment link", updateError);
     return new Response(JSON.stringify({ error: "Payment link created, but couldn't be saved. Please try again." }), {
       status: 500,
-      headers: { "Content-Type": "application/json" },
+      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
     });
   }
 
   return new Response(JSON.stringify({ authorization_url: authorizationUrl, reference: paystackReference }), {
     status: 200,
-    headers: { "Content-Type": "application/json" },
+    headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
   });
 });
