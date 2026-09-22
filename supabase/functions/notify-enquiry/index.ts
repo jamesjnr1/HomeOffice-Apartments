@@ -184,10 +184,18 @@ const APARTMENT_NAMES: Record<string, string> = {
 };
 
 function confirmedEmail(b: any) {
-  const subject = `Booking confirmed — ${b.check_in ?? "?"} → ${b.check_out ?? "?"}`;
+  const subject = `Payment received — receipt for ${b.reference ?? "your booking"}`;
   const nights = nightsBetween(b.check_in, b.check_out);
   const nightsLabel = nights !== null ? ` (${nights} night${nights === 1 ? "" : "s"})` : "";
   const apartmentLabel = APARTMENT_NAMES[b.apartment] || "Home-Office Apartments";
+  // b.paid_at is a full timestamptz, unlike check_in/check_out — needs
+  // its own formatting rather than formatDateLong (which assumes a
+  // plain YYYY-MM-DD date and would otherwise mangle this into an
+  // invalid date string).
+  const paidAtDate = b.paid_at ? new Date(b.paid_at) : null;
+  const paidOn = paidAtDate && !isNaN(paidAtDate.getTime())
+    ? paidAtDate.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" })
+    : null;
 
   const html = `
     <!doctype html>
@@ -196,12 +204,12 @@ function confirmedEmail(b: any) {
         <div style="max-width:560px;margin:0 auto;padding:32px 16px;">
           <div style="background:#2d6a4f;border-radius:12px 12px 0 0;padding:22px 28px;">
             <div style="color:#fff;font-size:17px;font-weight:700;letter-spacing:-.01em;">Home-Office Apartments</div>
-            <div style="color:#cfe3d7;font-size:12.5px;margin-top:2px;">Booking confirmed</div>
+            <div style="color:#cfe3d7;font-size:12.5px;margin-top:2px;">Payment received — booking confirmed</div>
           </div>
           <div style="background:#fff;border:1px solid #e8ebe8;border-top:0;border-radius:0 0 12px 12px;padding:28px;">
             <h1 style="margin:0 0 12px;font-size:19px;font-weight:600;">You're all set, ${escapeHtml(b.guest_name) || "there"}</h1>
             <p style="margin:0 0 20px;font-size:14px;line-height:1.5;color:#4a5450;">
-              Your stay at ${escapeHtml(apartmentLabel)} is confirmed. Here are the details for your records.
+              We've received your payment and your stay at ${escapeHtml(apartmentLabel)} is confirmed. This email is your receipt — keep it for your records.
             </p>
 
             <table style="width:100%;border-collapse:collapse;font-size:14px;background:#f4f5f3;border-radius:10px;">
@@ -222,12 +230,19 @@ function confirmedEmail(b: any) {
                 <td style="padding:4px 16px;font-weight:600;">${escapeHtml(b.guests) || "—"}</td>
               </tr>
               <tr>
-                <td style="padding:4px 16px 14px;color:#6a706d;">Total</td>
-                <td style="padding:4px 16px 14px;font-weight:600;">GHS ${Number(b.total).toLocaleString()}</td>
+                <td style="padding:4px 16px;${paidOn ? "" : "padding-bottom:14px;"}color:#6a706d;">Amount paid</td>
+                <td style="padding:4px 16px;${paidOn ? "" : "padding-bottom:14px;"}font-weight:600;">GHS ${Number(b.total).toLocaleString()}</td>
               </tr>
+              ${paidOn ? `
+              <tr>
+                <td style="padding:4px 16px 14px;color:#6a706d;">Paid on</td>
+                <td style="padding:4px 16px 14px;font-weight:600;">${paidOn}</td>
+              </tr>` : ""}
             </table>
 
-            <p style="margin:22px 0 0;color:#9aa19d;font-size:12px;">Questions before you arrive? Just reply to this email.</p>
+            <a href="${SITE_URL}/dashboard/bookings" style="display:inline-block;margin-top:22px;background:#2d6a4f;color:#fff;text-decoration:none;padding:11px 22px;border-radius:8px;font-weight:600;font-size:14px;">View or print full receipt →</a>
+
+            <p style="margin:18px 0 0;color:#9aa19d;font-size:12px;">Questions before you arrive? Just reply to this email.</p>
           </div>
         </div>
       </body>
