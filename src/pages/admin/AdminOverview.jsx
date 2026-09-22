@@ -9,7 +9,9 @@ import { supabase } from '../../lib/supabase';
  * Phase 2 of the direct-booking rollout) bookings are all real.
  *
  * - Unread messages: real, from messages.read_by_admin
- * - Total guests: real, distinct guest_id in messages
+ * - Total guests: real, count of public.profiles — every guest who has
+ *   ever signed up or been auto-registered on booking, not just the
+ *   ones who happen to have sent a message
  * - New enquiries: real, count of enquiries.status = 'new'
  * - Upcoming bookings: real, count of bookings.check_in in the future
  *   and status != 'cancelled'
@@ -31,8 +33,9 @@ export default function AdminOverview() {
   const loadDashboard = async () => {
     try {
       const today = new Date().toISOString().slice(0, 10);
-      const [messagesRes, enquiriesRes, bookingsRes] = await Promise.all([
+      const [messagesRes, guestsRes, enquiriesRes, bookingsRes] = await Promise.all([
         supabase.from('messages').select('*').order('created_at', { ascending: false }),
+        supabase.from('profiles').select('id', { count: 'exact', head: true }),
         supabase.from('enquiries').select('id', { count: 'exact', head: true }).eq('status', 'new'),
         supabase.from('bookings').select('id', { count: 'exact', head: true }).gte('check_in', today).neq('status', 'cancelled'),
       ]);
@@ -40,7 +43,6 @@ export default function AdminOverview() {
       const { data, error } = messagesRes;
       if (!error && data) {
         const unread = data.filter(m => !m.from_admin && !m.read_by_admin).length;
-        const uniqueGuests = new Set(data.map(m => m.guest_id).filter(Boolean));
 
         // Build recent threads (most recent message per guest)
         const seen = new Set();
@@ -54,7 +56,7 @@ export default function AdminOverview() {
 
         setStats({
           unreadMessages: unread,
-          totalGuests: uniqueGuests.size,
+          totalGuests: guestsRes.count || 0,
           newEnquiries: enquiriesRes.count || 0,
           upcomingBookings: bookingsRes.count || 0,
         });

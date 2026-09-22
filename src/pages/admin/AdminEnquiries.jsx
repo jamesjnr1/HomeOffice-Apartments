@@ -1,5 +1,5 @@
 import { Fragment, useState, useEffect } from 'react';
-import { Check, Reply, Archive, Trash2, CalendarCheck, Ban, AlertTriangle, Send, CircleDollarSign } from 'lucide-react';
+import { Check, Reply, Archive, Trash2, CalendarCheck, Ban, AlertTriangle, Send, CircleDollarSign, UserPlus } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { supabase } from '../../lib/supabase';
 import { DEFAULT_APARTMENT, apartmentName } from '../../lib/apartments';
@@ -87,6 +87,8 @@ export default function AdminEnquiries() {
   const [decliningId, setDecliningId] = useState(null);
   const [payingId, setPayingId] = useState(null); // booking id currently sending/refreshing a payment link
   const [markingPaidId, setMarkingPaidId] = useState(null); // booking id currently being marked paid manually
+  const [onboardingId, setOnboardingId] = useState(null); // booking id currently getting a guest account linked
+  const [onboardError, setOnboardError] = useState('');
   const [paymentLinks, setPaymentLinks] = useState({}); // booking id -> latest authorization_url, for a copy-link affordance
   const [bookError, setBookError] = useState('');
   const [loadError, setLoadError] = useState('');
@@ -117,7 +119,7 @@ export default function AdminEnquiries() {
       const [enquiriesRes, bookingsRes] = await Promise.all([
         supabase
           .from('enquiries')
-          .select('*, bookings!enquiries_booking_id_fkey(id, reference, status, payment_url)')
+          .select('*, bookings!enquiries_booking_id_fkey(id, reference, status, payment_url, guest_id)')
           .order('created_at', { ascending: false }),
         // All bookings' dates, for the overlap warning below — full
         // row detail is fine here, this page is already admin-only.
@@ -314,6 +316,29 @@ export default function AdminEnquiries() {
     setMarkingPaidId(null);
   };
 
+  // Gives a booking's guest a real dashboard account when it doesn't
+  // already have one — needed for anything confirmed through the old
+  // manual "Confirm booking" flow before book-and-pay's automatic
+  // account creation existed (see supabase/functions/admin-onboard-
+  // guest). Safe to call more than once: a booking that already has
+  // guest_id just comes back as a no-op.
+  const onboardGuest = async (bookingId) => {
+    setOnboardError('');
+    setOnboardingId(bookingId);
+    const { data, error } = await supabase.functions.invoke('admin-onboard-guest', {
+      body: { booking_id: bookingId },
+    });
+    if (error || !data?.ok) {
+      setOnboardError(data?.error || "Couldn't set up a dashboard account for this guest. Please try again.");
+      setOnboardingId(null);
+      return;
+    }
+    setEnquiries(prev => prev.map(row => row.bookings?.id === bookingId
+      ? { ...row, bookings: { ...row.bookings, guest_id: data.guest_id } }
+      : row));
+    setOnboardingId(null);
+  };
+
   // Decline — most commonly used when the requested dates conflict
   // with an existing booking (see the overlap warning above), but
   // works for any reason. Releases the duplicate-enquiry block
@@ -423,7 +448,7 @@ export default function AdminEnquiries() {
                           {urgency(e) && <StatusBadge label={urgency(e).label} tone={urgency(e).tone} />}
                           {conflict && (
                             <span className="status-badge status-badge-bad" title={`Overlaps ${conflict.reference}`}>
-                              <AlertTriangle size={11} />
+                              <span className="status-badge-icon"><AlertTriangle size={11} /></span>
                               Dates taken · {conflict.reference}
                             </span>
                           )}
@@ -449,23 +474,27 @@ export default function AdminEnquiries() {
                                 Declined{e.decline_reason ? ` — ${e.decline_reason}` : ''}.
                               </p>
                             )}
-                            <div className="mgmt-expanded-actions">
-                              <a
-                                className="mgmt-btn mgmt-btn-primary"
-                                href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(e.email)}&su=${encodeURIComponent('Re: Your enquiry — Home-Office Apartments')}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                <Reply size={14}/> Reply by email
-                              </a>
-                              {e.phone && (
-                                <a className="mgmt-btn mgmt-btn-outline" href={`tel:${e.phone}`}>
-                                  Call
-                                </a>
-                              )}
-                            </div>
+                            {!locked(e) && (
+                              <>
+                                <div className="mgmt-expanded-actions">
+                                  <a
+                                    className="mgmt-btn mgmt-btn-primary"
+                                    href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(e.email)}&su=${encodeURIComponent('Re: Your enquiry — Home-Office Apartments')}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    <Reply size={14}/> Reply by email
+                                  </a>
+                                  {e.phone && (
+                                    <a className="mgmt-btn mgmt-btn-outline" href={`tel:${e.phone}`}>
+                                      Call
+                                    </a>
+                                  )}
+                                </div>
 
-                            <div className="mgmt-divider" />
+                                <div className="mgmt-divider" />
+                              </>
+                            )}
 
                             {e.bookings?.status === 'awaiting_payment' ? (
                               <div className="mgmt-decision-row" onClick={ev => ev.stopPropagation()}>
@@ -480,6 +509,19 @@ export default function AdminEnquiries() {
                                   >
                                     <Send size={14}/> {payingId === e.bookings.id ? 'Sending…' : (e.bookings.payment_url ? 'Resend payment link' : 'Send payment link')}
                                   </button>
+                                  {!e.bookings.guest_id && (
+                                    <button
+                                      className="mgmt-btn mgmt-btn-outline"
+                                      style={{ marginLeft: 8 }}
+                                      disabled={onboardingId === e.bookings.id}
+                                      onClick={() => onboardGuest(e.bookings.id)}
+                                    >
+                                      <UserPlus size={14}/> {onboardingId === e.bookings.id ? 'Setting up…' : 'Give dashboard access'}
+                                    </button>
+                                  )}
+                                  {onboardError && onboardingId === null && (
+                                    <p className="form-error" style={{ margin: '8px 0 0' }}>{onboardError}</p>
+                                  )}
                                   {(paymentLinks[e.bookings.id] || e.bookings.payment_url) && (
                                     <p className="mgmt-td-muted" style={{ margin: '8px 0 0', wordBreak: 'break-all' }}>
                                       <a href={paymentLinks[e.bookings.id] || e.bookings.payment_url} target="_blank" rel="noopener noreferrer">
@@ -505,9 +547,24 @@ export default function AdminEnquiries() {
                                 )}
                               </div>
                             ) : e.bookings ? (
-                              <p className="mgmt-td-muted mgmt-status-cell">
-                                Booked as <strong>{e.bookings.reference}</strong> <StatusBadge status={e.bookings.status} />
-                              </p>
+                              <div onClick={ev => ev.stopPropagation()}>
+                                <p className="mgmt-td-muted mgmt-status-cell">
+                                  Booked as <strong>{e.bookings.reference}</strong> <StatusBadge status={e.bookings.status} />
+                                </p>
+                                {!e.bookings.guest_id && (
+                                  <button
+                                    className="mgmt-btn mgmt-btn-outline"
+                                    style={{ marginTop: 10 }}
+                                    disabled={onboardingId === e.bookings.id}
+                                    onClick={() => onboardGuest(e.bookings.id)}
+                                  >
+                                    <UserPlus size={14}/> {onboardingId === e.bookings.id ? 'Setting up…' : 'Give dashboard access'}
+                                  </button>
+                                )}
+                                {onboardError && onboardingId === null && (
+                                  <p className="form-error" style={{ margin: '8px 0 0' }}>{onboardError}</p>
+                                )}
+                              </div>
                             ) : e.status === 'declined' ? null : locked(e) ? (
                               <p className="mgmt-td-muted">
                                 Already marked <strong>{e.status}</strong> — no further action on this enquiry.

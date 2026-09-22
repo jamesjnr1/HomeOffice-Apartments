@@ -643,28 +643,44 @@ h4 { font-size: 16px; }
 .spin { animation: spin 1s linear infinite; }
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-/* StatusBadge (src/components/StatusBadge.jsx) — one shared badge
+/* StatusBadge (src/components/StatusBadge.jsx) — one shared status
    style used across admin pages and the guest dashboard, replacing
-   each page's own ad hoc status pill classes. Colors are hardcoded
-   here (not the admin-only --airbnb etc. custom properties, which are
-   scoped to .mgmt-shell) so this renders correctly everywhere. */
+   each page's own ad hoc status pill classes. Same "flaticon" idea as
+   .feature-icon on About.jsx: the icon sits in its own small soft-
+   tint badge, with a plain colored label next to it — not one pill
+   wrapping icon+text. Colors are hardcoded here (not the admin-only
+   --airbnb etc. custom properties, which are scoped to .mgmt-shell)
+   so this renders correctly everywhere. */
 .status-badge {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 3px 10px;
-  border-radius: 999px;
-  font-size: 11.5px;
+  gap: 6px;
+  font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
-  line-height: 1.6;
+  line-height: 1.5;
 }
-.status-badge-good    { background: #e2ece6; color: #2d6a4f; }
-.status-badge-warn    { background: #fef3c7; color: #b58a4a; }
-.status-badge-bad     { background: #fbe9e7; color: #b3261e; }
-.status-badge-neutral { background: #f4f5f3; color: #6a706d; }
-.status-badge-info    { background: #dbeafe; color: #2563eb; }
-.status-badge-airbnb  { background: #ffe5e6; color: #ff5a5f; }
+.status-badge-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+.status-badge-good    { color: #2d6a4f; }
+.status-badge-good    .status-badge-icon { background: #e2ece6; }
+.status-badge-warn    { color: #b58a4a; }
+.status-badge-warn    .status-badge-icon { background: #fef3c7; }
+.status-badge-bad     { color: #b3261e; }
+.status-badge-bad     .status-badge-icon { background: #fbe9e7; }
+.status-badge-neutral { color: #6a706d; }
+.status-badge-neutral .status-badge-icon { background: #f4f5f3; }
+.status-badge-info    { color: #2563eb; }
+.status-badge-info    .status-badge-icon { background: #dbeafe; }
+.status-badge-airbnb  { color: #ff5a5f; }
+.status-badge-airbnb  .status-badge-icon { background: #ffe5e6; }
 
 .form-error {
   background: #fbe9e7;

@@ -30,12 +30,12 @@ const STATUS_META = {
   reserved: { label: 'Reserved', icon: CalendarClock, tone: 'airbnb' },
 };
 
-export default function StatusBadge({ status, label, tone, size = 12 }) {
+export default function StatusBadge({ status, label, tone, size = 11 }) {
   const meta = STATUS_META[status] || { label: label || status || '—', icon: Clock, tone: tone || 'neutral' };
   const Icon = meta.icon;
   return (
     <span className={`status-badge status-badge-${tone || meta.tone}`}>
-      <Icon size={size} />
+      <span className="status-badge-icon"><Icon size={size} /></span>
       {label || meta.label}
     </span>
   );

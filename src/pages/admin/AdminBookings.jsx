@@ -187,7 +187,12 @@ export default function AdminBookings() {
                       <td><span className="mgmt-source mgmt-source-airbnb">Airbnb</span></td>
                       <td className="mgmt-td-sub">{apartmentName(sourceApartment(r.source))}</td>
                       <td className="mgmt-td-mono mgmt-td-muted">—</td>
-                      <td><div className="mgmt-td-primary mgmt-td-muted">Airbnb guest</div><div className="mgmt-td-sub">{r.summary}</div></td>
+                      <td>
+                        <div className="mgmt-td-primary mgmt-td-muted" title="Airbnb's calendar sync only shares blocked dates, never the guest's name, email or phone — that's a limit on their end, not something this site can pull in.">
+                          Airbnb guest
+                        </div>
+                        <div className="mgmt-td-sub">{r.summary}</div>
+                      </td>
                       <td>{r.start_date}</td>
                       <td>{r.end_date}</td>
                       <td>{differenceInCalendarDays(parseISO(r.end_date), parseISO(r.start_date))}</td>
