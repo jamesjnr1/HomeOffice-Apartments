@@ -423,7 +423,7 @@ export default function AdminEnquiries() {
                           {urgency(e) && <StatusBadge label={urgency(e).label} tone={urgency(e).tone} />}
                           {conflict && (
                             <span className="status-badge status-badge-bad" title={`Overlaps ${conflict.reference}`}>
-                              <AlertTriangle size={11} />
+                              <span className="status-badge-icon"><AlertTriangle size={11} /></span>
                               Dates taken · {conflict.reference}
                             </span>
                           )}
@@ -449,23 +449,27 @@ export default function AdminEnquiries() {
                                 Declined{e.decline_reason ? ` — ${e.decline_reason}` : ''}.
                               </p>
                             )}
-                            <div className="mgmt-expanded-actions">
-                              <a
-                                className="mgmt-btn mgmt-btn-primary"
-                                href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(e.email)}&su=${encodeURIComponent('Re: Your enquiry — Home-Office Apartments')}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                <Reply size={14}/> Reply by email
-                              </a>
-                              {e.phone && (
-                                <a className="mgmt-btn mgmt-btn-outline" href={`tel:${e.phone}`}>
-                                  Call
-                                </a>
-                              )}
-                            </div>
+                            {!locked(e) && (
+                              <>
+                                <div className="mgmt-expanded-actions">
+                                  <a
+                                    className="mgmt-btn mgmt-btn-primary"
+                                    href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(e.email)}&su=${encodeURIComponent('Re: Your enquiry — Home-Office Apartments')}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    <Reply size={14}/> Reply by email
+                                  </a>
+                                  {e.phone && (
+                                    <a className="mgmt-btn mgmt-btn-outline" href={`tel:${e.phone}`}>
+                                      Call
+                                    </a>
+                                  )}
+                                </div>
 
-                            <div className="mgmt-divider" />
+                                <div className="mgmt-divider" />
+                              </>
+                            )}
 
                             {e.bookings?.status === 'awaiting_payment' ? (
                               <div className="mgmt-decision-row" onClick={ev => ev.stopPropagation()}>

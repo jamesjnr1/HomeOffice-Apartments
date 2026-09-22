@@ -79,6 +79,7 @@ export default function AdminReviews() {
                     <td className="mgmt-td-muted">{new Date(r.created_at).toLocaleDateString()}</td>
                     <td>
                       <span className={`status-badge ${r.is_public ? 'status-badge-good' : 'status-badge-neutral'}`}>
+                        <span className="status-badge-icon">{r.is_public ? <Eye size={11} /> : <EyeOff size={11} />}</span>
                         {r.is_public ? 'Public' : 'Hidden'}
                       </span>
                     </td>
