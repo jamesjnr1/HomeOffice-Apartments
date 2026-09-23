@@ -67,25 +67,25 @@ export default function AdminRevenue() {
 
       <div className="mgmt-stat-grid">
         <div className="mgmt-stat mgmt-stat-green">
-          <span className="mgmt-stat-icon-wrap"><CircleDollarSign size={19} /></span>
-          <div>
-            <div className="mgmt-stat-value">GHS {totalRevenue.toLocaleString()}</div>
-            <div className="mgmt-stat-label">Total revenue ({year})</div>
+          <div className="mgmt-stat-top">
+            <span className="mgmt-stat-label">Total revenue ({year})</span>
+            <CircleDollarSign size={16} className="mgmt-stat-icon" />
           </div>
+          <div className="mgmt-stat-value">GHS {totalRevenue.toLocaleString()}</div>
         </div>
         <div className="mgmt-stat mgmt-stat-blue">
-          <span className="mgmt-stat-icon-wrap"><BedDouble size={19} /></span>
-          <div>
-            <div className="mgmt-stat-value">{totalNights}</div>
-            <div className="mgmt-stat-label">Total nights booked</div>
+          <div className="mgmt-stat-top">
+            <span className="mgmt-stat-label">Total nights booked</span>
+            <BedDouble size={16} className="mgmt-stat-icon" />
           </div>
+          <div className="mgmt-stat-value">{totalNights}</div>
         </div>
         <div className="mgmt-stat mgmt-stat-purple">
-          <span className="mgmt-stat-icon-wrap"><PieChart size={19} /></span>
-          <div>
-            <div className="mgmt-stat-value">{occupancy}%</div>
-            <div className="mgmt-stat-label">Occupancy ({year})</div>
+          <div className="mgmt-stat-top">
+            <span className="mgmt-stat-label">Occupancy ({year})</span>
+            <PieChart size={16} className="mgmt-stat-icon" />
           </div>
+          <div className="mgmt-stat-value">{occupancy}%</div>
         </div>
       </div>
 

@@ -90,11 +90,11 @@ export default function AdminOverview() {
       <div className="mgmt-stat-grid">
         {STAT_CARDS.map(s => (
           <Link key={s.label} to={s.link} className={`mgmt-stat mgmt-stat-${s.color}`}>
-            <span className="mgmt-stat-icon-wrap"><s.icon size={19} /></span>
-            <div>
-              <div className="mgmt-stat-value">{s.value}</div>
-              <div className="mgmt-stat-label">{s.label}</div>
+            <div className="mgmt-stat-top">
+              <span className="mgmt-stat-label">{s.label}</span>
+              <s.icon size={16} className="mgmt-stat-icon" />
             </div>
+            <div className="mgmt-stat-value">{s.value}</div>
           </Link>
         ))}
       </div>

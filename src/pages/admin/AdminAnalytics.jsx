@@ -90,31 +90,31 @@ export default function AdminAnalytics() {
       <div className="mgmt-funnel">
         <div className="mgmt-funnel-step">
           <div className="mgmt-stat mgmt-stat-blue">
-            <span className="mgmt-stat-icon-wrap"><Eye size={19} /></span>
-            <div>
-              <div className="mgmt-stat-value">{allTimeVisitors.toLocaleString()}</div>
-              <div className="mgmt-stat-label">Visitors (all time)</div>
+            <div className="mgmt-stat-top">
+              <span className="mgmt-stat-label">Visitors (all time)</span>
+              <Eye size={16} className="mgmt-stat-icon" />
             </div>
+            <div className="mgmt-stat-value">{allTimeVisitors.toLocaleString()}</div>
           </div>
         </div>
         <div className="mgmt-funnel-arrow">→ {enquiryRate}%</div>
         <div className="mgmt-funnel-step">
           <div className="mgmt-stat mgmt-stat-green">
-            <span className="mgmt-stat-icon-wrap"><Inbox size={19} /></span>
-            <div>
-              <div className="mgmt-stat-value">{enquiriesTotal.toLocaleString()}</div>
-              <div className="mgmt-stat-label">Enquiries sent</div>
+            <div className="mgmt-stat-top">
+              <span className="mgmt-stat-label">Enquiries sent</span>
+              <Inbox size={16} className="mgmt-stat-icon" />
             </div>
+            <div className="mgmt-stat-value">{enquiriesTotal.toLocaleString()}</div>
           </div>
         </div>
         <div className="mgmt-funnel-arrow">→ {bookingRate}%</div>
         <div className="mgmt-funnel-step">
           <div className="mgmt-stat mgmt-stat-gold">
-            <span className="mgmt-stat-icon-wrap"><CalendarCheck size={19} /></span>
-            <div>
-              <div className="mgmt-stat-value">{bookingsTotal.toLocaleString()}</div>
-              <div className="mgmt-stat-label">Bookings made</div>
+            <div className="mgmt-stat-top">
+              <span className="mgmt-stat-label">Bookings made</span>
+              <CalendarCheck size={16} className="mgmt-stat-icon" />
             </div>
+            <div className="mgmt-stat-value">{bookingsTotal.toLocaleString()}</div>
           </div>
         </div>
       </div>
