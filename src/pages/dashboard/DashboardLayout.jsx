@@ -3,10 +3,9 @@ import { useEffect, useState, useCallback } from 'react';
 import {
   LayoutDashboard, CalendarDays,
   MessageSquare, UserCircle, LogOut,
-  Tv, ChefHat, BedDouble, Bath,
+  Phone, Mail,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { FACILITIES } from '../../lib/propertyContent';
 import './dashboard.css';
 
 const NAV_ITEMS = [
@@ -15,10 +14,6 @@ const NAV_ITEMS = [
   { to: '/dashboard/messages', icon: MessageSquare, label: 'Messages' },
   { to: '/dashboard/profile', icon: UserCircle, label: 'Profile' },
 ];
-
-// Icons paired with FACILITIES by index — the text itself stays
-// defined once in propertyContent.js (shared with PropertyGallery).
-const FACILITY_ICONS = [Tv, ChefHat, BedDouble, Bath];
 
 export default function DashboardLayout() {
   const navigate = useNavigate();
@@ -144,25 +139,17 @@ export default function DashboardLayout() {
         </div>
       </main>
 
-      {/* A real footer, not filler — what's actually included in the
-          stay, with the same "flaticon" icon-square treatment the
-          marketing site uses (.feature-icon), on every dashboard page. */}
+      {/* A simple, real footer — how to reach us directly, same
+          contact details as the public site's own footer. */}
       <footer className="dash-footer">
         <div className="dash-footer-inner">
-          <div className="dash-footer-head">
-            <span className="dash-eyebrow">YOUR STAY</span>
-            <h2>What's included</h2>
-          </div>
-          <div className="dash-footer-grid">
-            {FACILITIES.map((label, i) => {
-              const Icon = FACILITY_ICONS[i] || Tv;
-              return (
-                <div className="dash-footer-item" key={label}>
-                  <span className="feature-icon"><Icon size={20} /></span>
-                  <span>{label}</span>
-                </div>
-              );
-            })}
+          <p className="dash-footer-copy">
+            © {new Date().getFullYear()} Home-Office Apartments and LivingSpring Gardens
+          </p>
+          <div className="dash-footer-contact">
+            <span className="dash-footer-help">For more info, call</span>
+            <a href="tel:+233206301032"><Phone size={13} /> +233 20 630 1032</a>
+            <a href="mailto:jamesd@home-officegroup.com"><Mail size={13} /> jamesd@home-officegroup.com</a>
           </div>
         </div>
       </footer>
