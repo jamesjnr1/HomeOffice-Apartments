@@ -569,6 +569,11 @@ h4 { font-size: 16px; }
 .cta-band h2 { color: #fff; }
 .cta-content { max-width: 640px; margin: 0 auto; }
 .cta-content .lead { color: rgba(255,255,255,.8); margin: 0 auto 32px; }
+/* The green .btn-primary read as a mismatched leftover once the band
+   went terracotta — white reads cleanly against it, with the
+   terracotta itself carried into the text for a tied-together look. */
+.cta-band .btn-primary { background: #fff; color: #a15c3a; }
+.cta-band .btn-primary:hover { background: #f5ece6; }
 
 /* ---------------- BOOK FORM ---------------- */
 .book-grid {
