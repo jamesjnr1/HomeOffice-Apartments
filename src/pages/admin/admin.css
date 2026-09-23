@@ -291,6 +291,7 @@ body:has(.auth-photo-admin) .site-footer { display: none !important; }
 .mgmt-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
 .mgmt-table th { text-align: left; font-size: 10.5px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: #9aa19d; padding: 11px 16px; border-bottom: 1px solid #e8ebe8; white-space: nowrap; background: #f4f5f3; }
 .mgmt-table td { padding: 13px 16px; border-bottom: 1px solid #f0f2ef; vertical-align: middle; }
+.mgmt-td-nowrap { white-space: nowrap; }
 .mgmt-table tbody tr:last-child td { border-bottom: 0; }
 .mgmt-table tbody tr:hover td { background: #f4f5f3; }
 .mgmt-tr-click { cursor: pointer; }

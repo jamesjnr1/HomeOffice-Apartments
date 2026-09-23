@@ -1,6 +1,6 @@
 import { Fragment, useState, useEffect } from 'react';
 import { Check, Reply, Archive, Trash2, CalendarCheck, Ban, AlertTriangle, CircleDollarSign, UserPlus } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, format, parseISO } from 'date-fns';
 import { supabase } from '../../lib/supabase';
 import { DEFAULT_APARTMENT, apartmentName } from '../../lib/apartments';
 import StatusBadge from '../../components/StatusBadge';
@@ -58,6 +58,15 @@ function makeReference() {
 // bookings_no_date_overlap and is_date_range_available.
 function rangesOverlap(aStart, aEnd, bStart, bEnd) {
   return aStart < bEnd && bStart < aEnd;
+}
+
+// '12 Nov → 15 Nov 2026' — drops the year off check-in when it's the
+// same as check-out, same convention as Overview.jsx's "next stay".
+function dateRange(checkIn, checkOut) {
+  const ci = parseISO(checkIn);
+  const co = parseISO(checkOut);
+  const ciFmt = ci.getFullYear() === co.getFullYear() ? 'd MMM' : 'd MMM yyyy';
+  return `${format(ci, ciFmt)} → ${format(co, 'd MMM yyyy')}`;
 }
 
 export default function AdminEnquiries() {
@@ -337,8 +346,8 @@ export default function AdminEnquiries() {
         guest_email: e.email,
         from_admin: true,
         body: reason
-          ? `About your enquiry for ${e.check_in} → ${e.check_out}: ${reason}`
-          : `Unfortunately we can't host you for ${e.check_in} → ${e.check_out} — those dates are no longer available. Feel free to send a new enquiry with different dates any time.`,
+          ? `About your enquiry for ${dateRange(e.check_in, e.check_out)}: ${reason}`
+          : `Unfortunately we can't host you for ${dateRange(e.check_in, e.check_out)} — those dates are no longer available. Feel free to send a new enquiry with different dates any time.`,
         read_by_guest: false,
         read_by_admin: true,
       });
@@ -393,7 +402,7 @@ export default function AdminEnquiries() {
                     >
                       <td><div className="mgmt-td-primary">{e.name}</div><div className="mgmt-td-sub">{e.email}</div></td>
                       <td className="mgmt-td-sub">{apartmentName(e.apartment || DEFAULT_APARTMENT)}</td>
-                      <td>{e.check_in} → {e.check_out}</td>
+                      <td className="mgmt-td-nowrap">{dateRange(e.check_in, e.check_out)}</td>
                       <td>{e.guests}</td>
                       <td>
                         <div className="mgmt-status-cell">

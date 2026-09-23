@@ -217,7 +217,7 @@ export default function AdminGuestDetail() {
                         <div className="mgmt-td-mono mgmt-td-muted">{b.reference}</div>
                       </td>
                       <td className="mgmt-td-sub">{a?.bedrooms} bed · {a?.beds} beds</td>
-                      <td className="mgmt-td-muted">
+                      <td className="mgmt-td-muted mgmt-td-nowrap">
                         {format(b.checkIn, 'd MMM yyyy')} → {format(b.checkOut, 'd MMM yyyy')}
                       </td>
                       <td>{b.guests}</td>
