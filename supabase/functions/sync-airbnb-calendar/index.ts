@@ -59,7 +59,12 @@ const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 const ARKESEL_API_KEY = Deno.env.get("ARKESEL_API_KEY");
 const ARKESEL_SENDER_ID = Deno.env.get("ARKESEL_SENDER_ID") || "Home-Office";
-const NOTIFY_SMS_TO = Deno.env.get("NOTIFY_SMS_TO") || "0206301032";
+// Comma-separated so more than one phone can be alerted — same
+// NOTIFY_SMS_TO secret notify-enquiry reads, shared project-wide.
+const NOTIFY_SMS_TO = (Deno.env.get("NOTIFY_SMS_TO") || "0206301032")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
 
 // Airbnb's export feed uses all-day events: DTSTART;VALUE=DATE:20261101
 // and DTEND;VALUE=DATE:20261103 (end is exclusive, same convention as
@@ -159,7 +164,7 @@ async function sendNewBookingSms(range: BusyRange, source: string): Promise<void
       body: JSON.stringify({
         sender: ARKESEL_SENDER_ID,
         message,
-        recipients: [toArkeselRecipient(NOTIFY_SMS_TO)],
+        recipients: NOTIFY_SMS_TO.map(toArkeselRecipient),
       }),
     });
     if (!res.ok) {

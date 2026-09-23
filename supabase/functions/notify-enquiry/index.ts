@@ -15,8 +15,10 @@
 //   type "confirmed" — emails the GUEST the moment their booking's
 //   payment is verified (supabase/functions/paystack-webhook), or an
 //   admin confirms/marks one paid directly, with the
-//   reference/dates/total for their records. Never texts — the SMS
-//   alert is for the admin only, on the enquiry side.
+//   reference/dates/total for their records. Also texts the admin(s)
+//   at NOTIFY_SMS_TO — a real, paid site booking is exactly the kind
+//   of event that shouldn't be missed, same as the enquiry-form and
+//   Airbnb-sync SMS alerts.
 //   type "welcome_account" — emails a GUEST a "set your password" link
 //   the moment book-and-pay auto-creates an account for them (every
 //   guest who completes a real booking gets one automatically, so
@@ -68,8 +70,10 @@
 //                        registered Arkesel Sender ID). Must be 11
 //                        characters or fewer; Arkesel may require it to
 //                        be pre-registered.
-//   NOTIFY_SMS_TO      — optional, defaults to 0206301032 below (admin's
-//                        phone, used for type "new_enquiry" only)
+//   NOTIFY_SMS_TO      — optional, defaults to 0206301032 below (admin
+//                        phone(s) — comma-separate for more than one,
+//                        e.g. "0549624125,0547955730" — used for types
+//                        "new_enquiry" and "confirmed")
 //   SITE_URL           — optional, defaults to
 //                        https://apartments.home-officegroup.com below —
 //                        used to link back to the admin dashboard
@@ -84,7 +88,12 @@ const SITE_URL = Deno.env.get("SITE_URL") || "https://apartments.home-officegrou
 
 const ARKESEL_API_KEY = Deno.env.get("ARKESEL_API_KEY");
 const ARKESEL_SENDER_ID = Deno.env.get("ARKESEL_SENDER_ID") || "Home-Office";
-const NOTIFY_SMS_TO = Deno.env.get("NOTIFY_SMS_TO") || "0206301032";
+// Comma-separated so more than one phone can be alerted — every
+// admin SMS in this file sends to the whole list, not just the first.
+const NOTIFY_SMS_TO = (Deno.env.get("NOTIFY_SMS_TO") || "0206301032")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
 
 function escapeHtml(value: unknown): string {
   return String(value ?? "").replace(/[&<>"']/g, (c) => ({
@@ -382,10 +391,12 @@ function toArkeselRecipient(phone: string): string {
   return digits;
 }
 
-// Shared low-level sender — posts one SMS via Arkesel and reports back
-// what actually happened (status + raw body), rather than swallowing
-// it, so a caller that needs to know (the test endpoint below) can.
-async function sendSms(to: string, message: string): Promise<{ ok: boolean; status: number; body: string }> {
+// Shared low-level sender — posts one SMS via Arkesel to one or more
+// recipients and reports back what actually happened (status + raw
+// body), rather than swallowing it, so a caller that needs to know
+// (the test endpoint below) can.
+async function sendSms(to: string | string[], message: string): Promise<{ ok: boolean; status: number; body: string }> {
+  const recipients = (Array.isArray(to) ? to : [to]).map(toArkeselRecipient);
   const res = await fetch("https://sms.arkesel.com/api/v2/sms/send", {
     method: "POST",
     headers: {
@@ -395,7 +406,7 @@ async function sendSms(to: string, message: string): Promise<{ ok: boolean; stat
     body: JSON.stringify({
       sender: ARKESEL_SENDER_ID,
       message,
-      recipients: [toArkeselRecipient(to)],
+      recipients,
     }),
   });
   const text = await res.text();
@@ -422,6 +433,30 @@ async function sendEnquirySms(e: any): Promise<void> {
     }
   } catch (err) {
     console.error("notify-enquiry: Arkesel SMS fetch error", err);
+  }
+}
+
+// Same best-effort shape as sendEnquirySms, for the other event that
+// deserves an immediate text: a real, paid site booking (paystack-
+// webhook flipping a row to `confirmed`) — previously silent on the
+// SMS side, guest-facing email only.
+async function sendBookingConfirmedSms(b: any): Promise<void> {
+  if (!ARKESEL_API_KEY) {
+    console.error("notify-enquiry: ARKESEL_API_KEY is not set, skipping SMS");
+    return;
+  }
+  const apartmentLabel = APARTMENT_NAMES[b.apartment] || "Home-Office Apartments";
+  const dateRange = `${formatDateShort(b.check_in)}-${formatDateShort(b.check_out)}`;
+  const message =
+    `Booking confirmed (${apartmentLabel}): ${b.guest_name || "Guest"}, ${dateRange}, GHS ${b.total ?? "?"}. Ref ${b.reference || "?"}.`;
+
+  try {
+    const result = await sendSms(NOTIFY_SMS_TO, message);
+    if (!result.ok) {
+      console.error("notify-enquiry: Arkesel SMS error (booking confirmed)", result.status, result.body);
+    }
+  } catch (err) {
+    console.error("notify-enquiry: Arkesel SMS fetch error (booking confirmed)", err);
   }
 }
 
@@ -525,10 +560,15 @@ Deno.serve(async (req: Request) => {
     }),
   });
 
-  // The SMS is a supplementary channel only for the admin-facing "new
-  // enquiry" alert — a declined-enquiry email goes to the guest, who
-  // never gets a text either way.
-  const smsPromise = type === "new_enquiry" ? sendEnquirySms(e) : Promise.resolve();
+  // The SMS is a supplementary channel for the two events an admin
+  // actually needs to know about right away: a new enquiry to act on,
+  // and a real, paid booking. Every other type (declined, payment
+  // link, welcome email, review request) is guest-facing only — no
+  // text either way.
+  const smsPromise =
+    type === "new_enquiry" ? sendEnquirySms(e) :
+    type === "confirmed" ? sendBookingConfirmedSms(e) :
+    Promise.resolve();
 
   const [res] = await Promise.all([emailPromise, smsPromise]);
 
