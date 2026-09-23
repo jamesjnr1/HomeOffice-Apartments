@@ -562,7 +562,7 @@ h4 { font-size: 16px; }
 
 /* ---------------- CTA BAND ---------------- */
 .cta-band {
-  background: var(--ink);
+  background: #a15c3a; /* "Jerusalem stone elegance" terracotta, not the dark green --ink */
   color: #fff;
   text-align: center;
 }
