@@ -4,6 +4,7 @@ export { default as AdminOverview } from './AdminOverview';
 export { default as AdminEnquiries } from './AdminEnquiries';
 export { default as AdminBookings } from './AdminBookings';
 export { default as AdminGuests } from './AdminGuests';
+export { default as AdminGuestDetail } from './AdminGuestDetail';
 export { default as AdminReviews } from './AdminReviews';
 export { default as AdminMessages } from './AdminMessages';
 export { default as AdminRates } from './AdminRates';

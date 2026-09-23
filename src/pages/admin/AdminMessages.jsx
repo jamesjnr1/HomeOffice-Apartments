@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Send, Search, Mail, Phone } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { formatDistanceToNow } from 'date-fns';
@@ -18,8 +19,13 @@ import { formatDistanceToNow } from 'date-fns';
  */
 
 export default function AdminMessages() {
+  const [searchParams] = useSearchParams();
   const [allMessages, setAllMessages] = useState([]);
-  const [activeGuestId, setActiveGuestId] = useState(null);
+  // Pre-selects a thread when arriving via AdminGuestDetail's "Message
+  // guest" link (?guest=<id>) — only works if that guest already has a
+  // thread (there's no compose-to-a-new-guest flow here), otherwise
+  // this just falls back to auto-selecting the first thread below.
+  const [activeGuestId, setActiveGuestId] = useState(searchParams.get('guest'));
   const [draft, setDraft] = useState('');
   const [q, setQ] = useState('');
   const [loading, setLoading] = useState(true);
@@ -62,10 +68,11 @@ export default function AdminMessages() {
 
       if (!error && data) {
         setAllMessages(data);
-        // Auto-select first guest thread if none selected yet
-        if (!activeGuestId && data.length > 0) {
-          const firstGuest = data[0].guest_id;
-          setActiveGuestId(firstGuest);
+        // Auto-select the first thread if nothing's selected, or if a
+        // deep-linked ?guest= doesn't actually match any real thread.
+        const hasActiveThread = activeGuestId && data.some((m) => m.guest_id === activeGuestId);
+        if (!hasActiveThread && data.length > 0) {
+          setActiveGuestId(data[0].guest_id);
         }
       }
     } catch {
