@@ -1,7 +1,7 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
-  LayoutDashboard, CalendarDays, Heart,
+  LayoutDashboard, CalendarDays,
   MessageSquare, UserCircle, LogOut, Menu, X,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
@@ -10,8 +10,23 @@ import './dashboard.css';
 export default function DashboardLayout() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+  // The guest's editable identity — name, phone, avatar (see Profile.jsx
+  // and supabase/migrations/20260923000000_guest_profile_avatar_and_
+  // phone.sql). Fetched here, once, and shared via Outlet context so
+  // the sidebar's avatar and every page's greeting stay in sync with
+  // whatever Profile.jsx just saved, without each page re-fetching it.
+  const loadProfile = useCallback((userId) => {
+    supabase
+      .from('profiles')
+      .select('full_name, phone, avatar_url')
+      .eq('id', userId)
+      .maybeSingle()
+      .then(({ data }) => setProfile(data || null));
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -19,13 +34,23 @@ export default function DashboardLayout() {
       if (!mounted) return;
       if (!user) { navigate('/signin', { replace: true }); return; }
       setUser(user); setLoading(false);
+      loadProfile(user.id);
     });
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session?.user) navigate('/signin', { replace: true });
       else setUser(session.user);
     });
     return () => { mounted = false; sub?.subscription?.unsubscribe(); };
-  }, [navigate]);
+  }, [navigate, loadProfile]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    const sub = supabase
+      .channel(`guest-profile-${user.id}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles', filter: `id=eq.${user.id}` }, () => loadProfile(user.id))
+      .subscribe();
+    return () => { supabase.removeChannel(sub); };
+  }, [user?.id, loadProfile]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -44,7 +69,7 @@ export default function DashboardLayout() {
   }
 
   const displayName =
-    user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'there';
+    profile?.full_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'there';
   const initial = displayName.charAt(0).toUpperCase();
 
   return (
@@ -89,9 +114,6 @@ export default function DashboardLayout() {
           <NavLink to="/dashboard/bookings" onClick={() => setMobileNavOpen(false)}>
             <CalendarDays size={18} /> <span>Bookings</span>
           </NavLink>
-          <NavLink to="/dashboard/wishlist" onClick={() => setMobileNavOpen(false)}>
-            <Heart size={18} /> <span>Wishlist</span>
-          </NavLink>
           <NavLink to="/dashboard/messages" onClick={() => setMobileNavOpen(false)}>
             <MessageSquare size={18} /> <span>Messages</span>
           </NavLink>
@@ -103,7 +125,9 @@ export default function DashboardLayout() {
         <div className="dash-sidebar-foot">
           {/* User info — explicit sizing to prevent circle overflow */}
           <div className="dash-user">
-            <div className="dash-avatar-small">{initial}</div>
+            <div className="dash-avatar-small">
+              {profile?.avatar_url ? <img src={profile.avatar_url} alt="" /> : initial}
+            </div>
             <div className="dash-user-meta">
               <div className="dash-user-name">{displayName}</div>
               <div className="dash-user-email">{user?.email}</div>
@@ -121,7 +145,7 @@ export default function DashboardLayout() {
 
       <main className="dash-main">
         <div className="dash-main-inner">
-          <Outlet context={{ user, displayName }} />
+          <Outlet context={{ user, displayName, profile, refreshProfile: () => loadProfile(user.id) }} />
         </div>
       </main>
     </div>
