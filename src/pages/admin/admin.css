@@ -73,13 +73,17 @@ body:has(.auth-photo-admin) .site-footer { display: none !important; }
 .mgmt-brand-sub { font-size: 10px; color: #6a706d; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* ── SIDEBAR ── */
+/* Solid green, matching the guest dashboard's sidebar treatment — the
+   one deliberately strong block of brand color, while the main
+   content area and its tabs (mgmt-tabs, table headers, etc.) stay
+   white/cream as before. */
 .mgmt-sidebar {
   width: 248px !important;
   height: 100vh !important;
   position: sticky !important;
   top: 0 !important;
-  background: #fff !important;
-  border-right: 1px solid #e8ebe8 !important;
+  background: linear-gradient(180deg, #2d6a4f 0%, #24573f 100%) !important;
+  border-right: 1px solid #1f4d38 !important;
   display: flex !important;
   flex-direction: column !important;
   overflow: hidden !important;
@@ -89,60 +93,71 @@ body:has(.auth-photo-admin) .site-footer { display: none !important; }
 }
 .mgmt-sidebar-top {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 18px 14px 14px; border-bottom: 1px solid #f0f2ef; flex-shrink: 0;
+  padding: 18px 14px 14px; border-bottom: 1px solid rgba(255,255,255,.14); flex-shrink: 0;
 }
 .mgmt-close-btn { display: none; }
+
+/* Brand — same markup in the mobile top bar (white background) and
+   the sidebar (green), so these overrides are scoped to .mgmt-sidebar
+   specifically; the base rules above stay dark for the mobile bar. */
+.mgmt-sidebar .mgmt-brand-mark { filter: brightness(0) invert(1); }
+.mgmt-sidebar .mgmt-brand-link,
+.mgmt-sidebar .mgmt-brand-title { color: #fff; }
+.mgmt-sidebar .mgmt-brand-sub { color: rgba(255,255,255,.65); }
+.mgmt-sidebar .mgmt-icon-btn { color: #fff; }
+.mgmt-sidebar .mgmt-icon-btn:hover { background: rgba(255,255,255,.1); }
 
 /* ── NAV ── */
 .mgmt-nav-block { padding: 10px 8px 4px; }
 .mgmt-nav-label {
   font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
-  color: #9aa19d; font-weight: 600; padding: 0 8px; margin: 0 0 4px; display: block;
+  color: rgba(255,255,255,.5); font-weight: 600; padding: 0 8px; margin: 0 0 4px; display: block;
 }
 .mgmt-nav-link {
   display: flex !important; align-items: center; gap: 10px; padding: 9px 10px;
-  border-radius: 8px; color: #6a706d; text-decoration: none;
+  border-radius: 8px; color: rgba(255,255,255,.75); text-decoration: none;
   font-weight: 500; font-size: 13px;
   transition: background .15s ease, color .15s ease;
   margin-bottom: 1px; position: relative;
 }
-.mgmt-nav-link:hover { background: #f4f5f3; color: #1f2b26; }
-.mgmt-nav-link.active { background: #e2ece6; color: #2d6a4f; font-weight: 600; }
+.mgmt-nav-link:hover { background: rgba(255,255,255,.1); color: #fff; }
+.mgmt-nav-link.active { background: #fff; color: #2d6a4f; font-weight: 600; box-shadow: 0 4px 10px rgba(0,0,0,.15); }
 .mgmt-nav-link svg { flex-shrink: 0; opacity: .7; }
 .mgmt-nav-link.active svg { opacity: 1; }
 .mgmt-badge {
-  margin-left: auto; background: #b3261e; color: #fff;
+  margin-left: auto; background: #fff; color: #b3261e;
   font-size: 10px; font-weight: 700; padding: 2px 7px;
   border-radius: 999px; line-height: 1.3; flex-shrink: 0;
 }
+.mgmt-nav-link.active .mgmt-badge { background: #b3261e; color: #fff; }
 
 /* ── SIDEBAR FOOTER ── */
 .mgmt-sidebar-foot {
   margin-top: auto; padding: 12px 8px 20px;
-  border-top: 1px solid #f0f2ef; flex-shrink: 0;
+  border-top: 1px solid rgba(255,255,255,.14); flex-shrink: 0;
 }
 .mgmt-user-row { display: flex; align-items: center; gap: 10px; padding: 6px 8px; margin-bottom: 4px; overflow: hidden; }
 .mgmt-avatar-sm {
   width: 28px; height: 28px; min-width: 28px; border-radius: 999px;
-  background: #2d6a4f; color: #fff; display: flex; align-items: center;
+  background: #fff; color: #2d6a4f; display: flex; align-items: center;
   justify-content: center; font-weight: 600; font-size: 11px; flex-shrink: 0;
 }
 .mgmt-user-info { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.mgmt-user-name { font-weight: 600; font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #1f2b26; }
+.mgmt-user-name { font-weight: 600; font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #fff; }
 .mgmt-role-pill {
   display: inline-block; padding: 2px 8px; border-radius: 999px;
   font-size: 9.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; width: fit-content;
 }
-.mgmt-role-pill.owner { background: #e2ece6; color: #2d6a4f; }
-.mgmt-role-pill.manager { background: #f4f5f3; color: #6a706d; }
+.mgmt-role-pill.owner { background: #fff; color: #2d6a4f; }
+.mgmt-role-pill.manager { background: rgba(255,255,255,.18); color: #fff; }
 .mgmt-signout-btn {
   display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 10px;
-  border: 0; background: transparent; color: #6a706d;
+  border: 0; background: transparent; color: rgba(255,255,255,.75);
   font: 500 12px/1 'Poppins', system-ui, sans-serif;
   border-radius: 8px; cursor: pointer;
   transition: background .15s ease, color .15s ease;
 }
-.mgmt-signout-btn:hover { background: #f4f5f3; color: #1f2b26; }
+.mgmt-signout-btn:hover { background: rgba(255,255,255,.1); color: #fff; }
 
 /* ── MOBILE ── */
 .mgmt-mobile-bar {
