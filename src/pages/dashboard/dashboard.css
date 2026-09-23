@@ -31,6 +31,14 @@ body:has(.dash-shell) main { padding: 0 !important; }
 .dash-shell * { box-sizing: border-box; }
 .dash-shell h1, .dash-shell h2 { font-family: 'Fraunces', Georgia, serif; }
 
+/* Most sizes here are fixed px rather than em/rem, so a plain
+   font-size bump on the shell wouldn't cascade proportionally to
+   them — a rendering-level scale does, same fix as the admin
+   dashboard's .mgmt-shell. Desktop only; mobile is already tight. */
+@media (min-width: 901px) {
+  .dash-shell { zoom: 1.1; }
+}
+
 /* ── LOADING ── */
 .dash-loading {
   min-height: 100vh;

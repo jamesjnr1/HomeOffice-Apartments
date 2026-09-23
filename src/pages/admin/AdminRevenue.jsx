@@ -5,7 +5,6 @@
 import { useOutletContext, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { parseISO, differenceInCalendarDays } from 'date-fns';
-import { CircleDollarSign, BedDouble, PieChart } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 const MONTH_LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -66,26 +65,17 @@ export default function AdminRevenue() {
       </header>
 
       <div className="mgmt-stat-grid">
-        <div className="mgmt-stat mgmt-stat-green">
-          <span className="mgmt-stat-icon-wrap"><CircleDollarSign size={19} /></span>
-          <div>
-            <div className="mgmt-stat-value">GHS {totalRevenue.toLocaleString()}</div>
-            <div className="mgmt-stat-label">Total revenue ({year})</div>
-          </div>
+        <div className="mgmt-stat mgmt-stat-tone-1">
+          <div className="mgmt-stat-value">GHS {totalRevenue.toLocaleString()}</div>
+          <div className="mgmt-stat-label">Total revenue ({year})</div>
         </div>
-        <div className="mgmt-stat mgmt-stat-blue">
-          <span className="mgmt-stat-icon-wrap"><BedDouble size={19} /></span>
-          <div>
-            <div className="mgmt-stat-value">{totalNights}</div>
-            <div className="mgmt-stat-label">Total nights booked</div>
-          </div>
+        <div className="mgmt-stat mgmt-stat-tone-2">
+          <div className="mgmt-stat-value">{totalNights}</div>
+          <div className="mgmt-stat-label">Total nights booked</div>
         </div>
-        <div className="mgmt-stat mgmt-stat-purple">
-          <span className="mgmt-stat-icon-wrap"><PieChart size={19} /></span>
-          <div>
-            <div className="mgmt-stat-value">{occupancy}%</div>
-            <div className="mgmt-stat-label">Occupancy ({year})</div>
-          </div>
+        <div className="mgmt-stat mgmt-stat-tone-4">
+          <div className="mgmt-stat-value">{occupancy}%</div>
+          <div className="mgmt-stat-label">Occupancy ({year})</div>
         </div>
       </div>
 
@@ -98,11 +88,13 @@ export default function AdminRevenue() {
             {months.map(m => (
               <div key={m.m} className="mgmt-bar-col">
                 <div className="mgmt-bar-wrap">
-                  <div
-                    className="mgmt-bar"
-                    style={{ height: max > 0 ? `${(m.v / max) * 100}%` : '0%' }}
-                    title={`GHS ${m.v.toLocaleString()}`}
-                  />
+                  {m.v > 0 && (
+                    <div
+                      className="mgmt-bar"
+                      style={{ height: max > 0 ? `${(m.v / max) * 100}%` : '0%' }}
+                      title={`GHS ${m.v.toLocaleString()}`}
+                    />
+                  )}
                 </div>
                 <div className="mgmt-bar-label">{m.m}</div>
                 {m.v > 0 && <div className="mgmt-bar-val">{(m.v/1000).toFixed(1)}k</div>}
