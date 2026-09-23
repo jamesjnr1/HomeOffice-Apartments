@@ -12,6 +12,9 @@ import {
   Info,
   Users,
   BedDouble,
+  CalendarDays,
+  History,
+  Moon,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { APARTMENTS, apartmentName } from '../../lib/apartments';
@@ -257,9 +260,9 @@ export default function Overview() {
 
           {/* Stats */}
           <section className="dash-stat-grid">
-            <StatCard label="Upcoming" value={stats.upcomingBookings} suffix="bookings" />
-            <StatCard label="Past stays" value={stats.pastStays} suffix="visits" />
-            <StatCard label="Nights with us" value={stats.nightsWithUs} suffix="total" />
+            <StatCard label="Upcoming bookings" value={stats.upcomingBookings} icon={CalendarDays} />
+            <StatCard label="Past stays" value={stats.pastStays} icon={History} />
+            <StatCard label="Nights with us" value={stats.nightsWithUs} icon={Moon} />
           </section>
 
           {/* Check-in details — only for guests with a current/upcoming stay */}
@@ -354,12 +357,12 @@ function EnquiryStatusCard({ enquiry: en }) {
   );
 }
 
-function StatCard({ label, value, suffix }) {
+function StatCard({ label, value, icon: Icon }) {
   return (
     <div className="dash-stat">
-      <div className="dash-stat-label">{label}</div>
+      <Icon size={20} strokeWidth={1.75} className="dash-stat-icon" />
       <div className="dash-stat-value">{value}</div>
-      <div className="dash-stat-suffix">{suffix}</div>
+      <div className="dash-stat-label">{label}</div>
     </div>
   );
 }
