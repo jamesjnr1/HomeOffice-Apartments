@@ -13,10 +13,14 @@ body:has(.dash-shell) .site-header,
 body:has(.dash-shell) .site-footer { display: none !important; }
 body:has(.dash-shell) main { padding: 0 !important; }
 
-/* ── SHELL ── */
+/* ── SHELL ──
+   Sidebar on the left (desktop), sticky alongside the page as it
+   scrolls, with main content and the footer stacked in the other
+   column — not the old fixed-100vh/overflow:hidden double-scroll-pane
+   version, since the footer needs the page to scroll as a whole. */
 .dash-shell {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 252px 1fr;
   min-height: 100vh;
   background: linear-gradient(180deg, #faf8f3 0%, #f5f3ee 100%);
   color: #1f2b26;
@@ -49,34 +53,42 @@ body:has(.dash-shell) main { padding: 0 !important; }
 .dash-loading p { color: #6a706d; margin: 0; font-size: 13px; }
 .dash-loading-brand { font-weight: 700; font-size: 22px; letter-spacing: -.025em; }
 
-/* ── TOP BAR ──
-   One bar at every screen size — used to be a tall green sidebar on
-   desktop and a separate hamburger-triggered off-canvas drawer on
-   mobile. Both are gone: this single always-visible green bar carries
-   brand, nav, and account everywhere. On narrow screens the nav drops
-   to its own row (see the max-width query below); on wide screens
-   everything sits in one row. */
-.dash-topbar {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  grid-template-areas: "brand . account" "nav nav nav";
-  align-items: center;
-  column-gap: 16px;
-  background: linear-gradient(180deg, #2d6a4f 0%, #24573f 100%);
-  padding: 14px 20px 0;
+/* ── SIDEBAR ──
+   Solid green, not white/cream like the main content area — the one
+   part of this dashboard that's deliberately a strong block of our
+   brand color rather than the paper-toned palette everywhere else. */
+.dash-sidebar {
+  width: 252px;
+  height: 100vh;
   position: sticky;
   top: 0;
-  z-index: 40;
+  background: linear-gradient(180deg, #2d6a4f 0%, #24573f 100%);
+  border-right: 1px solid #1f4d38;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex-shrink: 0;
 }
-.dash-topbar-brand { grid-area: brand; padding-bottom: 14px; }
-.dash-topbar-account { grid-area: account; padding-bottom: 14px; position: relative; }
 
+.dash-sidebar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 16px 16px;
+  border-bottom: 1px solid rgba(255,255,255,.14);
+  flex-shrink: 0;
+}
+
+/* Brand — same markup in the mobile top bar (white background) and
+   the sidebar (solid green, below), so the white-text/inverted-icon
+   treatment is scoped to .dash-sidebar specifically rather than these
+   base rules, which stay dark for the mobile bar. */
 .dash-brand {
   display: flex;
   flex-direction: column;
   gap: 2px;
   text-decoration: none;
-  color: #fff;
+  color: #1f2b26;
   min-width: 0;
 }
 .dash-brand-logo {
@@ -85,11 +97,10 @@ body:has(.dash-shell) main { padding: 0 !important; }
   gap: 8px;
 }
 .dash-brand-icon {
-  height: 26px;
+  height: 28px;
   width: auto;
   flex-shrink: 0;
   display: block;
-  filter: brightness(0) invert(1);
 }
 .dash-brand-text {
   display: flex;
@@ -101,64 +112,99 @@ body:has(.dash-shell) main { padding: 0 !important; }
   font-weight: 700;
   font-size: 13.5px;
   letter-spacing: -.02em;
-  color: #fff;
+  color: #1f2b26;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 200px;
 }
 .dash-brand-sub {
   font-weight: 400;
   font-size: 10px;
-  color: rgba(255,255,255,.65);
+  color: #9aa19d;
   white-space: nowrap;
 }
-.dash-brand-accent { color: #d4e9b8; font-weight: 500; }
+.dash-brand-accent { color: #2d6a4f; font-weight: 500; }
 
-/* Nav — a white pill for the active tab, since the bar itself is
-   already the solid green a "green pill" would otherwise use to
-   stand out. Its own row by default; folded inline on wide screens
-   below. */
-.dash-topbar-nav {
-  grid-area: nav;
+/* Sidebar overrides — white text/inverted mark on the solid green. */
+.dash-sidebar .dash-brand-icon { filter: brightness(0) invert(1); }
+.dash-sidebar .dash-brand,
+.dash-sidebar .dash-brand-primary { color: #fff; }
+.dash-sidebar .dash-brand-sub { color: rgba(255,255,255,.65); }
+.dash-sidebar .dash-brand-accent { color: #d4e9b8; }
+
+/* Nav — active state inverts to a white pill, since the sidebar
+   itself is already the solid green a "green pill" would otherwise
+   use to stand out. */
+.dash-nav {
   display: flex;
-  gap: 4px;
-  overflow-x: auto;
-  border-top: 1px solid rgba(255,255,255,.14);
-  padding: 6px 0;
-}
-.dash-topbar-nav a {
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 10px;
   flex: 1;
-  display: flex; align-items: center; justify-content: center; gap: 7px;
-  padding: 10px 8px;
+  overflow-y: auto;
+}
+.dash-nav a {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 11px;
   border-radius: 9px;
   color: rgba(255,255,255,.75);
   text-decoration: none;
   font-weight: 500;
-  font-size: 13px;
-  white-space: nowrap;
+  font-size: 13.5px;
   transition: background .15s ease, color .15s ease;
 }
-.dash-topbar-nav a:hover { background: rgba(255,255,255,.1); color: #fff; }
-.dash-topbar-nav a.active { background: #fff; color: #2d6a4f; }
-.dash-topbar-nav a svg { flex-shrink: 0; }
+.dash-nav a:hover { background: rgba(255,255,255,.1); color: #fff; }
+.dash-nav a.active { background: #fff; color: #2d6a4f; box-shadow: 0 4px 10px rgba(0,0,0,.15); }
+.dash-nav a svg { flex-shrink: 0; }
 
-/* Account button + dropdown */
+/* Sidebar footer — pinned to bottom, no empty space */
+.dash-sidebar-foot {
+  flex-shrink: 0;
+  padding: 12px 10px 20px;
+  border-top: 1px solid rgba(255,255,255,.14);
+}
+
+/* ── MOBILE ──
+   Primary nav is a horizontal tab bar (.dash-mobile-tabs) under the
+   top bar, always visible — not a hamburger-triggered off-canvas
+   drawer. A full-height green panel for 4 short links left most of
+   the screen empty; a tab row uses the space it actually needs. The
+   .dash-sidebar drawer is desktop-only now (see below), and account/
+   sign-out moved to a small dropdown off the avatar button. */
+.dash-mobile-bar {
+  display: none;
+  padding: 14px 20px;
+  background: #fff;
+  border-bottom: 1px solid #e8ebe8;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
 .dash-account-btn {
   width: 34px; height: 34px; min-width: 34px;
   border-radius: 999px; border: 0; padding: 0;
-  background: rgba(255,255,255,.16); color: #fff;
+  background: #2d6a4f; color: #fff;
   display: flex; align-items: center; justify-content: center;
   font-weight: 600; font-size: 13px; cursor: pointer; overflow: hidden;
 }
-.dash-account-btn:hover { background: rgba(255,255,255,.26); }
 .dash-account-btn img { width: 100%; height: 100%; object-fit: cover; }
 .dash-account-menu {
-  position: absolute; top: calc(100% + 8px); right: 0; z-index: 45;
+  position: absolute; top: 62px; right: 16px; z-index: 45;
   width: 240px; background: #fff; border: 1px solid #ece7db;
   border-radius: 14px; box-shadow: 0 10px 28px rgba(31,43,38,.14);
   padding: 12px;
 }
+.dash-account-menu .dash-user { color: #1f2b26; }
+.dash-account-menu .dash-avatar-small { background: #2d6a4f; color: #fff; }
+.dash-account-menu .dash-user-name { color: #1f2b26; }
+.dash-account-menu .dash-user-email { color: #9aa19d; }
+.dash-account-menu .dash-signout { color: #b3261e; }
+.dash-account-menu .dash-signout:hover { background: #fbe9e7; color: #b3261e; }
+
 .dash-user {
   display: flex;
   align-items: center;
@@ -172,8 +218,8 @@ body:has(.dash-shell) main { padding: 0 !important; }
   height: 30px;
   min-width: 30px;
   border-radius: 999px;
-  background: #2d6a4f;
-  color: #fff;
+  background: #fff;
+  color: #2d6a4f;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -187,14 +233,14 @@ body:has(.dash-shell) main { padding: 0 !important; }
 .dash-user-name {
   font-weight: 600;
   font-size: 13px;
-  color: #1f2b26;
+  color: #fff;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .dash-user-email {
   font-size: 11px;
-  color: #9aa19d;
+  color: rgba(255,255,255,.6);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -207,60 +253,72 @@ body:has(.dash-shell) main { padding: 0 !important; }
   padding: 9px 11px;
   border: 0;
   background: transparent;
-  color: #b3261e;
+  color: rgba(255,255,255,.75);
   font: 500 13px/1 'Poppins', sans-serif;
   border-radius: 8px;
   cursor: pointer;
-  transition: background .15s ease;
+  transition: background .15s ease, color .15s ease;
 }
-.dash-signout:hover { background: #fbe9e7; }
+.dash-signout:hover { background: rgba(255,255,255,.1); color: #fff; }
+
+/* ── TABS (mobile) ── */
+.dash-mobile-tabs {
+  display: none;
+  position: sticky;
+  top: 62px;
+  z-index: 39;
+  background: #fff;
+  border-bottom: 1px solid #e8ebe8;
+  padding: 0 8px;
+}
+.dash-mobile-tabs a {
+  flex: 1;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 13px 4px;
+  color: #9aa19d;
+  text-decoration: none;
+  font-weight: 500; font-size: 12.5px;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+}
+.dash-mobile-tabs a svg { flex-shrink: 0; }
+.dash-mobile-tabs a.active { color: #2d6a4f; border-bottom-color: #2d6a4f; }
 
 .dash-backdrop {
+  display: none;
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,.4);
   z-index: 40;
 }
 
-/* Wide screens: brand, nav, and account all fit in one row. Nav sits
-   in the middle column and is centered within it, rather than hugging
-   the brand — left-aligned left a visibly dead strip of green between
-   the last tab and the avatar. */
-@media (min-width: 901px) {
-  .dash-topbar {
-    grid-template-columns: auto 1fr auto;
-    grid-template-areas: "brand nav account";
-    padding: 14px 32px;
-  }
-  .dash-topbar-brand, .dash-topbar-account { padding-bottom: 0; }
-  .dash-topbar-nav {
-    border-top: 0; padding: 0; margin: 0;
-    justify-content: center;
-  }
-  .dash-topbar-nav a { flex: 0 0 auto; padding: 9px 16px; border-radius: 999px; }
-  .dash-topbar-nav a.active { box-shadow: 0 4px 10px rgba(0,0,0,.15); }
+@media (max-width: 900px) {
+  .dash-shell { grid-template-columns: 1fr; }
+  .dash-mobile-bar { display: flex; }
+  .dash-mobile-tabs { display: flex; }
+  .dash-sidebar { display: none; }
+  .dash-backdrop { display: block; }
 }
 
 /* Narrow phones: icon-over-label reads better than a cramped row */
 @media (max-width: 420px) {
-  .dash-topbar-nav a { flex-direction: column; gap: 3px; font-size: 10.5px; padding: 9px 2px 10px; }
+  .dash-mobile-tabs a { flex-direction: column; gap: 3px; font-size: 10.5px; padding: 9px 2px 10px; }
 }
 
 /* ── MAIN ── */
-.dash-main { flex: 1; }
 .dash-main-inner {
   max-width: 1160px;
   margin: 0 auto;
-  padding: 48px 44px 120px;
+  padding: 72px 44px 120px;
 }
 @media (max-width: 900px) {
-  .dash-main-inner { padding: 28px 20px 80px; }
+  .dash-main-inner { padding: 32px 20px 80px; }
 }
 
 /* ── FOOTER ──
    Simple and clean: copyright on one side, real contact details on
    the other — same phone/email the public site's own footer uses. */
-.dash-footer { border-top: 1px solid #ece7db; background: #fff; padding: 22px 20px; }
+.dash-footer { grid-column: 1 / -1; border-top: 1px solid #ece7db; background: #fff; padding: 22px 20px; }
 .dash-footer-inner {
   max-width: 1160px; margin: 0 auto;
   display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px 24px;
