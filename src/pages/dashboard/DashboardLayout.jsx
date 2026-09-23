@@ -2,17 +2,24 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useEffect, useState, useCallback } from 'react';
 import {
   LayoutDashboard, CalendarDays,
-  MessageSquare, UserCircle, LogOut, Menu, X,
+  MessageSquare, UserCircle, LogOut,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import './dashboard.css';
+
+const NAV_ITEMS = [
+  { to: '/dashboard', end: true, icon: LayoutDashboard, label: 'Overview' },
+  { to: '/dashboard/bookings', icon: CalendarDays, label: 'Bookings' },
+  { to: '/dashboard/messages', icon: MessageSquare, label: 'Messages' },
+  { to: '/dashboard/profile', icon: UserCircle, label: 'Profile' },
+];
 
 export default function DashboardLayout() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
 
   // The guest's editable identity — name, phone, avatar (see Profile.jsx
   // and supabase/migrations/20260923000000_guest_profile_avatar_and_
@@ -74,7 +81,10 @@ export default function DashboardLayout() {
 
   return (
     <div className="dash-shell">
-      {/* Mobile top bar */}
+      {/* Mobile top bar — brand + an avatar button for account/sign-out.
+          Primary nav lives in .dash-mobile-tabs below, not behind a
+          hamburger — a full-height off-canvas drawer for just 4 short
+          links left most of the screen empty green space. */}
       <div className="dash-mobile-bar">
         <a href="/" className="dash-brand dash-brand-logo">
           <img src="/images/logo-icon.png" alt="" className="dash-brand-icon" />
@@ -85,13 +95,42 @@ export default function DashboardLayout() {
             </span>
           </span>
         </a>
-        <button className="dash-menu-btn" onClick={() => setMobileNavOpen(true)} aria-label="Open menu">
-          <Menu size={22} />
+        <button className="dash-account-btn" onClick={() => setAccountOpen(o => !o)} aria-label="Account menu">
+          {profile?.avatar_url ? <img src={profile.avatar_url} alt="" /> : initial}
         </button>
+        {accountOpen && (
+          <div className="dash-account-menu">
+            <div className="dash-user">
+              <div className="dash-avatar-small">
+                {profile?.avatar_url ? <img src={profile.avatar_url} alt="" /> : initial}
+              </div>
+              <div className="dash-user-meta">
+                <div className="dash-user-name">{displayName}</div>
+                <div className="dash-user-email">{user?.email}</div>
+              </div>
+            </div>
+            <button className="dash-signout" onClick={handleSignOut}>
+              <LogOut size={16} /> Sign out
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Sidebar */}
-      <aside className={`dash-sidebar ${mobileNavOpen ? 'open' : ''}`}>
+      {/* Horizontal tab bar — mobile-only primary nav, always visible. */}
+      <nav className="dash-mobile-tabs">
+        {NAV_ITEMS.map(({ to, end, icon: Icon, label }) => (
+          <NavLink key={to} to={to} end={end}>
+            <Icon size={18} /> <span>{label}</span>
+          </NavLink>
+        ))}
+      </nav>
+
+      {accountOpen && (
+        <div className="dash-backdrop" onClick={() => setAccountOpen(false)} />
+      )}
+
+      {/* Sidebar — desktop only */}
+      <aside className="dash-sidebar">
         <div className="dash-sidebar-head">
           <a href="/" className="dash-brand dash-brand-logo">
             <img src="/images/logo-icon.png" alt="" className="dash-brand-icon" />
@@ -102,24 +141,14 @@ export default function DashboardLayout() {
               </span>
             </span>
           </a>
-          <button className="dash-menu-btn dash-menu-close" onClick={() => setMobileNavOpen(false)} aria-label="Close menu">
-            <X size={22} />
-          </button>
         </div>
 
         <nav className="dash-nav">
-          <NavLink to="/dashboard" end onClick={() => setMobileNavOpen(false)}>
-            <LayoutDashboard size={18} /> <span>Overview</span>
-          </NavLink>
-          <NavLink to="/dashboard/bookings" onClick={() => setMobileNavOpen(false)}>
-            <CalendarDays size={18} /> <span>Bookings</span>
-          </NavLink>
-          <NavLink to="/dashboard/messages" onClick={() => setMobileNavOpen(false)}>
-            <MessageSquare size={18} /> <span>Messages</span>
-          </NavLink>
-          <NavLink to="/dashboard/profile" onClick={() => setMobileNavOpen(false)}>
-            <UserCircle size={18} /> <span>Profile</span>
-          </NavLink>
+          {NAV_ITEMS.map(({ to, end, icon: Icon, label }) => (
+            <NavLink key={to} to={to} end={end}>
+              <Icon size={18} /> <span>{label}</span>
+            </NavLink>
+          ))}
         </nav>
 
         <div className="dash-sidebar-foot">
@@ -138,10 +167,6 @@ export default function DashboardLayout() {
           </button>
         </div>
       </aside>
-
-      {mobileNavOpen && (
-        <div className="dash-backdrop" onClick={() => setMobileNavOpen(false)} />
-      )}
 
       <main className="dash-main">
         <div className="dash-main-inner">

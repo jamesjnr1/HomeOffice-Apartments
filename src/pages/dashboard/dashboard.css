@@ -219,7 +219,13 @@ body:has(.dash-shell) main { padding: 0 !important; }
 }
 .dash-signout:hover { background: rgba(255,255,255,.1); color: #fff; }
 
-/* ── MOBILE ── */
+/* ── MOBILE ──
+   Primary nav is a horizontal tab bar (.dash-mobile-tabs) under the
+   top bar, always visible — not a hamburger-triggered off-canvas
+   drawer. A full-height green panel for 4 short links left most of
+   the screen empty; a tab row uses the space it actually needs. The
+   .dash-sidebar drawer is desktop-only now (see below), and account/
+   sign-out moved to a small dropdown off the avatar button. */
 .dash-mobile-bar {
   display: none;
   padding: 14px 20px;
@@ -231,19 +237,49 @@ body:has(.dash-shell) main { padding: 0 !important; }
   top: 0;
   z-index: 40;
 }
-.dash-menu-btn {
-  background: transparent;
-  border: 0;
-  padding: 8px;
-  border-radius: 8px;
-  color: #1f2b26;
-  cursor: pointer;
-  display: inline-flex;
+.dash-account-btn {
+  width: 34px; height: 34px; min-width: 34px;
+  border-radius: 999px; border: 0; padding: 0;
+  background: #2d6a4f; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 600; font-size: 13px; cursor: pointer; overflow: hidden;
 }
-.dash-menu-btn:hover { background: #f7f8f6; }
-.dash-sidebar .dash-menu-btn { color: #fff; }
-.dash-sidebar .dash-menu-btn:hover { background: rgba(255,255,255,.1); }
-.dash-menu-close { display: none; }
+.dash-account-btn img { width: 100%; height: 100%; object-fit: cover; }
+.dash-account-menu {
+  position: absolute; top: 62px; right: 16px; z-index: 45;
+  width: 240px; background: #fff; border: 1px solid #ece7db;
+  border-radius: 14px; box-shadow: 0 10px 28px rgba(31,43,38,.14);
+  padding: 12px;
+}
+.dash-account-menu .dash-user { color: #1f2b26; }
+.dash-account-menu .dash-avatar-small { background: #2d6a4f; color: #fff; }
+.dash-account-menu .dash-user-name { color: #1f2b26; }
+.dash-account-menu .dash-user-email { color: #9aa19d; }
+.dash-account-menu .dash-signout { color: #b3261e; }
+.dash-account-menu .dash-signout:hover { background: #fbe9e7; color: #b3261e; }
+
+.dash-mobile-tabs {
+  display: none;
+  position: sticky;
+  top: 62px;
+  z-index: 39;
+  background: #fff;
+  border-bottom: 1px solid #e8ebe8;
+  padding: 0 8px;
+}
+.dash-mobile-tabs a {
+  flex: 1;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 13px 4px;
+  color: #9aa19d;
+  text-decoration: none;
+  font-weight: 500; font-size: 12.5px;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+}
+.dash-mobile-tabs a svg { flex-shrink: 0; }
+.dash-mobile-tabs a.active { color: #2d6a4f; border-bottom-color: #2d6a4f; }
+
 .dash-backdrop {
   display: none;
   position: fixed;
@@ -255,18 +291,14 @@ body:has(.dash-shell) main { padding: 0 !important; }
 @media (max-width: 900px) {
   .dash-shell { grid-template-columns: 1fr; height: auto; overflow: auto; }
   .dash-mobile-bar { display: flex; }
-  .dash-sidebar {
-    position: fixed !important;
-    top: 0; left: 0;
-    width: 280px !important;
-    height: 100vh !important;
-    z-index: 50;
-    transform: translateX(-100%);
-    transition: transform .3s ease;
-  }
-  .dash-sidebar.open { transform: translateX(0); }
-  .dash-menu-close { display: inline-flex; }
+  .dash-mobile-tabs { display: flex; }
+  .dash-sidebar { display: none; }
   .dash-backdrop { display: block; }
+}
+
+/* Narrow phones: icon-over-label reads better than a cramped row */
+@media (max-width: 420px) {
+  .dash-mobile-tabs a { flex-direction: column; gap: 3px; font-size: 10.5px; padding: 9px 2px 10px; }
 }
 
 /* ── MAIN ── */
