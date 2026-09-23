@@ -5,7 +5,6 @@ import { Download, MessageSquare, ArrowRight, MapPin, CreditCard, Star } from 'l
 import Receipt from '../../components/Receipt';
 import StatusBadge from '../../components/StatusBadge';
 import StarRating from '../../components/StarRating';
-import DashReviews from '../../components/DashReviews';
 import { supabase } from '../../lib/supabase';
 import { apartmentName } from '../../lib/apartments';
 
@@ -134,18 +133,15 @@ export default function Bookings() {
       {loading ? (
         <div className="dash-empty"><p>Loading your trips…</p></div>
       ) : filtered.length === 0 ? (
-        <>
-          <div className="dash-empty">
-            <h3>Nothing here yet</h3>
-            <p>
-              When you book a stay with us, it'll show up here.
-            </p>
-            <Link to="/book" className="dash-btn dash-btn-primary">
-              Book a stay <ArrowRight size={16} />
-            </Link>
-          </div>
-          <DashReviews />
-        </>
+        <div className="dash-empty">
+          <h3>Nothing here yet</h3>
+          <p>
+            When you book a stay with us, it'll show up here.
+          </p>
+          <Link to="/book" className="dash-btn dash-btn-primary">
+            Book a stay <ArrowRight size={16} />
+          </Link>
+        </div>
       ) : (
         <div className="dash-booking-list">
           {filtered.map((b) => (
