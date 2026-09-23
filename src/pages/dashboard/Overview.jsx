@@ -12,9 +12,6 @@ import {
   Info,
   Users,
   BedDouble,
-  CalendarDays,
-  History,
-  Moon,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { APARTMENTS, apartmentName } from '../../lib/apartments';
@@ -258,11 +255,31 @@ export default function Overview() {
             </section>
           )}
 
-          {/* Stats */}
-          <section className="dash-stat-grid">
-            <StatCard label="Upcoming bookings" value={stats.upcomingBookings} icon={CalendarDays} />
-            <StatCard label="Past stays" value={stats.pastStays} icon={History} />
-            <StatCard label="Nights with us" value={stats.nightsWithUs} icon={Moon} />
+          {/* Stats — upcoming bookings (the one a guest actually acts on)
+              gets a featured card; the other two are smaller supporting
+              figures beside it, rather than three identical boxes. */}
+          <section className="dash-stat-feature-row">
+            <div className="dash-stat-feature">
+              <span className="dash-stat-feature-eyebrow">Upcoming bookings</span>
+              <div>
+                <div className="dash-stat-feature-num">{stats.upcomingBookings}</div>
+                <div className="dash-stat-feature-caption">
+                  {nextStay
+                    ? `Next stay in ${daysUntil} day${daysUntil !== 1 ? 's' : ''}`
+                    : 'No trips booked yet'}
+                </div>
+              </div>
+            </div>
+            <div className="dash-stat-support-stack">
+              <div className="dash-stat-support">
+                <span className="dash-stat-support-num">{stats.pastStays}</span>
+                <span className="dash-stat-support-label">Past stays</span>
+              </div>
+              <div className="dash-stat-support">
+                <span className="dash-stat-support-num">{stats.nightsWithUs}</span>
+                <span className="dash-stat-support-label">Nights with us</span>
+              </div>
+            </div>
           </section>
 
           {/* Check-in details — only for guests with a current/upcoming stay */}
@@ -357,12 +374,3 @@ function EnquiryStatusCard({ enquiry: en }) {
   );
 }
 
-function StatCard({ label, value, icon: Icon }) {
-  return (
-    <div className="dash-stat">
-      <Icon size={20} strokeWidth={1.75} className="dash-stat-icon" />
-      <div className="dash-stat-value">{value}</div>
-      <div className="dash-stat-label">{label}</div>
-    </div>
-  );
-}
