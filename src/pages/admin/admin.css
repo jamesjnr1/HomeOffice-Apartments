@@ -499,7 +499,7 @@ body:has(.auth-photo-admin) .site-footer { display: none !important; }
   transition: background .15s ease;
 }
 .mgmt-msg-composer button:hover:not(:disabled) { background: #1f4d38; }
-.mgmt-msg-composer button:disabled { background: #e8ebe8; cursor: not-allowed; }
+.mgmt-msg-composer button:disabled { background: #e8ebe8; color: #9aa19d; cursor: not-allowed; }
 
 /* ── RATES ── */
 .mgmt-rates-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }

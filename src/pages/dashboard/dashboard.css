@@ -488,7 +488,7 @@ body:has(.dash-shell) main { padding: 0 !important; }
   transition: background .15s ease;
 }
 .dash-msg-composer button:hover:not(:disabled) { background: #1f4d38; }
-.dash-msg-composer button:disabled { background: #e8ebe8; cursor: not-allowed; }
+.dash-msg-composer button:disabled { background: #e8ebe8; color: #9aa19d; cursor: not-allowed; }
 
 /* ── PROFILE ── */
 .dash-profile { display: flex; flex-direction: column; gap: 18px; max-width: 780px; }
