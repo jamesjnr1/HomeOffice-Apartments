@@ -2,10 +2,10 @@
 // a guest with known, available dates goes straight from "Book & pay
 // now" to a real Paystack checkout, with no admin step in between.
 // Replaces, for the common case, the old enquiry -> admin "Confirm &
-// request payment" -> "Send payment link" chain (still built and
-// still used as the fallback below, and still available for guests
-// who send a plain question via the separate "Send an enquiry" path
-// on the same page).
+// request payment" -> guest pays from their own dashboard chain
+// (still built and still used as the fallback below, and still
+// available for guests who send a plain question via the separate
+// "Send an enquiry" path on the same page).
 //
 // Flow:
 //   1. Validate input.
@@ -345,8 +345,8 @@ Deno.serve(async (req: Request) => {
   if (!initRes.ok || !initJson?.status || !initJson?.data?.authorization_url) {
     console.error("book-and-pay: Paystack error", initRes.status, initJson);
     // The booking already exists as awaiting_payment (harmless, blocks
-    // nothing) — an admin can still send a payment link manually from
-    // AdminEnquiries if this keeps happening.
+    // nothing) — the guest can retry payment from their own dashboard
+    // (or here again) if this keeps happening.
     return json({ error: "Paystack couldn't start this payment. Please try again in a moment." }, 502);
   }
 

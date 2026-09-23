@@ -10,9 +10,16 @@ import { apartmentName } from '../../lib/apartments';
 
 /**
  * Bookings — real rows from the `bookings` table, scoped to this
- * guest (guest_id = auth.uid(), enforced by RLS too). Only shows up
- * here if the enquiry's email matched an existing account at the
- * moment an admin confirmed it — see AdminEnquiries.jsx.
+ * guest (guest_id = auth.uid(), enforced by RLS too). Every booking
+ * gets a guest_id one way or another — automatically for anything
+ * booked through the site (book-and-pay's ensureGuestAccount), or via
+ * admin-onboard-guest for the rarer manually-confirmed enquiry — see
+ * AdminEnquiries.jsx's "Give dashboard access".
+ *
+ * Payment: an `awaiting_payment` booking's "Pay now" (see
+ * PayNowButton below) is the ONLY way payment happens — there's no
+ * admin-side "send a payment link" action. The guest starts checkout
+ * themselves, whenever they're ready.
  *
  * Home-Office Apartment and LivingSpring Gardens & Apartment are two
  * separate units in the same building, so the name shown per booking
@@ -223,11 +230,7 @@ function BookingCard({ booking, review, onReceipt, onReviewSaved }) {
         </div>
 
         <div className="dash-booking-actions">
-          {b.status === 'awaiting_payment' && b.payment_url && (
-            <a href={b.payment_url} target="_blank" rel="noopener noreferrer" className="dash-btn dash-btn-primary dash-btn-sm">
-              <CreditCard size={14} /> Pay now
-            </a>
-          )}
+          {b.status === 'awaiting_payment' && <PayNowButton booking={b} />}
           <button className="dash-btn dash-btn-ghost dash-btn-sm" onClick={onReceipt}>
             <Download size={14} /> Receipt
           </button>
@@ -246,6 +249,41 @@ function BookingCard({ booking, review, onReceipt, onReviewSaved }) {
         ) : null}
       </div>
     </article>
+  );
+}
+
+// Payment lives entirely here in the guest's own dashboard — there is
+// no admin-side "send a payment link" action anymore. Clicking this
+// calls paystack-init directly (RLS's bookings_guest_select_own lets
+// a guest request a checkout link for their own booking, same as an
+// admin can for any booking) and redirects straight to Paystack's
+// hosted checkout the moment it's ready, whenever the guest chooses
+// to pay.
+function PayNowButton({ booking }) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const payNow = async () => {
+    setError('');
+    setLoading(true);
+    const { data, error: fnError } = await supabase.functions.invoke('paystack-init', {
+      body: { booking_id: booking.id },
+    });
+    if (fnError || !data?.authorization_url) {
+      setError(data?.error || "Couldn't start payment. Please try again.");
+      setLoading(false);
+      return;
+    }
+    window.location.href = data.authorization_url;
+  };
+
+  return (
+    <>
+      <button className="dash-btn dash-btn-primary dash-btn-sm" disabled={loading} onClick={payNow}>
+        <CreditCard size={14} /> {loading ? 'Preparing checkout…' : 'Pay now'}
+      </button>
+      {error && <p className="form-error" style={{ margin: '6px 0 0', fontSize: 12, flexBasis: '100%' }}>{error}</p>}
+    </>
   );
 }
 

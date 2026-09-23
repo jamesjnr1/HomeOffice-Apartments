@@ -17,10 +17,13 @@ function sourceApartment(source) {
 
 // Status filter tabs, most-actionable first — an admin opening this
 // page usually wants "what needs attention" (awaiting payment) before
-// "what's already settled" (confirmed), not one flat list mixing both
-// with Airbnb rows and cancellations.
-const TABS = ['all', 'awaiting_payment', 'confirmed', 'cancelled'];
-const TAB_LABELS = { all: 'All', awaiting_payment: 'Awaiting payment', confirmed: 'Confirmed', cancelled: 'Cancelled' };
+// "what's already settled" (confirmed) or "what's already happened"
+// (completed), not one flat list mixing all of that with Airbnb rows
+// and cancellations. "Completed" is every past reservation across
+// BOTH apartments — the query below never filters by apartment, so
+// this isn't scoped to just one unit.
+const TABS = ['all', 'awaiting_payment', 'confirmed', 'completed', 'cancelled'];
+const TAB_LABELS = { all: 'All', awaiting_payment: 'Awaiting payment', confirmed: 'Confirmed', completed: 'Completed', cancelled: 'Cancelled' };
 
 /**
  * AdminBookings — real rows from the `bookings` table, now mostly

@@ -1,28 +1,31 @@
 // paystack-init — creates a Paystack hosted-checkout link for an
-// `awaiting_payment` booking (see AdminEnquiries.jsx's "Send payment
-// link", and supabase/migrations/20260921120000_payment_gated_
-// bookings.sql for why a confirmed enquiry now sits as
-// `awaiting_payment` instead of going straight to `confirmed`).
+// `awaiting_payment` booking. Called from the GUEST's own dashboard
+// (Bookings.jsx's "Pay now") when they're ready to pay — see
+// supabase/migrations/20260921120000_payment_gated_bookings.sql for
+// why a confirmed enquiry now sits as `awaiting_payment` instead of
+// going straight to `confirmed`. There is no admin-side "send a
+// payment link" action anymore; payment is entirely the guest's own
+// dashboard flow.
 //
 // Auth: verify_jwt is ON (the platform rejects any request without a
-// valid Supabase access token before this code even runs) — this must
-// only ever be callable by a logged-in admin, since it spends real
-// money-adjacent API calls and writes to bookings. On top of that, the
-// booking read below is done with the CALLER's own token, not the
-// service role, so Row Level Security itself enforces that only an
-// owner/manager can read (and therefore request payment for) a given
-// booking — no separate role check needed here. The write that follows
-// (saving the checkout link) uses the service role, since anon/
-// authenticated has no UPDATE grant on bookings beyond what RLS
-// already covers for admins, and we've already proven the caller is
-// one by that point.
+// valid Supabase access token before this code even runs) — beyond
+// that, the booking read below is done with the CALLER's own token,
+// not the service role, so Row Level Security is what actually
+// decides who may request payment for a given booking: either an
+// owner/manager (bookings_admin_select), or the booking's own guest
+// (bookings_guest_select_own, guest_id = auth.uid()) — no separate
+// role check needed here, since RLS already only returns a row when
+// one of those is true. The write that follows (saving the checkout
+// link) uses the service role, since neither an admin nor a guest has
+// a plain UPDATE grant on bookings beyond what RLS covers, and we've
+// already proven the caller is allowed to act on this booking by the
+// read above succeeding.
 //
 // A booking's `paystack_reference` is deliberately reminted every time
 // this runs, never reused — Paystack's Initialize Transaction API
 // rejects a reference it's seen before, even if that transaction was
 // abandoned, so retrying with the same reference isn't an option (e.g.
-// admin clicking "Send payment link" again after the guest didn't pay
-// the first one).
+// the guest clicking "Pay now" again after abandoning checkout once).
 //
 // Saving `payment_url` on the booking (below) is what fires the
 // "payment_requested" guest email — see public.notify_payment_
@@ -51,9 +54,9 @@ const PAYSTACK_SECRET_KEY = Deno.env.get("PAYSTACK_SECRET_KEY");
 const SITE_URL = Deno.env.get("SITE_URL") || "https://apartments.home-officegroup.com";
 
 // Unlike every other function in this project, this one is called
-// directly from the browser (AdminEnquiries.jsx's "Send payment
-// link", via supabase.functions.invoke) rather than server-to-server
-// — which means the browser sends a CORS preflight (OPTIONS) request
+// directly from the browser (the guest dashboard's "Pay now", via
+// supabase.functions.invoke) rather than server-to-server — which
+// means the browser sends a CORS preflight (OPTIONS) request
 // first. Without handling it and echoing these headers on every
 // response, the browser silently blocks the real POST before it ever
 // reaches this function (it shows up in the logs as "OPTIONS | 405",
@@ -100,10 +103,11 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  // Runs as the caller (their access token is forwarded as-is) — RLS's
-  // bookings_admin_select policy means this simply returns nothing for
-  // anyone who isn't an owner/manager, which we treat as "forbidden"
-  // below without needing to inspect roles ourselves.
+  // Runs as the caller (their access token is forwarded as-is) — RLS
+  // (bookings_admin_select OR bookings_guest_select_own) simply
+  // returns nothing for anyone who is neither an owner/manager nor
+  // this booking's own guest, which we treat as "forbidden" below
+  // without needing to inspect roles ourselves.
   const callerClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     global: { headers: { Authorization: req.headers.get("Authorization") || "" } },
   });

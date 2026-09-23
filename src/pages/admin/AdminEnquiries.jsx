@@ -1,5 +1,5 @@
 import { Fragment, useState, useEffect } from 'react';
-import { Check, Reply, Archive, Trash2, CalendarCheck, Ban, AlertTriangle, Send, CircleDollarSign, UserPlus } from 'lucide-react';
+import { Check, Reply, Archive, Trash2, CalendarCheck, Ban, AlertTriangle, CircleDollarSign, UserPlus } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { supabase } from '../../lib/supabase';
 import { DEFAULT_APARTMENT, apartmentName } from '../../lib/apartments';
@@ -15,23 +15,26 @@ import StatusBadge from '../../components/StatusBadge';
  * and enter the agreed total to create a `bookings` row (see
  * supabase/migrations/20260909150000_create_bookings.sql). That's the
  * only place bookings get created. It's also one of the two things
- * that release a guest to submit another enquiry — see the urgency()
- * helper below and supabase/migrations/20260909210000_block_until_
- * booked_not_just_replied.sql. Marking an enquiry replied or archived
- * deliberately does NOT release it; declining it (see declineEnquiry
- * below) does, immediately.
+ * that release a guest to submit another enquiry — see
+ * supabase/migrations/20260909210000_block_until_booked_not_just_
+ * replied.sql (a 3-day self-expiry on top). Marking an enquiry replied
+ * or archived deliberately does NOT release it; declining it (see
+ * declineEnquiry below) does, immediately.
  *
  * Payment (Phase 3): "Confirm booking" no longer confirms outright —
  * it creates the booking as `awaiting_payment` (dates aren't held yet,
  * see is_date_range_available/bookings_no_date_overlap in
- * supabase/migrations/20260921120000_payment_gated_bookings.sql), then
- * "Send payment link" calls the paystack-init edge function to create
- * a Paystack checkout link and email it to the guest. The booking only
- * becomes `confirmed` — which is what actually locks the dates,
- * confirms the guest by email, and lets it export to Airbnb — once
- * Paystack's webhook verifies the payment (supabase/functions/
- * paystack-webhook). "Mark as paid" is the manual fallback for a
- * guest who pays by direct mobile-money transfer instead.
+ * supabase/migrations/20260921120000_payment_gated_bookings.sql). From
+ * there, payment itself happens entirely in the GUEST's own dashboard
+ * (Bookings.jsx's "Pay now" calls paystack-init directly, RLS-scoped
+ * to their own booking) — there is deliberately no admin-side "send a
+ * payment link" action here; the guest starts checkout themselves,
+ * whenever they're ready. The booking only becomes `confirmed` — which
+ * is what actually locks the dates, confirms the guest by email, and
+ * lets it export to Airbnb — once Paystack's webhook verifies the
+ * payment (supabase/functions/paystack-webhook). "Mark as paid" below
+ * is the manual fallback for a guest who pays by direct mobile-money
+ * transfer instead of using the dashboard.
  *
  * Reservation conflicts: since 20260910100100_prevent_overlapping_
  * bookings.sql, two confirmed bookings can never actually overlap —
@@ -44,8 +47,6 @@ import StatusBadge from '../../components/StatusBadge';
  */
 
 const TABS = ['all', 'new', 'replied', 'archived', 'declined'];
-const RESUBMIT_WINDOW_MS = 3 * 24 * 60 * 60 * 1000; // keep in sync with the
-// 3-day window in supabase/migrations/20260909210000_block_until_booked_not_just_replied.sql
 
 function makeReference() {
   const code = Math.random().toString(36).slice(2, 7).toUpperCase();
@@ -59,22 +60,6 @@ function rangesOverlap(aStart, aEnd, bStart, bEnd) {
   return aStart < bEnd && bStart < aEnd;
 }
 
-// An enquiry that hasn't become a booking yet blocks the same email
-// from resubmitting — marking it replied or archived does NOT release
-// this, only confirming a booking or declining it does (or the 3-day
-// self-expiry). Surfaced here so a second enquiry from the same
-// person, once the window opens, doesn't come as a surprise.
-function urgency(e) {
-  if (e.booking_id || e.status === 'declined') return null;
-  const remaining = RESUBMIT_WINDOW_MS - (Date.now() - new Date(e.created_at).getTime());
-  if (remaining <= 0) return { label: 'Overdue · guest can resubmit', tone: 'bad' };
-  if (remaining <= 24 * 60 * 60 * 1000) {
-    const hrs = Math.max(1, Math.round(remaining / (60 * 60 * 1000)));
-    return { label: `Resubmit window opens in ${hrs}h`, tone: 'warn' };
-  }
-  return null;
-}
-
 export default function AdminEnquiries() {
   const [tab, setTab] = useState('all');
   const [enquiries, setEnquiries] = useState([]);
@@ -85,11 +70,9 @@ export default function AdminEnquiries() {
   const [declineReasons, setDeclineReasons] = useState({}); // enquiry id -> draft reason string
   const [confirmingId, setConfirmingId] = useState(null);
   const [decliningId, setDecliningId] = useState(null);
-  const [payingId, setPayingId] = useState(null); // booking id currently sending/refreshing a payment link
   const [markingPaidId, setMarkingPaidId] = useState(null); // booking id currently being marked paid manually
   const [onboardingId, setOnboardingId] = useState(null); // booking id currently getting a guest account linked
   const [onboardError, setOnboardError] = useState('');
-  const [paymentLinks, setPaymentLinks] = useState({}); // booking id -> latest authorization_url, for a copy-link affordance
   const [bookError, setBookError] = useState('');
   const [loadError, setLoadError] = useState('');
 
@@ -270,29 +253,6 @@ export default function AdminEnquiries() {
     setConfirmingId(null);
   };
 
-  // Creates a Paystack checkout link for an awaiting-payment booking
-  // and emails it to the guest (see supabase/functions/paystack-init —
-  // saving payment_url server-side is what fires that email). Safe to
-  // call again if the guest hasn't paid yet; each call mints a fresh
-  // link since Paystack won't reuse a reference.
-  const sendPaymentLink = async (bookingId) => {
-    setBookError('');
-    setPayingId(bookingId);
-    const { data, error } = await supabase.functions.invoke('paystack-init', {
-      body: { booking_id: bookingId },
-    });
-    if (error || !data?.authorization_url) {
-      setBookError(data?.error || "Couldn't create a payment link. Please try again.");
-      setPayingId(null);
-      return;
-    }
-    setPaymentLinks(prev => ({ ...prev, [bookingId]: data.authorization_url }));
-    setEnquiries(prev => prev.map(row => row.bookings?.id === bookingId
-      ? { ...row, bookings: { ...row.bookings, payment_url: data.authorization_url } }
-      : row));
-    setPayingId(null);
-  };
-
   // Manual fallback for a guest who pays by direct mobile-money
   // transfer instead of Paystack — the admin attests payment was
   // received and confirms the booking directly. Same UPDATE the
@@ -445,7 +405,6 @@ export default function AdminEnquiries() {
                           ) : (
                             <StatusBadge status={e.status} />
                           )}
-                          {urgency(e) && <StatusBadge label={urgency(e).label} tone={urgency(e).tone} />}
                           {conflict && (
                             <span className="status-badge status-badge-bad" title={`Overlaps ${conflict.reference}`}>
                               <span className="status-badge-icon"><AlertTriangle size={11} /></span>
@@ -465,7 +424,7 @@ export default function AdminEnquiries() {
                     </tr>
                     {expanded === e.id && (
                       <tr className="mgmt-tr-expanded">
-                        <td colSpan={6}>
+                        <td colSpan={7}>
                           <div className="mgmt-expanded-body">
                             {e.message && <p><strong>Message:</strong> {e.message}</p>}
                             {e.phone && <p><strong>Phone:</strong> {e.phone}</p>}
@@ -500,19 +459,11 @@ export default function AdminEnquiries() {
                               <div className="mgmt-decision-row" onClick={ev => ev.stopPropagation()}>
                                 <div className="mgmt-confirm-booking">
                                   <p className="mgmt-td-muted" style={{ margin: '0 0 10px' }}>
-                                    Booked as <strong>{e.bookings.reference}</strong> — waiting on payment. Dates aren't held until it's paid.
+                                    Booked as <strong>{e.bookings.reference}</strong> — waiting on payment. Dates aren't held until it's paid. The guest pays from their own dashboard whenever they're ready.
                                   </p>
-                                  <button
-                                    className="mgmt-btn mgmt-btn-primary"
-                                    disabled={payingId === e.bookings.id || markingPaidId === e.bookings.id}
-                                    onClick={() => sendPaymentLink(e.bookings.id)}
-                                  >
-                                    <Send size={14}/> {payingId === e.bookings.id ? 'Sending…' : (e.bookings.payment_url ? 'Resend payment link' : 'Send payment link')}
-                                  </button>
                                   {!e.bookings.guest_id && (
                                     <button
                                       className="mgmt-btn mgmt-btn-outline"
-                                      style={{ marginLeft: 8 }}
                                       disabled={onboardingId === e.bookings.id}
                                       onClick={() => onboardGuest(e.bookings.id)}
                                     >
@@ -522,13 +473,6 @@ export default function AdminEnquiries() {
                                   {onboardError && onboardingId === null && (
                                     <p className="form-error" style={{ margin: '8px 0 0' }}>{onboardError}</p>
                                   )}
-                                  {(paymentLinks[e.bookings.id] || e.bookings.payment_url) && (
-                                    <p className="mgmt-td-muted" style={{ margin: '8px 0 0', wordBreak: 'break-all' }}>
-                                      <a href={paymentLinks[e.bookings.id] || e.bookings.payment_url} target="_blank" rel="noopener noreferrer">
-                                        {paymentLinks[e.bookings.id] || e.bookings.payment_url}
-                                      </a>
-                                    </p>
-                                  )}
                                 </div>
                                 <div className="mgmt-decline-box">
                                   <p className="mgmt-td-muted" style={{ margin: '0 0 10px' }}>
@@ -536,13 +480,13 @@ export default function AdminEnquiries() {
                                   </p>
                                   <button
                                     className="mgmt-btn mgmt-btn-outline"
-                                    disabled={payingId === e.bookings.id || markingPaidId === e.bookings.id}
+                                    disabled={markingPaidId === e.bookings.id}
                                     onClick={() => markPaidManually(e.bookings.id)}
                                   >
                                     <CircleDollarSign size={14}/> {markingPaidId === e.bookings.id ? 'Confirming…' : 'Mark as paid'}
                                   </button>
                                 </div>
-                                {bookError && payingId === null && markingPaidId === null && (
+                                {bookError && markingPaidId === null && (
                                   <span className="form-error" style={{ margin: 0 }}>{bookError}</span>
                                 )}
                               </div>
