@@ -244,37 +244,23 @@ body:has(.auth-photo-admin) .site-footer { display: none !important; }
 .mgmt-linky:hover { text-decoration: underline; }
 
 /* ── STATS ──
-   Flat solid cards, one brand family (deep green → cream) instead of
-   a rainbow of unrelated SaaS colors — simple blocks, no icons, no
-   badges, differentiated by color depth and label text only. */
+   Separate white cards, no borders (shadow does the separating), a
+   small outline icon in the brand green, bold number, muted label —
+   the reference layout the user shared, recolored to the site's own
+   green instead of its original blue. */
 .mgmt-stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 32px; }
 @media (max-width: 1100px) { .mgmt-stat-grid { grid-template-columns: repeat(2,1fr); } }
 @media (max-width: 500px) { .mgmt-stat-grid { grid-template-columns: 1fr; } }
 .mgmt-stat {
-  padding: 24px 22px; border-radius: 14px; text-decoration: none;
-  display: flex; flex-direction: column; gap: 8px;
-  transition: transform .2s ease, box-shadow .2s ease;
+  background: #fff; padding: 26px 24px; border-radius: 14px; text-decoration: none;
+  display: flex; flex-direction: column; gap: 12px;
   box-shadow: 0 1px 3px rgba(0,0,0,.05);
+  transition: transform .2s ease, box-shadow .2s ease;
 }
-.mgmt-stat:hover { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(0,0,0,.12); }
-.mgmt-stat-value { font-size: 32px; font-weight: 700; letter-spacing: -.02em; line-height: 1; }
-.mgmt-stat-label { font-size: 13px; font-weight: 500; }
-
-.mgmt-stat-tone-1 { background: #2d6a4f; }
-.mgmt-stat-tone-1 .mgmt-stat-value { color: #fff; }
-.mgmt-stat-tone-1 .mgmt-stat-label { color: rgba(255,255,255,.75); }
-
-.mgmt-stat-tone-2 { background: #4f7d63; }
-.mgmt-stat-tone-2 .mgmt-stat-value { color: #fff; }
-.mgmt-stat-tone-2 .mgmt-stat-label { color: rgba(255,255,255,.75); }
-
-.mgmt-stat-tone-3 { background: #dceadd; }
-.mgmt-stat-tone-3 .mgmt-stat-value { color: #1f2b26; }
-.mgmt-stat-tone-3 .mgmt-stat-label { color: #4c6155; }
-
-.mgmt-stat-tone-4 { background: #f4ead6; }
-.mgmt-stat-tone-4 .mgmt-stat-value { color: #1f2b26; }
-.mgmt-stat-tone-4 .mgmt-stat-label { color: #7a6a4d; }
+.mgmt-stat:hover { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(0,0,0,.09); }
+.mgmt-stat-icon { color: #2d6a4f; }
+.mgmt-stat-value { font-size: 30px; font-weight: 700; letter-spacing: -.02em; line-height: 1; color: #1f2b26; }
+.mgmt-stat-label { font-size: 13.5px; color: #6a706d; line-height: 1.4; }
 
 /* ── FUNNEL (Analytics) ── */
 .mgmt-funnel { display: flex; align-items: center; gap: 14px; margin-bottom: 32px; }
