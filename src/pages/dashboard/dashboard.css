@@ -330,21 +330,41 @@ body:has(.dash-shell) main { padding: 0 !important; }
 .dash-next-stay-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 
 /* ── STATS ──
-   Same recipe as the admin dashboard's stat cards: a small icon, a
-   bold plain number, a muted label — separate white cards, no badges
-   or color-coding, just clean and consistent. */
-.dash-stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 40px; }
-@media (max-width: 700px) { .dash-stat-grid { grid-template-columns: 1fr; } }
-.dash-stat {
-  background: #fff; border: 1px solid #ece7db; border-radius: 16px;
-  padding: 24px; box-shadow: 0 2px 10px rgba(63,50,30,.06);
-  display: flex; flex-direction: column; gap: 12px;
-  transition: transform .2s ease, box-shadow .2s ease;
+   Featured + supporting instead of three identical boxes: upcoming
+   bookings (the one a guest actually acts on) gets a solid green
+   feature card; past stays and nights with us sit beside it as
+   smaller, quieter figures — real hierarchy, not three lookalikes. */
+.dash-stat-feature-row { display: grid; grid-template-columns: 1.3fr 1fr; gap: 16px; margin-bottom: 40px; }
+@media (max-width: 620px) { .dash-stat-feature-row { grid-template-columns: 1fr; } }
+
+.dash-stat-feature {
+  background: linear-gradient(150deg, #2d6a4f 0%, #1f4d38 100%);
+  border-radius: 18px; padding: 28px; color: #fff; position: relative; overflow: hidden;
+  display: flex; flex-direction: column; justify-content: space-between; min-height: 168px;
 }
-.dash-stat:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(63,50,30,.1); }
-.dash-stat-icon { color: #2d6a4f; }
-.dash-stat-value { font-size: 30px; font-weight: 700; letter-spacing: -.025em; line-height: 1; color: #1f2b26; }
-.dash-stat-label { font-size: 13.5px; color: #6a706d; }
+.dash-stat-feature::after {
+  content: ''; position: absolute; right: -30px; bottom: -40px; width: 160px; height: 160px;
+  border-radius: 50%; background: rgba(255,255,255,.07);
+}
+.dash-stat-feature-eyebrow { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,.7); font-weight: 600; }
+.dash-stat-feature-num {
+  font-family: 'Fraunces', Georgia, serif; font-weight: 500; font-size: 52px;
+  line-height: 1; letter-spacing: -.03em; margin: 10px 0 4px;
+  font-variant-numeric: tabular-nums;
+}
+.dash-stat-feature-caption { font-size: 14px; color: rgba(255,255,255,.85); }
+
+.dash-stat-support-stack { display: flex; flex-direction: column; gap: 14px; }
+.dash-stat-support {
+  background: #fff; border: 1px solid #ece7db; border-radius: 14px;
+  padding: 16px 18px; flex: 1; display: flex; align-items: center; justify-content: space-between;
+  box-shadow: 0 2px 10px rgba(63,50,30,.06);
+}
+.dash-stat-support-num {
+  font-family: 'Fraunces', Georgia, serif; font-weight: 500; font-size: 26px;
+  letter-spacing: -.02em; color: #1f2b26; font-variant-numeric: tabular-nums;
+}
+.dash-stat-support-label { font-size: 12.5px; color: #6a706d; text-align: right; max-width: 100px; }
 
 /* ── TABS ── */
 .dash-tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid #e8ebe8; }
