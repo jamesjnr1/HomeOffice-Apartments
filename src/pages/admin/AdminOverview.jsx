@@ -1,6 +1,6 @@
 import { useOutletContext, Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, MessageSquare, Users, Inbox, CalendarDays } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 /**
@@ -71,10 +71,10 @@ export default function AdminOverview() {
   };
 
   const STAT_CARDS = [
-    { label: 'Unread messages', value: stats.unreadMessages, link: '/admin/messages', tone: 1 },
-    { label: 'Total guests', value: stats.totalGuests, link: '/admin/guests', tone: 2 },
-    { label: 'New enquiries', value: stats.newEnquiries, link: '/admin/enquiries', tone: 3 },
-    { label: 'Upcoming bookings', value: stats.upcomingBookings, link: '/admin/bookings', tone: 4 },
+    { label: 'Unread messages', value: stats.unreadMessages, link: '/admin/messages', icon: MessageSquare },
+    { label: 'Total guests', value: stats.totalGuests, link: '/admin/guests', icon: Users },
+    { label: 'New enquiries', value: stats.newEnquiries, link: '/admin/enquiries', icon: Inbox },
+    { label: 'Upcoming bookings', value: stats.upcomingBookings, link: '/admin/bookings', icon: CalendarDays },
   ];
 
   return (
@@ -89,7 +89,8 @@ export default function AdminOverview() {
 
       <div className="mgmt-stat-grid">
         {STAT_CARDS.map(s => (
-          <Link key={s.label} to={s.link} className={`mgmt-stat mgmt-stat-tone-${s.tone}`}>
+          <Link key={s.label} to={s.link} className="mgmt-stat">
+            <s.icon size={22} strokeWidth={1.75} className="mgmt-stat-icon" />
             <div className="mgmt-stat-value">{s.value}</div>
             <div className="mgmt-stat-label">{s.label}</div>
           </Link>

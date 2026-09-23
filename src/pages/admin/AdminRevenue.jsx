@@ -5,6 +5,7 @@
 import { useOutletContext, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { parseISO, differenceInCalendarDays } from 'date-fns';
+import { CircleDollarSign, BedDouble, PieChart } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 const MONTH_LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -65,15 +66,18 @@ export default function AdminRevenue() {
       </header>
 
       <div className="mgmt-stat-grid">
-        <div className="mgmt-stat mgmt-stat-tone-1">
+        <div className="mgmt-stat">
+          <CircleDollarSign size={22} strokeWidth={1.75} className="mgmt-stat-icon" />
           <div className="mgmt-stat-value">GHS {totalRevenue.toLocaleString()}</div>
           <div className="mgmt-stat-label">Total revenue ({year})</div>
         </div>
-        <div className="mgmt-stat mgmt-stat-tone-2">
+        <div className="mgmt-stat">
+          <BedDouble size={22} strokeWidth={1.75} className="mgmt-stat-icon" />
           <div className="mgmt-stat-value">{totalNights}</div>
           <div className="mgmt-stat-label">Total nights booked</div>
         </div>
-        <div className="mgmt-stat mgmt-stat-tone-4">
+        <div className="mgmt-stat">
+          <PieChart size={22} strokeWidth={1.75} className="mgmt-stat-icon" />
           <div className="mgmt-stat-value">{occupancy}%</div>
           <div className="mgmt-stat-label">Occupancy ({year})</div>
         </div>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Eye, Inbox, CalendarCheck } from 'lucide-react';
 import { format, subDays, isAfter } from 'date-fns';
 import { supabase } from '../../lib/supabase';
 
@@ -88,21 +89,24 @@ export default function AdminAnalytics() {
       {/* Funnel */}
       <div className="mgmt-funnel">
         <div className="mgmt-funnel-step">
-          <div className="mgmt-stat mgmt-stat-tone-1">
+          <div className="mgmt-stat">
+            <Eye size={22} strokeWidth={1.75} className="mgmt-stat-icon" />
             <div className="mgmt-stat-value">{allTimeVisitors.toLocaleString()}</div>
             <div className="mgmt-stat-label">Visitors (all time)</div>
           </div>
         </div>
         <div className="mgmt-funnel-arrow">→ {enquiryRate}%</div>
         <div className="mgmt-funnel-step">
-          <div className="mgmt-stat mgmt-stat-tone-2">
+          <div className="mgmt-stat">
+            <Inbox size={22} strokeWidth={1.75} className="mgmt-stat-icon" />
             <div className="mgmt-stat-value">{enquiriesTotal.toLocaleString()}</div>
             <div className="mgmt-stat-label">Enquiries sent</div>
           </div>
         </div>
         <div className="mgmt-funnel-arrow">→ {bookingRate}%</div>
         <div className="mgmt-funnel-step">
-          <div className="mgmt-stat mgmt-stat-tone-4">
+          <div className="mgmt-stat">
+            <CalendarCheck size={22} strokeWidth={1.75} className="mgmt-stat-icon" />
             <div className="mgmt-stat-value">{bookingsTotal.toLocaleString()}</div>
             <div className="mgmt-stat-label">Bookings made</div>
           </div>
