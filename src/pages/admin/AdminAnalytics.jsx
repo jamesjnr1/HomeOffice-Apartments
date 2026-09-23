@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Eye, Inbox, CalendarCheck } from 'lucide-react';
 import { format, subDays, isAfter } from 'date-fns';
 import { supabase } from '../../lib/supabase';
 
@@ -89,32 +88,23 @@ export default function AdminAnalytics() {
       {/* Funnel */}
       <div className="mgmt-funnel">
         <div className="mgmt-funnel-step">
-          <div className="mgmt-stat mgmt-stat-blue">
-            <div className="mgmt-stat-top">
-              <span className="mgmt-stat-label">Visitors (all time)</span>
-              <Eye size={16} className="mgmt-stat-icon" />
-            </div>
+          <div className="mgmt-stat mgmt-stat-tone-1">
             <div className="mgmt-stat-value">{allTimeVisitors.toLocaleString()}</div>
+            <div className="mgmt-stat-label">Visitors (all time)</div>
           </div>
         </div>
         <div className="mgmt-funnel-arrow">→ {enquiryRate}%</div>
         <div className="mgmt-funnel-step">
-          <div className="mgmt-stat mgmt-stat-green">
-            <div className="mgmt-stat-top">
-              <span className="mgmt-stat-label">Enquiries sent</span>
-              <Inbox size={16} className="mgmt-stat-icon" />
-            </div>
+          <div className="mgmt-stat mgmt-stat-tone-2">
             <div className="mgmt-stat-value">{enquiriesTotal.toLocaleString()}</div>
+            <div className="mgmt-stat-label">Enquiries sent</div>
           </div>
         </div>
         <div className="mgmt-funnel-arrow">→ {bookingRate}%</div>
         <div className="mgmt-funnel-step">
-          <div className="mgmt-stat mgmt-stat-gold">
-            <div className="mgmt-stat-top">
-              <span className="mgmt-stat-label">Bookings made</span>
-              <CalendarCheck size={16} className="mgmt-stat-icon" />
-            </div>
+          <div className="mgmt-stat mgmt-stat-tone-4">
             <div className="mgmt-stat-value">{bookingsTotal.toLocaleString()}</div>
+            <div className="mgmt-stat-label">Bookings made</div>
           </div>
         </div>
       </div>
