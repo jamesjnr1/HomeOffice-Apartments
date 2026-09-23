@@ -1650,6 +1650,33 @@ body:has(.auth-split) main { padding: 0; }
   max-width: 780px;
   text-align: left;
 }
+.intro-v2-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 64px;
+  align-items: center;
+}
+.intro-v2-airbnb {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px;
+  margin-top: 8px; padding-top: 20px; border-top: 1px solid #e8ebe8; max-width: 620px;
+}
+.intro-v2-airbnb-label { font-size: 12.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.intro-v2-airbnb-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 14px; border: 1px solid #e8ebe8; border-radius: 999px;
+  font-size: 13.5px; font-weight: 500; color: var(--brick); text-decoration: none;
+  transition: border-color .15s ease, background .15s ease;
+}
+.intro-v2-airbnb-link:hover { border-color: var(--brick); background: rgba(166,81,43,.08); }
+.intro-v2-media { border-radius: var(--radius-lg); overflow: hidden; }
+.intro-v2-media img { width: 100%; height: auto; display: block; }
+.intro-v2-media-icon { border-radius: 0; overflow: visible; display: flex; justify-content: center; }
+.intro-v2-media-icon img { width: 100%; max-width: 300px; height: auto; }
+@media (max-width: 900px) {
+  .intro-v2-grid { grid-template-columns: 1fr; gap: 32px; }
+  .intro-v2-media { order: -1; }
+  .intro-v2-media-icon img { max-width: 220px; }
+}
 /* Supporting intro copy folded into the page header, instead of a
    second competing hero-sized section */
 /* Tinted callout box — a visual break instead of more plain paragraphs */
@@ -1699,6 +1726,23 @@ body:has(.auth-split) main { padding: 0; }
   margin: 0 0 20px;
   max-width: 620px;
 }
+.intro-v2-features {
+  margin: 4px 0 24px;
+  padding: 20px 22px;
+  background: var(--bg-soft);
+  border-radius: var(--radius);
+  max-width: 620px;
+}
+.intro-v2-features-label {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin-bottom: 12px;
+}
+.intro-v2-features .prose-list { margin: 0; max-width: none; }
 .intro-v2 .prose-list {
   list-style: none;
   padding: 0;
