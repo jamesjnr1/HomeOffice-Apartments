@@ -257,6 +257,25 @@ body:has(.dash-shell) main { padding: 0 !important; }
   .dash-main-inner { padding: 28px 20px 80px; }
 }
 
+/* ── FOOTER ──
+   Simple and clean: copyright on one side, real contact details on
+   the other — same phone/email the public site's own footer uses. */
+.dash-footer { border-top: 1px solid #ece7db; background: #fff; padding: 22px 20px; }
+.dash-footer-inner {
+  max-width: 1160px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px 24px;
+}
+.dash-footer-copy { font-size: 12.5px; color: #9aa19d; margin: 0; }
+.dash-footer-contact { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 18px; font-size: 12.5px; }
+.dash-footer-help { color: #9aa19d; }
+.dash-footer-contact a {
+  display: inline-flex; align-items: center; gap: 6px;
+  color: #6a706d; text-decoration: none; font-weight: 500;
+  transition: color .15s ease;
+}
+.dash-footer-contact a:hover { color: #2d6a4f; }
+@media (max-width: 600px) { .dash-footer-inner { justify-content: center; text-align: center; } }
+
 /* ── PAGE HEAD ── */
 .dash-page { }
 .dash-page-head { margin-bottom: 36px; }

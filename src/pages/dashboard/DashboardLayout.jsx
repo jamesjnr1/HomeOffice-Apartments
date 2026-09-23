@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback } from 'react';
 import {
   LayoutDashboard, CalendarDays,
   MessageSquare, UserCircle, LogOut,
+  Phone, Mail,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import './dashboard.css';
@@ -137,6 +138,21 @@ export default function DashboardLayout() {
           <Outlet context={{ user, displayName, profile, refreshProfile: () => loadProfile(user.id) }} />
         </div>
       </main>
+
+      {/* A simple, real footer — how to reach us directly, same
+          contact details as the public site's own footer. */}
+      <footer className="dash-footer">
+        <div className="dash-footer-inner">
+          <p className="dash-footer-copy">
+            © {new Date().getFullYear()} Home-Office Apartments and LivingSpring Gardens
+          </p>
+          <div className="dash-footer-contact">
+            <span className="dash-footer-help">For more info, call</span>
+            <a href="tel:+233206301032"><Phone size={13} /> +233 20 630 1032</a>
+            <a href="mailto:jamesd@home-officegroup.com"><Mail size={13} /> jamesd@home-officegroup.com</a>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
