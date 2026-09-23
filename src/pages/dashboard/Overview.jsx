@@ -10,9 +10,12 @@ import {
   KeyRound,
   ScrollText,
   Info,
+  Users,
+  BedDouble,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { apartmentName } from '../../lib/apartments';
+import { APARTMENTS, apartmentName } from '../../lib/apartments';
+import PropertyGallery from '../../components/PropertyGallery';
 
 /**
  * Overview
@@ -230,6 +233,25 @@ export default function Overview() {
                   </Link>
                 </div>
               </div>
+            </section>
+          )}
+
+          {/* Room capacity/beds + the real facilities gallery — same
+              content AdminGuestDetail shows an admin for any guest
+              (see PropertyGallery), just framed as "your stay". */}
+          {nextStay && (
+            <section className="dash-card" style={{ marginBottom: 28 }}>
+              <div className="dash-stay-facts">
+                <div className="dash-stay-fact">
+                  <Users size={14} />
+                  <div><span className="dash-detail-label">ROOM CAPACITY</span><span className="dash-detail-value">Up to {APARTMENTS[nextStay.apartment]?.guests ?? nextStay.guests} guests</span></div>
+                </div>
+                <div className="dash-stay-fact">
+                  <BedDouble size={14} />
+                  <div><span className="dash-detail-label">BEDS</span><span className="dash-detail-value">{APARTMENTS[nextStay.apartment]?.bedrooms} bedrooms · {APARTMENTS[nextStay.apartment]?.beds} beds</span></div>
+                </div>
+              </div>
+              <PropertyGallery />
             </section>
           )}
 

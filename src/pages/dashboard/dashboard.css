@@ -44,13 +44,16 @@ body:has(.dash-shell) main { padding: 0 !important; }
 .dash-loading-brand { font-weight: 700; font-size: 22px; letter-spacing: -.025em; }
 
 /* ── SIDEBAR ── */
+/* Solid green, not white/cream like the main content area — the one
+   part of this dashboard that's deliberately a strong block of our
+   brand color rather than the paper-toned palette everywhere else. */
 .dash-sidebar {
   width: 252px;
   height: 100vh;
   position: sticky;
   top: 0;
-  background: linear-gradient(180deg, #fffdf9 0%, #fbf8f2 100%);
-  border-right: 1px solid #ece7db;
+  background: linear-gradient(180deg, #2d6a4f 0%, #24573f 100%);
+  border-right: 1px solid #1f4d38;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -62,11 +65,14 @@ body:has(.dash-shell) main { padding: 0 !important; }
   align-items: center;
   justify-content: space-between;
   padding: 20px 16px 16px;
-  border-bottom: 1px solid #f0f2ef;
+  border-bottom: 1px solid rgba(255,255,255,.14);
   flex-shrink: 0;
 }
 
-/* Brand */
+/* Brand — same markup in the mobile top bar (white background) and
+   the sidebar (solid green, below), so the white-text/inverted-icon
+   treatment is scoped to .dash-sidebar specifically rather than these
+   base rules, which stay dark for the mobile bar. */
 .dash-brand {
   display: flex;
   flex-direction: column;
@@ -109,7 +115,16 @@ body:has(.dash-shell) main { padding: 0 !important; }
 }
 .dash-brand-accent { color: #2d6a4f; font-weight: 500; }
 
-/* Nav */
+/* Sidebar overrides — white text/inverted mark on the solid green. */
+.dash-sidebar .dash-brand-icon { filter: brightness(0) invert(1); }
+.dash-sidebar .dash-brand,
+.dash-sidebar .dash-brand-primary { color: #fff; }
+.dash-sidebar .dash-brand-sub { color: rgba(255,255,255,.65); }
+.dash-sidebar .dash-brand-accent { color: #d4e9b8; }
+
+/* Nav — active state inverts to a white pill, since the sidebar
+   itself is already the solid green a "green pill" would otherwise
+   use to stand out. */
 .dash-nav {
   display: flex;
   flex-direction: column;
@@ -124,21 +139,21 @@ body:has(.dash-shell) main { padding: 0 !important; }
   gap: 11px;
   padding: 10px 11px;
   border-radius: 9px;
-  color: #6a706d;
+  color: rgba(255,255,255,.75);
   text-decoration: none;
   font-weight: 500;
   font-size: 13.5px;
   transition: background .15s ease, color .15s ease;
 }
-.dash-nav a:hover { background: #f2eee4; color: #1f2b26; }
-.dash-nav a.active { background: #2d6a4f; color: #fff; box-shadow: 0 4px 10px rgba(45,106,79,.25); }
+.dash-nav a:hover { background: rgba(255,255,255,.1); color: #fff; }
+.dash-nav a.active { background: #fff; color: #2d6a4f; box-shadow: 0 4px 10px rgba(0,0,0,.15); }
 .dash-nav a svg { flex-shrink: 0; }
 
 /* Sidebar footer — pinned to bottom, no empty space */
 .dash-sidebar-foot {
   flex-shrink: 0;
   padding: 12px 10px 20px;
-  border-top: 1px solid #f0f2ef;
+  border-top: 1px solid rgba(255,255,255,.14);
 }
 .dash-user {
   display: flex;
@@ -153,8 +168,8 @@ body:has(.dash-shell) main { padding: 0 !important; }
   height: 30px;
   min-width: 30px;
   border-radius: 999px;
-  background: #2d6a4f;
-  color: #fff;
+  background: #fff;
+  color: #2d6a4f;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -168,14 +183,14 @@ body:has(.dash-shell) main { padding: 0 !important; }
 .dash-user-name {
   font-weight: 600;
   font-size: 13px;
-  color: #1f2b26;
+  color: #fff;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .dash-user-email {
   font-size: 11px;
-  color: #9aa19d;
+  color: rgba(255,255,255,.6);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -188,13 +203,13 @@ body:has(.dash-shell) main { padding: 0 !important; }
   padding: 9px 11px;
   border: 0;
   background: transparent;
-  color: #6a706d;
+  color: rgba(255,255,255,.75);
   font: 500 13px/1 'Poppins', sans-serif;
   border-radius: 8px;
   cursor: pointer;
   transition: background .15s ease, color .15s ease;
 }
-.dash-signout:hover { background: #f7f8f6; color: #1f2b26; }
+.dash-signout:hover { background: rgba(255,255,255,.1); color: #fff; }
 
 /* ── MOBILE ── */
 .dash-mobile-bar {
@@ -218,6 +233,8 @@ body:has(.dash-shell) main { padding: 0 !important; }
   display: inline-flex;
 }
 .dash-menu-btn:hover { background: #f7f8f6; }
+.dash-sidebar .dash-menu-btn { color: #fff; }
+.dash-sidebar .dash-menu-btn:hover { background: rgba(255,255,255,.1); }
 .dash-menu-close { display: none; }
 .dash-backdrop {
   display: none;
@@ -475,6 +492,14 @@ body:has(.dash-shell) main { padding: 0 !important; }
 }
 .dash-card-h { margin: 0 0 4px; font-size: 17px; font-weight: 500; letter-spacing: -.01em; color: #1f2b26; }
 .dash-card-sub { margin: 0 0 18px; font-size: 13.5px; color: #6a706d; }
+
+/* ── STAY FACTS (Room capacity/beds, above the facilities gallery) ── */
+.dash-stay-facts {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px;
+  padding-bottom: 18px; margin-bottom: 18px; border-bottom: 1px solid #ece7db;
+}
+.dash-stay-fact { display: flex; align-items: flex-start; gap: 10px; color: #2d6a4f; }
+.dash-stay-fact > div { display: flex; flex-direction: column; gap: 2px; }
 
 /* ── CHECK-IN DETAILS (guest dashboard) ── */
 .dash-checkin-grid {

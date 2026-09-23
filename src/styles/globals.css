@@ -2615,3 +2615,34 @@ html.a11y-reduce-motion .reveal { opacity: 1 !important; transform: none !import
   }
 }
 
+/* ---------------- PROPERTY GALLERY (src/components/PropertyGallery.jsx) ----------------
+   Shared, unprefixed on purpose — used inside both the admin's mgmt-*
+   page shell (AdminGuestDetail) and the guest dashboard's dash-* shell
+   (Overview), loaded here in globals.css so it works in either without
+   duplicating the component or its styles. */
+.property-facility-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.property-facility-head h3 { margin: 0; font-size: 14px; font-weight: 500; color: #1f2b26; }
+.property-facility-list { font-size: 12px; color: #6a706d; }
+.property-gallery { display: flex; align-items: center; gap: 8px; }
+.property-gallery-thumb {
+  flex: 1; aspect-ratio: 4/3; border-radius: 10px; overflow: hidden; border: 0; padding: 0; cursor: pointer;
+  background: #f4f5f3; min-width: 0;
+}
+.property-gallery-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform .3s ease; }
+.property-gallery-thumb:hover img { transform: scale(1.06); }
+.property-gallery-nav {
+  width: 30px; height: 30px; border-radius: 999px; border: 1px solid #e8ebe8; background: #fff;
+  display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; color: #1f2b26;
+}
+.property-gallery-nav:hover { background: #f4f5f3; }
+.property-lightbox {
+  position: fixed; inset: 0; background: rgba(0,0,0,.82); z-index: 200;
+  display: flex; align-items: center; justify-content: center; padding: 40px; cursor: zoom-out;
+}
+.property-lightbox img { max-width: 100%; max-height: 100%; border-radius: 8px; cursor: default; }
+.property-lightbox-close {
+  position: absolute; top: 20px; right: 24px; width: 38px; height: 38px; border-radius: 999px;
+  background: rgba(255,255,255,.12); color: #fff; border: 0; display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.property-lightbox-close:hover { background: rgba(255,255,255,.2); }
+
