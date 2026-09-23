@@ -16,6 +16,7 @@ import {
 import { supabase } from '../../lib/supabase';
 import { APARTMENTS, apartmentName } from '../../lib/apartments';
 import PropertyGallery from '../../components/PropertyGallery';
+import DashReviews from '../../components/DashReviews';
 
 /**
  * Overview
@@ -284,6 +285,11 @@ export default function Overview() {
 
           {/* Check-in details — only for guests with a current/upcoming stay */}
           {checkInDetails && <CheckInDetailsCard details={checkInDetails} />}
+
+          {/* No next stay means no hero/gallery/check-in card above —
+              fill the rest of the page with something real instead of
+              empty space. */}
+          {!nextStay && <DashReviews />}
         </>
       )}
     </div>
