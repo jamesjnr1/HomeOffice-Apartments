@@ -81,12 +81,13 @@ export default function DashboardLayout() {
 
   return (
     <div className="dash-shell">
-      {/* Mobile top bar — brand + an avatar button for account/sign-out.
-          Primary nav lives in .dash-mobile-tabs below, not behind a
-          hamburger — a full-height off-canvas drawer for just 4 short
-          links left most of the screen empty green space. */}
-      <div className="dash-mobile-bar">
-        <a href="/" className="dash-brand dash-brand-logo">
+      {/* One top bar at every screen size — brand, nav, and an avatar
+          button for account/sign-out. Used to be a tall green sidebar
+          on desktop and a hamburger-triggered off-canvas drawer on
+          mobile; both are gone in favor of this single always-visible
+          bar (nav wraps to its own row on narrow screens, see CSS). */}
+      <header className="dash-topbar">
+        <a href="/" className="dash-brand dash-brand-logo dash-topbar-brand">
           <img src="/images/logo-icon.png" alt="" className="dash-brand-icon" />
           <span className="dash-brand-text">
             <span className="dash-brand-primary">Home-Office Apartments</span>
@@ -95,55 +96,8 @@ export default function DashboardLayout() {
             </span>
           </span>
         </a>
-        <button className="dash-account-btn" onClick={() => setAccountOpen(o => !o)} aria-label="Account menu">
-          {profile?.avatar_url ? <img src={profile.avatar_url} alt="" /> : initial}
-        </button>
-        {accountOpen && (
-          <div className="dash-account-menu">
-            <div className="dash-user">
-              <div className="dash-avatar-small">
-                {profile?.avatar_url ? <img src={profile.avatar_url} alt="" /> : initial}
-              </div>
-              <div className="dash-user-meta">
-                <div className="dash-user-name">{displayName}</div>
-                <div className="dash-user-email">{user?.email}</div>
-              </div>
-            </div>
-            <button className="dash-signout" onClick={handleSignOut}>
-              <LogOut size={16} /> Sign out
-            </button>
-          </div>
-        )}
-      </div>
 
-      {/* Horizontal tab bar — mobile-only primary nav, always visible. */}
-      <nav className="dash-mobile-tabs">
-        {NAV_ITEMS.map(({ to, end, icon: Icon, label }) => (
-          <NavLink key={to} to={to} end={end}>
-            <Icon size={18} /> <span>{label}</span>
-          </NavLink>
-        ))}
-      </nav>
-
-      {accountOpen && (
-        <div className="dash-backdrop" onClick={() => setAccountOpen(false)} />
-      )}
-
-      {/* Sidebar — desktop only */}
-      <aside className="dash-sidebar">
-        <div className="dash-sidebar-head">
-          <a href="/" className="dash-brand dash-brand-logo">
-            <img src="/images/logo-icon.png" alt="" className="dash-brand-icon" />
-            <span className="dash-brand-text">
-              <span className="dash-brand-primary">Home-Office Apartments</span>
-              <span className="dash-brand-sub">
-                and Living<span className="dash-brand-accent">Spring</span> Gardens
-              </span>
-            </span>
-          </a>
-        </div>
-
-        <nav className="dash-nav">
+        <nav className="dash-topbar-nav">
           {NAV_ITEMS.map(({ to, end, icon: Icon, label }) => (
             <NavLink key={to} to={to} end={end}>
               <Icon size={18} /> <span>{label}</span>
@@ -151,22 +105,32 @@ export default function DashboardLayout() {
           ))}
         </nav>
 
-        <div className="dash-sidebar-foot">
-          {/* User info — explicit sizing to prevent circle overflow */}
-          <div className="dash-user">
-            <div className="dash-avatar-small">
-              {profile?.avatar_url ? <img src={profile.avatar_url} alt="" /> : initial}
-            </div>
-            <div className="dash-user-meta">
-              <div className="dash-user-name">{displayName}</div>
-              <div className="dash-user-email">{user?.email}</div>
-            </div>
-          </div>
-          <button className="dash-signout" onClick={handleSignOut}>
-            <LogOut size={16} /> Sign out
+        <div className="dash-topbar-account">
+          <button className="dash-account-btn" onClick={() => setAccountOpen(o => !o)} aria-label="Account menu">
+            {profile?.avatar_url ? <img src={profile.avatar_url} alt="" /> : initial}
           </button>
+          {accountOpen && (
+            <div className="dash-account-menu">
+              <div className="dash-user">
+                <div className="dash-avatar-small">
+                  {profile?.avatar_url ? <img src={profile.avatar_url} alt="" /> : initial}
+                </div>
+                <div className="dash-user-meta">
+                  <div className="dash-user-name">{displayName}</div>
+                  <div className="dash-user-email">{user?.email}</div>
+                </div>
+              </div>
+              <button className="dash-signout" onClick={handleSignOut}>
+                <LogOut size={16} /> Sign out
+              </button>
+            </div>
+          )}
         </div>
-      </aside>
+      </header>
+
+      {accountOpen && (
+        <div className="dash-backdrop" onClick={() => setAccountOpen(false)} />
+      )}
 
       <main className="dash-main">
         <div className="dash-main-inner">
