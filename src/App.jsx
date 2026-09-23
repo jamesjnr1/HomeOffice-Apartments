@@ -23,7 +23,6 @@ import NotFound from './pages/NotFound';
 import DashboardLayout from './pages/dashboard/DashboardLayout';
 import Overview from './pages/dashboard/Overview';
 import Bookings from './pages/dashboard/Bookings';
-import Wishlist from './pages/dashboard/Wishlist';
 import Messages from './pages/dashboard/Messages';
 import Profile from './pages/dashboard/Profile';
 
@@ -66,7 +65,6 @@ function AppContent() {
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<Overview />} />
             <Route path="bookings" element={<Bookings />} />
-            <Route path="wishlist" element={<Wishlist />} />
             <Route path="messages" element={<Messages />} />
             <Route path="profile" element={<Profile />} />
           </Route>

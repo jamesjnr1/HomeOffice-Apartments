@@ -18,12 +18,14 @@ function sourceApartment(source) {
 // Status filter tabs, most-actionable first — an admin opening this
 // page usually wants "what needs attention" (awaiting payment) before
 // "what's already settled" (confirmed) or "what's already happened"
-// (completed), not one flat list mixing all of that with Airbnb rows
-// and cancellations. "Completed" is every past reservation across
-// BOTH apartments — the query below never filters by apartment, so
-// this isn't scoped to just one unit.
-const TABS = ['all', 'awaiting_payment', 'confirmed', 'completed', 'cancelled'];
-const TAB_LABELS = { all: 'All', awaiting_payment: 'Awaiting payment', confirmed: 'Confirmed', completed: 'Completed', cancelled: 'Cancelled' };
+// (past), not one flat list mixing all of that with Airbnb rows and
+// cancellations. Unlike the other tabs, "past" isn't a status filter
+// at all — it's a DATE filter (check_out/end_date before today) that
+// includes Airbnb reservations too, since those never have a
+// `bookings.status` of their own. Covers BOTH apartments — the query
+// below never filters by apartment, so this isn't scoped to one unit.
+const TABS = ['all', 'awaiting_payment', 'confirmed', 'past', 'cancelled'];
+const TAB_LABELS = { all: 'All', awaiting_payment: 'Awaiting payment', confirmed: 'Confirmed', past: 'Past', cancelled: 'Cancelled' };
 
 /**
  * AdminBookings — real rows from the `bookings` table, now mostly
@@ -109,25 +111,36 @@ export default function AdminBookings() {
     return day >= s && day < e;
   });
 
+  // Today as a 'YYYY-MM-DD' string — check_in/check_out/start_date/
+  // end_date are all stored the same way, so plain string comparison
+  // is safe and avoids a timezone-sensitive Date construction here.
+  const todayStr = format(new Date(), 'yyyy-MM-dd');
+  const isPast = (r) => (r.kind === 'site' ? r.check_out : r.end_date) < todayStr;
+
   // Every reservation blocking the calendar, from either source, in
   // one list sorted by check-in — what the admin actually wants to
   // see when asking "what's booked". Airbnb rows have no real status
-  // of their own (always "reserved"), so they only ever show under
-  // the "all" tab — the status tabs are a `bookings.status` filter.
+  // of their own (always "reserved"), so the status tabs (a
+  // `bookings.status` filter) never match them — only "all" and
+  // "past" (a date filter) include them.
   const allReservations = [
     ...bookings.map((b) => ({ kind: 'site', key: b.id, ...b })),
     ...airbnbBlocks.map((x) => ({ kind: 'airbnb', key: x.id, ...x })),
   ]
-    .filter((r) => tab === 'all' || (r.kind === 'site' && r.status === tab))
+    .filter((r) => tab === 'all' || (tab === 'past' ? isPast(r) : r.kind === 'site' && r.status === tab))
     .sort((a, b) => {
       const ad = a.kind === 'site' ? a.check_in : a.start_date;
       const bd = b.kind === 'site' ? b.check_in : b.start_date;
       return bd.localeCompare(ad);
     });
 
-  const counts = Object.fromEntries(TABS.map((t) => [
-    t, t === 'all' ? bookings.length + airbnbBlocks.length : bookings.filter((b) => b.status === t).length,
-  ]));
+  const counts = Object.fromEntries(TABS.map((t) => {
+    if (t === 'all') return [t, bookings.length + airbnbBlocks.length];
+    if (t === 'past') {
+      return [t, bookings.filter((b) => b.check_out < todayStr).length + airbnbBlocks.filter((x) => x.end_date < todayStr).length];
+    }
+    return [t, bookings.filter((b) => b.status === t).length];
+  }));
 
   return (
     <div className="mgmt-page">

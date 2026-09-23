@@ -1,14 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import {
   Save,
   User,
   Mail,
   Phone,
-  Monitor,
-  Clock,
-  BellRing,
-  CreditCard,
+  Camera,
   Lock,
   Check,
   AlertCircle,
@@ -16,214 +13,117 @@ import {
 import { supabase } from '../../lib/supabase';
 
 /**
- * Profile
- * Editable profile + preferences relevant to a remote-worker/homeoffice apartment.
+ * Profile — real account details, stored on public.profiles (see
+ * supabase/migrations/20260923000000_guest_profile_avatar_and_phone.sql
+ * for phone/avatar_url). Loaded from and saved straight to that table;
+ * profiles_update_own RLS (auth.uid() = id) is what actually lets a
+ * guest edit their own row here.
  *
- * TODO(supabase):
- *   - Load: supabase.from('profiles').select('*').eq('user_id', user.id).single()
- *   - Save: supabase.from('profiles').upsert({ user_id: user.id, ...form })
- *
- * Password IS wired up for real (see PasswordSection below) — this is
- * where a guest who was auto-signed-up at booking time (see
+ * Password IS wired up for real too (see PasswordSection below) —
+ * this is where a guest who was auto-signed-up at booking time (see
  * supabase/functions/book-and-pay/index.ts's "welcome_account" email)
  * actually lands to set one, via a Supabase recovery link that signs
  * them in and redirects here.
  */
 
 export default function Profile() {
-  const { user } = useOutletContext();
+  const { user, profile, refreshProfile } = useOutletContext();
 
-  const [form, setForm] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
-    workspace: 'dedicated-desk',
-    monitors: '1',
-    checkInPreference: 'afternoon',
-    quietHours: true,
-    emailUpdates: true,
-    smsUpdates: false,
-  });
-
+  const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    if (user) {
-      setForm((f) => ({
-        ...f,
-        fullName: user.user_metadata?.full_name || '',
-        email: user.email || '',
-      }));
-    }
-    // TODO(supabase): load full profile
-  }, [user]);
+    setFullName(profile?.full_name || user?.user_metadata?.full_name || '');
+    setPhone(profile?.phone || '');
+  }, [profile, user]);
 
-  const update = (k) => (e) => {
-    const val = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
-    setForm((f) => ({ ...f, [k]: val }));
-  };
-
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-    // TODO(supabase): upsert profile
+    setError('');
+    setSaving(true);
+    const { error: updateError } = await supabase
+      .from('profiles')
+      .update({ full_name: fullName.trim() || null, phone: phone.trim() || null })
+      .eq('id', user.id);
+    setSaving(false);
+    if (updateError) {
+      setError("Couldn't save your changes. Please try again.");
+      return;
+    }
+    refreshProfile();
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   };
 
-  const initials =
-    (form.fullName || form.email || 'H').charAt(0).toUpperCase();
+  const displayName = profile?.full_name || user?.user_metadata?.full_name || '';
+  const initials = (displayName || user?.email || 'H').charAt(0).toUpperCase();
 
   return (
     <div className="dash-page">
       <header className="dash-page-head">
         <p className="dash-eyebrow">PROFILE</p>
         <h1>Your account</h1>
-        <p className="dash-lead">Details, preferences, and payment.</p>
+        <p className="dash-lead">Your details, and how to reach you.</p>
       </header>
 
       <form onSubmit={submit} className="dash-profile">
-        {/* Identity card */}
         <section className="dash-card">
           <div className="dash-profile-head">
-            <div className="dash-avatar dash-avatar-lg">{initials}</div>
+            <AvatarUpload userId={user?.id} avatarUrl={profile?.avatar_url} initials={initials} onUploaded={refreshProfile} />
             <div>
-              <h2>{form.fullName || 'Add your name'}</h2>
-              <p className="dash-text-muted">{form.email}</p>
+              <h2>{displayName || 'Add your name'}</h2>
+              <p className="dash-text-muted">{user?.email}</p>
             </div>
           </div>
+
+          {error && (
+            <div className="form-error" style={{ marginBottom: 16 }}>
+              <AlertCircle size={14} style={{ verticalAlign: -2, marginRight: 6 }} />
+              {error}
+            </div>
+          )}
 
           <div className="dash-form-grid">
             <Field label="Full name" icon={<User size={14} />}>
               <input
                 type="text"
-                value={form.fullName}
-                onChange={update('fullName')}
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
                 placeholder="Your full name"
               />
             </Field>
             <Field label="Email" icon={<Mail size={14} />}>
-              <input
-                type="email"
-                value={form.email}
-                onChange={update('email')}
-                disabled
-              />
+              <input type="email" value={user?.email || ''} disabled />
             </Field>
             <Field label="Phone / WhatsApp" icon={<Phone size={14} />}>
               <input
                 type="tel"
-                value={form.phone}
-                onChange={update('phone')}
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
                 placeholder="+233 …"
               />
             </Field>
           </div>
-        </section>
 
-        {/* Workspace preferences — the HomeOffice angle */}
-        <section className="dash-card">
-          <h2 className="dash-card-h">Workspace preferences</h2>
-          <p className="dash-text-muted dash-card-sub">
-            Help us set up the apartment to suit how you work.
-          </p>
-
-          <div className="dash-form-grid">
-            <Field label="Preferred workspace" icon={<Monitor size={14} />}>
-              <select value={form.workspace} onChange={update('workspace')}>
-                <option value="dedicated-desk">Dedicated desk</option>
-                <option value="standing-desk">Standing desk</option>
-                <option value="laptop-friendly">Laptop-friendly nook</option>
-                <option value="dining-table">Dining table is fine</option>
-              </select>
-            </Field>
-            <Field label="Monitors needed">
-              <select value={form.monitors} onChange={update('monitors')}>
-                <option value="0">None (laptop only)</option>
-                <option value="1">1 external monitor</option>
-                <option value="2">Dual monitors</option>
-              </select>
-            </Field>
-            <Field label="Check-in preference" icon={<Clock size={14} />}>
-              <select
-                value={form.checkInPreference}
-                onChange={update('checkInPreference')}
-              >
-                <option value="morning">Morning (before 12)</option>
-                <option value="afternoon">Afternoon (12 – 5)</option>
-                <option value="evening">Evening (after 5)</option>
-                <option value="late-night">Late night arrival</option>
-              </select>
-            </Field>
-          </div>
-
-          <label className="dash-toggle">
-            <input
-              type="checkbox"
-              checked={form.quietHours}
-              onChange={update('quietHours')}
-            />
-            <span>Prefer a quiet-hours policy after 10 PM</span>
-          </label>
-        </section>
-
-        {/* Notifications */}
-        <section className="dash-card">
-          <h2 className="dash-card-h">Notifications</h2>
-
-          <label className="dash-toggle">
-            <input
-              type="checkbox"
-              checked={form.emailUpdates}
-              onChange={update('emailUpdates')}
-            />
-            <span>
-              <BellRing size={14} />
-              Email me trip reminders and receipts
-            </span>
-          </label>
-
-          <label className="dash-toggle">
-            <input
-              type="checkbox"
-              checked={form.smsUpdates}
-              onChange={update('smsUpdates')}
-            />
-            <span>
-              <BellRing size={14} />
-              SMS me check-in codes and urgent updates
-            </span>
-          </label>
-        </section>
-
-        {/* Payment */}
-        <section className="dash-card">
-          <h2 className="dash-card-h">Payment methods</h2>
-          <div className="dash-empty dash-empty-inline">
-            <CreditCard size={28} className="dash-empty-icon" />
-            <p>No cards saved yet.</p>
-            <button type="button" className="dash-btn dash-btn-outline dash-btn-sm">
-              Add a card
+          <div className="dash-save-bar" style={{ marginTop: 20, position: 'static' }}>
+            {saved && (
+              <span className="dash-save-note">
+                <Check size={14} /> Saved
+              </span>
+            )}
+            <button type="submit" className="dash-btn dash-btn-primary" disabled={saving}>
+              <Save size={16} /> {saving ? 'Saving…' : 'Save changes'}
             </button>
           </div>
         </section>
 
-        {/* Security */}
         <section className="dash-card">
           <h2 className="dash-card-h">Security</h2>
           <PasswordSection />
         </section>
-
-        {/* Save bar */}
-        <div className="dash-save-bar">
-          {saved && (
-            <span className="dash-save-note">
-              <Check size={14} /> Saved
-            </span>
-          )}
-          <button type="submit" className="dash-btn dash-btn-primary">
-            <Save size={16} /> Save changes
-          </button>
-        </div>
       </form>
     </div>
   );
@@ -240,13 +140,95 @@ function Field({ label, icon, children }) {
   );
 }
 
-// The only part of this page actually wired to Supabase — everything
-// else here is still a local-state mock (see the TODOs above). This
-// one has to work for real: it's where an auto-created guest account
-// (see book-and-pay's "welcome_account" email) actually gets a
-// password set for the first time, via a recovery link that signs
-// them in and lands them here — same call either way, whether that's
-// a first-time password or a change to an existing one.
+// Uploads to the public "avatars" storage bucket at "{user.id}/avatar.
+// <ext>" — the storage RLS policies (see the migration above) key off
+// that first path segment, so a guest can only ever write inside their
+// own folder. `upsert: true` means re-uploading just replaces the same
+// file rather than accumulating old ones; the cache-busting query
+// param on the saved URL is what makes a new photo show immediately
+// instead of the browser serving its cached copy of the old one.
+function AvatarUpload({ userId, avatarUrl, initials, onUploaded }) {
+  const inputRef = useRef(null);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState('');
+
+  const pick = () => inputRef.current?.click();
+
+  const handleFile = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setError('Please choose an image file.');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Image must be under 5MB.');
+      return;
+    }
+
+    setError('');
+    setUploading(true);
+    const ext = file.name.split('.').pop() || 'jpg';
+    const path = `${userId}/avatar.${ext}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(path, file, { upsert: true, cacheControl: '3600' });
+
+    if (uploadError) {
+      setUploading(false);
+      setError("Couldn't upload that photo. Please try again.");
+      return;
+    }
+
+    const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path);
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({ avatar_url: `${urlData.publicUrl}?t=${Date.now()}` })
+      .eq('id', userId);
+
+    setUploading(false);
+    if (profileError) {
+      setError("Photo uploaded, but couldn't be saved. Please try again.");
+      return;
+    }
+    onUploaded();
+  };
+
+  return (
+    <div className="dash-avatar-upload">
+      <div className="dash-avatar dash-avatar-lg">
+        {avatarUrl ? <img src={avatarUrl} alt="" /> : initials}
+        <button
+          type="button"
+          className="dash-avatar-edit"
+          onClick={pick}
+          disabled={uploading}
+          title="Change photo"
+        >
+          <Camera size={13} />
+        </button>
+      </div>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFile}
+        style={{ display: 'none' }}
+      />
+      {error && <p className="form-error" style={{ position: 'absolute', marginTop: 68, fontSize: 12 }}>{error}</p>}
+    </div>
+  );
+}
+
+// The only other part of this page wired to Supabase for real — this
+// is where an auto-created guest account (see book-and-pay's
+// "welcome_account" email) actually gets a password set for the first
+// time, via a recovery link that signs them in and lands them here —
+// same call either way, whether that's a first-time password or a
+// change to an existing one.
 function PasswordSection() {
   const [open, setOpen] = useState(false);
   const [password, setPassword] = useState('');
