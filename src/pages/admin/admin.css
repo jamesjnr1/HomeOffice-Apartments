@@ -592,21 +592,9 @@ body:has(.auth-photo-admin) .site-footer { display: none !important; }
 .mgmt-stat-inline-label { font-size: 10px; letter-spacing: .08em; color: var(--muted-2); font-weight: 600; }
 .mgmt-stat-inline-value { font-size: 13.5px; color: var(--ink); font-weight: 500; }
 
-.mgmt-facility-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
-.mgmt-facility-head h3 { margin: 0; font-size: 14px; font-weight: 500; }
-.mgmt-facility-list { font-size: 12px; color: var(--muted); }
-.mgmt-facility-gallery { display: flex; align-items: center; gap: 8px; }
-.mgmt-gallery-thumb {
-  flex: 1; aspect-ratio: 4/3; border-radius: 10px; overflow: hidden; border: 0; padding: 0; cursor: pointer;
-  background: var(--bg-soft); min-width: 0;
-}
-.mgmt-gallery-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform .3s ease; }
-.mgmt-gallery-thumb:hover img { transform: scale(1.06); }
-.mgmt-gallery-nav {
-  width: 30px; height: 30px; border-radius: 999px; border: 1px solid var(--line); background: #fff;
-  display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; color: var(--ink);
-}
-.mgmt-gallery-nav:hover { background: var(--bg-soft); }
+/* Facilities/gallery/lightbox live in globals.css as unprefixed
+   .property-* — shared with the guest dashboard's Overview page (see
+   src/components/PropertyGallery.jsx). */
 
 .mgmt-date-filter {
   display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px;
@@ -614,14 +602,3 @@ body:has(.auth-photo-admin) .site-footer { display: none !important; }
 }
 .mgmt-date-filter input { border: 0; background: transparent; font: inherit; color: var(--ink); width: 108px; }
 .mgmt-date-filter input:focus { outline: none; }
-
-.mgmt-lightbox {
-  position: fixed; inset: 0; background: rgba(0,0,0,.82); z-index: 200;
-  display: flex; align-items: center; justify-content: center; padding: 40px; cursor: zoom-out;
-}
-.mgmt-lightbox img { max-width: 100%; max-height: 100%; border-radius: 8px; cursor: default; }
-.mgmt-lightbox-close {
-  position: absolute; top: 20px; right: 24px; width: 38px; height: 38px; border-radius: 999px;
-  background: rgba(255,255,255,.12); color: #fff; border: 0; display: flex; align-items: center; justify-content: center; cursor: pointer;
-}
-.mgmt-lightbox-close:hover { background: rgba(255,255,255,.2); }

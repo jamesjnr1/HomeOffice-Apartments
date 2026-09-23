@@ -3,12 +3,13 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { format, parseISO } from 'date-fns';
 import {
   Phone, Mail, KeyRound, Users, BedDouble, CalendarDays,
-  ChevronLeft, ChevronRight, X, Filter, Download, MessageSquare,
+  Filter, Download, MessageSquare,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { APARTMENTS, apartmentName } from '../../lib/apartments';
 import StatusBadge from '../../components/StatusBadge';
 import Receipt from '../../components/Receipt';
+import PropertyGallery from '../../components/PropertyGallery';
 
 /**
  * AdminGuestDetail — a single guest's full profile: contact details,
@@ -18,30 +19,16 @@ import Receipt from '../../components/Receipt';
  * the reference's hotel-room fields we don't have (individual room
  * numbers/floors — we let two whole apartments, not per-room hotel
  * inventory). "Room Capacity"/"Bed Type" map to the apartment's real
- * guests/bedrooms/beds (src/lib/apartments.js); the facilities photos
- * are this project's own real property photos, and the facilities
- * list is the same copy already used on Home.jsx — nothing invented.
+ * guests/bedrooms/beds (src/lib/apartments.js); the facilities list
+ * and photos (see PropertyGallery) are this project's own real
+ * content, shared with the guest dashboard's own Overview page so
+ * both show the exact same thing — nothing invented.
  *
  * No page-level top bar (search/notifications/language picker) was
  * added here — that's global admin chrome, out of scope for a single
  * page, and this project has neither a search index nor i18n to back
  * it for real.
  */
-
-const FACILITIES = [
-  'Fully furnished hall with TV',
-  'Modern kitchen equipped for convenience',
-  'King, Queen, and Standard beds',
-  'Two bathrooms',
-];
-
-const GALLERY_IMAGES = [
-  { src: '/images/exterior-1.jpg', label: 'Exterior' },
-  { src: '/images/living-room-1.jpg', label: 'Living room' },
-  { src: '/images/kitchen.jpg', label: 'Kitchen' },
-  { src: '/images/bedroom-1.jpg', label: 'Bedroom' },
-  { src: '/images/bathroom.jpg', label: 'Bathroom' },
-];
 
 export default function AdminGuestDetail() {
   const { id } = useParams();
@@ -50,8 +37,6 @@ export default function AdminGuestDetail() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
-  const [galleryStart, setGalleryStart] = useState(0);
-  const [lightbox, setLightbox] = useState(null);
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [receiptBooking, setReceiptBooking] = useState(null);
@@ -119,7 +104,6 @@ export default function AdminGuestDetail() {
 
   const apt = current ? APARTMENTS[current.apartment] : null;
   const initial = (profile.full_name || profile.email || '?').charAt(0).toUpperCase();
-  const visibleGallery = GALLERY_IMAGES.slice(galleryStart, galleryStart + 4);
 
   return (
     <div className="mgmt-page">
@@ -192,29 +176,7 @@ export default function AdminGuestDetail() {
                 </div>
               </div>
 
-              <div className="mgmt-facility-section">
-                <div className="mgmt-facility-head">
-                  <h3>Room facilities</h3>
-                  <span className="mgmt-facility-list">{FACILITIES.join(' · ')}</span>
-                </div>
-                <div className="mgmt-facility-gallery">
-                  {galleryStart > 0 && (
-                    <button className="mgmt-gallery-nav mgmt-gallery-nav-prev" onClick={() => setGalleryStart((s) => Math.max(0, s - 1))}>
-                      <ChevronLeft size={16} />
-                    </button>
-                  )}
-                  {visibleGallery.map((img) => (
-                    <button key={img.src} className="mgmt-gallery-thumb" onClick={() => setLightbox(img)}>
-                      <img src={img.src} alt={img.label} />
-                    </button>
-                  ))}
-                  {galleryStart + 4 < GALLERY_IMAGES.length && (
-                    <button className="mgmt-gallery-nav mgmt-gallery-nav-next" onClick={() => setGalleryStart((s) => s + 1)}>
-                      <ChevronRight size={16} />
-                    </button>
-                  )}
-                </div>
-              </div>
+              <PropertyGallery />
             </>
           )}
         </div>
@@ -274,13 +236,6 @@ export default function AdminGuestDetail() {
           </div>
         )}
       </section>
-
-      {lightbox && (
-        <div className="mgmt-lightbox" onClick={() => setLightbox(null)}>
-          <button className="mgmt-lightbox-close" onClick={() => setLightbox(null)}><X size={20} /></button>
-          <img src={lightbox.src} alt={lightbox.label} onClick={(e) => e.stopPropagation()} />
-        </div>
-      )}
 
       {receiptBooking && (
         <Receipt
