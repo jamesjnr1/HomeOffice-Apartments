@@ -185,8 +185,8 @@ export default function AdminBookings() {
                       <td className="mgmt-td-sub">{apartmentName(r.apartment)}</td>
                       <td className="mgmt-td-mono">{r.reference}</td>
                       <td><div className="mgmt-td-primary">{r.guest_name}</div><div className="mgmt-td-sub">{r.guest_email}</div></td>
-                      <td>{r.check_in}</td>
-                      <td>{r.check_out}</td>
+                      <td className="mgmt-td-nowrap">{format(parseISO(r.check_in), 'd MMM yyyy')}</td>
+                      <td className="mgmt-td-nowrap">{format(parseISO(r.check_out), 'd MMM yyyy')}</td>
                       <td>{r.nights}</td>
                       <td>GHS {Number(r.total).toLocaleString()}</td>
                       <td><StatusBadge status={r.status} /></td>
@@ -209,8 +209,8 @@ export default function AdminBookings() {
                         </div>
                         <div className="mgmt-td-sub">{r.summary}</div>
                       </td>
-                      <td>{r.start_date}</td>
-                      <td>{r.end_date}</td>
+                      <td className="mgmt-td-nowrap">{format(parseISO(r.start_date), 'd MMM yyyy')}</td>
+                      <td className="mgmt-td-nowrap">{format(parseISO(r.end_date), 'd MMM yyyy')}</td>
                       <td>{differenceInCalendarDays(parseISO(r.end_date), parseISO(r.start_date))}</td>
                       <td className="mgmt-td-muted">—</td>
                       <td><StatusBadge status="reserved" /></td>
