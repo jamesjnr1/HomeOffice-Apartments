@@ -1,18 +1,23 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 /**
  * AdminGuests — real registered guests, from the `profiles` table.
  * `profiles` is kept in sync with `auth.users` by a database trigger
- * (see supabase/migrations/20260830120000_guest_profiles_directory.sql).
+ * for a normal signup (see supabase/migrations/20260830120000_guest_
+ * profiles_directory.sql), or written directly by book-and-pay/
+ * admin-onboard-guest for an auto-created account (that admin API
+ * path doesn't reliably fire the trigger — see book-and-pay's
+ * ensureGuestAccount for why).
  *
- * Booking counts / total spent aren't shown yet — there's no real
- * `bookings` table wired up on the live schema, and showing fake
- * numbers next to real guest data would be misleading.
+ * A row opens AdminGuestDetail.jsx — that page has the real booking
+ * history/current stay; this list stays a lightweight directory.
  */
 
 export default function AdminGuests() {
+  const navigate = useNavigate();
   const [guests, setGuests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState('');
@@ -73,11 +78,11 @@ export default function AdminGuests() {
               </thead>
               <tbody>
                 {filtered.map((g) => (
-                  <tr key={g.id}>
+                  <tr key={g.id} className="mgmt-tr-click" onClick={() => navigate(`/admin/guests/${g.id}`)}>
                     <td>
                       <div className="mgmt-guest-row">
                         <div className="mgmt-guest-av">
-                          {(g.full_name || g.email || '?').charAt(0).toUpperCase()}
+                          {g.avatar_url ? <img src={g.avatar_url} alt="" /> : (g.full_name || g.email || '?').charAt(0).toUpperCase()}
                         </div>
                         <div className="mgmt-td-primary">{g.full_name || 'Guest'}</div>
                       </div>

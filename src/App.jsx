@@ -34,6 +34,7 @@ import {
   AdminEnquiries,
   AdminBookings,
   AdminGuests,
+  AdminGuestDetail,
   AdminReviews,
   AdminMessages,
   AdminRates,
@@ -76,6 +77,7 @@ function AppContent() {
             <Route path="enquiries" element={<AdminEnquiries />} />
             <Route path="bookings" element={<AdminBookings />} />
             <Route path="guests" element={<AdminGuests />} />
+            <Route path="guests/:id" element={<AdminGuestDetail />} />
             <Route path="reviews" element={<AdminReviews />} />
             <Route path="messages" element={<AdminMessages />} />
             <Route path="rates" element={<AdminRates />} />
