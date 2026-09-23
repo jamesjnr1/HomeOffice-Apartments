@@ -36,27 +36,32 @@ export default function Home() {
       {/* Intro */}
       <section className="section section-narrow">
         <div className="container">
-          <div className="intro-v2 reveal">
-            <span className="eyebrow">A HOME AWAY FROM HOME</span>
-            <h2>
-              <span className="intro-v2-accent">Jerusalem stone elegance</span>, a peaceful
-              pergola front yard, and expansive open space for relaxation or memorable events.
-            </h2>
-            <p className="prose">
-              Discover self‑contained apartments in a peaceful compound, thoughtfully designed
-              for the way you work from home and the way you rest.
-            </p>
-            <p className="prose" style={{ marginBottom: 12 }}>Each apartment features:</p>
-            <ul className="prose-list">
-              <li>A spacious, fully furnished hall with TV</li>
-              <li>A modern kitchen equipped for convenience</li>
-              <li>Two comfortable bedrooms with King, Queen, and Standard beds</li>
-            </ul>
-            <p className="prose">
-              Step outside and your apartment opens directly onto the serene LivingSpring Gardens,
-              where well‑kept lawns and tranquil surroundings create the perfect setting for
-              relaxation, reflection, and holidays.
-            </p>
+          <div className="intro-v2-grid reveal">
+            <div className="intro-v2">
+              <span className="eyebrow">A HOME AWAY FROM HOME</span>
+              <h2>
+                <span className="intro-v2-accent">Jerusalem stone elegance</span>, a peaceful
+                pergola front yard, and expansive open space for relaxation or memorable events.
+              </h2>
+              <p className="prose">
+                Discover self‑contained apartments in a peaceful compound, thoughtfully designed
+                for the way you work from home and the way you rest.
+              </p>
+              <p className="prose" style={{ marginBottom: 12 }}>Each apartment features:</p>
+              <ul className="prose-list">
+                <li>A spacious, fully furnished hall with TV</li>
+                <li>A modern kitchen equipped for convenience</li>
+                <li>Two comfortable bedrooms with King, Queen, and Standard beds</li>
+              </ul>
+              <p className="prose">
+                Step outside and your apartment opens directly onto the serene LivingSpring Gardens,
+                where well‑kept lawns and tranquil surroundings create the perfect setting for
+                relaxation, reflection, and holidays.
+              </p>
+            </div>
+            <div className="intro-v2-media">
+              <img src="/images/exterior-1-house.jpg" alt="Jerusalem stone facade and pergola front yard" />
+            </div>
           </div>
         </div>
       </section>

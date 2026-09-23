@@ -1650,6 +1650,18 @@ body:has(.auth-split) main { padding: 0; }
   max-width: 780px;
   text-align: left;
 }
+.intro-v2-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 64px;
+  align-items: center;
+}
+.intro-v2-media { border-radius: var(--radius-lg); overflow: hidden; aspect-ratio: 4/5; }
+.intro-v2-media img { width: 100%; height: 100%; object-fit: cover; object-position: left bottom; display: block; }
+@media (max-width: 900px) {
+  .intro-v2-grid { grid-template-columns: 1fr; gap: 32px; }
+  .intro-v2-media { aspect-ratio: 16/10; order: -1; }
+}
 /* Supporting intro copy folded into the page header, instead of a
    second competing hero-sized section */
 /* Tinted callout box — a visual break instead of more plain paragraphs */
