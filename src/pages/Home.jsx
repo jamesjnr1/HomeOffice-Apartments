@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ExternalLink } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -47,20 +47,44 @@ export default function Home() {
                 Discover self‑contained apartments in a peaceful compound, thoughtfully designed
                 for the way you work from home and the way you rest.
               </p>
-              <p className="prose" style={{ marginBottom: 12 }}>Each apartment features:</p>
-              <ul className="prose-list">
-                <li>A spacious, fully furnished hall with TV</li>
-                <li>A modern kitchen equipped for convenience</li>
-                <li>Two comfortable bedrooms with King, Queen, and Standard beds</li>
-              </ul>
+
+              <div className="intro-v2-features">
+                <span className="intro-v2-features-label">Each apartment features</span>
+                <ul className="prose-list">
+                  <li>A spacious, fully furnished hall with TV</li>
+                  <li>A modern kitchen equipped for convenience</li>
+                  <li>Two comfortable bedrooms with King, Queen, and Standard beds</li>
+                </ul>
+              </div>
+
               <p className="prose">
                 Step outside and your apartment opens directly onto the serene LivingSpring Gardens,
                 where well‑kept lawns and tranquil surroundings create the perfect setting for
                 relaxation, reflection, and holidays.
               </p>
+
+              <div className="intro-v2-airbnb">
+                <span className="intro-v2-airbnb-label">Also listed on Airbnb</span>
+                <a
+                  href="https://www.airbnb.com/rooms/1773106679484408993"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="intro-v2-airbnb-link"
+                >
+                  Home-Office Apartment <ExternalLink size={13} />
+                </a>
+                <a
+                  href="https://www.airbnb.com/rooms/1743067197312497878"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="intro-v2-airbnb-link"
+                >
+                  LivingSpring Gardens <ExternalLink size={13} />
+                </a>
+              </div>
             </div>
-            <div className="intro-v2-media">
-              <img src="/images/exterior-1-house.jpg" alt="Jerusalem stone facade and pergola front yard" />
+            <div className="intro-v2-media intro-v2-media-icon">
+              <img src="/images/travel-suitcase-terracotta.png" alt="" />
             </div>
           </div>
         </div>
