@@ -1,4 +1,4 @@
-import { CheckCircle2, Clock, XCircle, Archive, Sparkles, MessageCircle, CalendarClock, DoorOpen } from 'lucide-react';
+import { CheckCircle2, Clock, XCircle, Archive, Sparkles, MessageCircle, CalendarClock, UserCheck } from 'lucide-react';
 
 /**
  * StatusBadge — one consistent icon+color pill for every status this
@@ -32,7 +32,7 @@ const STATUS_META = {
   // purely from today's date vs. the block's own start/end, same as
   // the row-highlighting in AdminBookings.jsx.
   reserved: { label: 'Reserved', icon: CalendarClock, tone: 'airbnb' },
-  checked_in: { label: 'Checked in', icon: DoorOpen, tone: 'good' },
+  checked_in: { label: 'Checked in', icon: UserCheck, tone: 'good' },
 };
 
 export default function StatusBadge({ status, label, tone, size = 11 }) {
