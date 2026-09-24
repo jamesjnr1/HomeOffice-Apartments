@@ -303,6 +303,16 @@ body:has(.auth-photo-admin) .site-footer { display: none !important; }
 .mgmt-td-muted { color: #6a706d; }
 .mgmt-td-mono { font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
 
+/* Which of these are happening right now vs. already over — grouped
+   in AdminBookings.jsx by the same date-derived state, this is the
+   visual half: a guest currently in-house gets a green left edge and
+   tint (on either source, regardless of a site booking's own
+   `status`), a stay that's already ended is faded back so it doesn't
+   compete for attention with what's upcoming or ongoing. */
+.mgmt-table tbody tr.mgmt-row-current td { background: #eef6f1; box-shadow: inset 3px 0 0 var(--accent); }
+.mgmt-table tbody tr.mgmt-row-current:hover td { background: #e4f0e9; }
+.mgmt-table tbody tr.mgmt-row-past td { opacity: .55; }
+
 /* ── STATUS ──
    Actual badge styling now lives in src/components/StatusBadge.jsx +
    the shared .status-badge* classes in globals.css — this just lays

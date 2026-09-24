@@ -1,4 +1,4 @@
-import { CheckCircle2, Clock, XCircle, Archive, Sparkles, MessageCircle, CalendarClock } from 'lucide-react';
+import { CheckCircle2, Clock, XCircle, Archive, Sparkles, MessageCircle, CalendarClock, DoorOpen } from 'lucide-react';
 
 /**
  * StatusBadge — one consistent icon+color pill for every status this
@@ -26,8 +26,13 @@ const STATUS_META = {
   replied: { label: 'Replied', icon: MessageCircle, tone: 'good' },
   archived: { label: 'Archived', icon: Archive, tone: 'neutral' },
   declined: { label: 'Declined', icon: XCircle, tone: 'bad' },
-  // external_calendar_blocks (Airbnb) — not a real status, just a tag
+  // external_calendar_blocks (Airbnb) — not a real status, just a tag.
+  // Airbnb's calendar export never tells us when a guest actually
+  // checks out; "checked_in"/derived "completed" below are inferred
+  // purely from today's date vs. the block's own start/end, same as
+  // the row-highlighting in AdminBookings.jsx.
   reserved: { label: 'Reserved', icon: CalendarClock, tone: 'airbnb' },
+  checked_in: { label: 'Checked in', icon: DoorOpen, tone: 'good' },
 };
 
 export default function StatusBadge({ status, label, tone, size = 11 }) {

@@ -115,23 +115,55 @@ export default function AdminBookings() {
   // end_date are all stored the same way, so plain string comparison
   // is safe and avoids a timezone-sensitive Date construction here.
   const todayStr = format(new Date(), 'yyyy-MM-dd');
-  const isPast = (r) => (r.kind === 'site' ? r.check_out : r.end_date) < todayStr;
+  const rowDates = (r) => (r.kind === 'site' ? [r.check_in, r.check_out] : [r.start_date, r.end_date]);
+  const isPast = (r) => rowDates(r)[1] < todayStr;
+
+  // A guest currently in-house (check-in has passed, check-out
+  // hasn't) is the one thing worth calling out at a glance, on either
+  // source — this is date-derived, independent of a site booking's
+  // own `status`, so a `confirmed` booking still gets highlighted
+  // once the guest has actually arrived.
+  const dateState = (r) => {
+    const [start, end] = rowDates(r);
+    if (end < todayStr) return 'past';
+    if (start <= todayStr) return 'current';
+    return 'upcoming';
+  };
+
+  // Airbnb's calendar export has no real status of its own (always
+  // "Reserved") — infer one from today vs. the block's own dates, so
+  // an admin can tell a stay that's over from one still upcoming
+  // without opening Airbnb itself.
+  const airbnbDisplayStatus = (r) => {
+    const state = dateState(r);
+    if (state === 'past') return 'completed';
+    if (state === 'current') return 'checked_in';
+    return 'reserved';
+  };
 
   // Every reservation blocking the calendar, from either source, in
-  // one list sorted by check-in — what the admin actually wants to
-  // see when asking "what's booked". Airbnb rows have no real status
-  // of their own (always "reserved"), so the status tabs (a
-  // `bookings.status` filter) never match them — only "all" and
-  // "past" (a date filter) include them.
+  // one list — what the admin actually wants to see when asking
+  // "what's booked". Airbnb rows have no real status of their own, so
+  // the status tabs (a `bookings.status` filter) never match them —
+  // only "all" and "past" (a date filter) include them. Grouped by
+  // relevance rather than plain reverse-chronological: who's in the
+  // apartment right now, then what's coming up (soonest first), then
+  // what's already happened (most recent first) — instead of mixing a
+  // booking three months out with one from last week.
   const allReservations = [
     ...bookings.map((b) => ({ kind: 'site', key: b.id, ...b })),
     ...airbnbBlocks.map((x) => ({ kind: 'airbnb', key: x.id, ...x })),
   ]
     .filter((r) => tab === 'all' || (tab === 'past' ? isPast(r) : r.kind === 'site' && r.status === tab))
     .sort((a, b) => {
-      const ad = a.kind === 'site' ? a.check_in : a.start_date;
-      const bd = b.kind === 'site' ? b.check_in : b.start_date;
-      return bd.localeCompare(ad);
+      const stateOrder = { current: 0, upcoming: 1, past: 2 };
+      const sa = stateOrder[dateState(a)];
+      const sb = stateOrder[dateState(b)];
+      if (sa !== sb) return sa - sb;
+      const ad = rowDates(a)[0];
+      const bd = rowDates(b)[0];
+      // Upcoming/current: soonest check-in first. Past: most recent first.
+      return sa === 2 ? bd.localeCompare(ad) : ad.localeCompare(bd);
     });
 
   const counts = Object.fromEntries(TABS.map((t) => {
@@ -180,7 +212,7 @@ export default function AdminBookings() {
                 </thead>
                 <tbody>
                   {allReservations.map((r) => r.kind === 'site' ? (
-                    <tr key={r.key}>
+                    <tr key={r.key} className={`mgmt-row-${dateState(r)}`}>
                       <td><span className="mgmt-source mgmt-source-site">Site</span></td>
                       <td className="mgmt-td-sub">{apartmentName(r.apartment)}</td>
                       <td className="mgmt-td-mono">{r.reference}</td>
@@ -199,7 +231,7 @@ export default function AdminBookings() {
                       </td>
                     </tr>
                   ) : (
-                    <tr key={r.key}>
+                    <tr key={r.key} className={`mgmt-row-${dateState(r)}`}>
                       <td><span className="mgmt-source mgmt-source-airbnb">Airbnb</span></td>
                       <td className="mgmt-td-sub">{apartmentName(sourceApartment(r.source))}</td>
                       <td className="mgmt-td-mono mgmt-td-muted">—</td>
@@ -213,7 +245,7 @@ export default function AdminBookings() {
                       <td className="mgmt-td-nowrap">{format(parseISO(r.end_date), 'd MMM yyyy')}</td>
                       <td>{differenceInCalendarDays(parseISO(r.end_date), parseISO(r.start_date))}</td>
                       <td className="mgmt-td-muted">—</td>
-                      <td><StatusBadge status="reserved" /></td>
+                      <td><StatusBadge status={airbnbDisplayStatus(r)} /></td>
                       <td></td>
                     </tr>
                   ))}
