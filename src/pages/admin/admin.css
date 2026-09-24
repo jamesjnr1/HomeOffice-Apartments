@@ -303,6 +303,12 @@ body:has(.auth-photo-admin) .site-footer { display: none !important; }
 .mgmt-td-muted { color: #6a706d; }
 .mgmt-td-mono { font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
 
+/* Who's in-house right now (grouped to the top in AdminBookings.jsx
+   by the same date-derived state) — one plain left border, no
+   background tint. Past stays aren't styled at all here; the
+   "Completed" badge already says so. */
+.mgmt-table tbody tr.mgmt-row-current td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
+
 /* ── STATUS ──
    Actual badge styling now lives in src/components/StatusBadge.jsx +
    the shared .status-badge* classes in globals.css — this just lays
