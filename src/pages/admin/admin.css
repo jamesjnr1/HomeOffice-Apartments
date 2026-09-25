@@ -322,13 +322,20 @@ body:has(.auth-photo-admin) .site-footer { display: none !important; }
 .mgmt-source-airbnb { background: var(--airbnb-soft); color: var(--airbnb); }
 
 /* ── TABS ── */
-.mgmt-tabs { display: flex; gap: 4px; margin-top: 8px; margin-bottom: 24px; border-bottom: 1px solid #e8ebe8; }
+/* overflow-x:auto so a narrow phone can scroll to reach every tab
+   instead of the extra ones getting clipped by the global mobile
+   `overflow-x: hidden` on html/body (globals.css) with no way back. */
+.mgmt-tabs {
+  display: flex; gap: 4px; margin-top: 8px; margin-bottom: 24px; border-bottom: 1px solid #e8ebe8;
+  overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+}
+.mgmt-tabs::-webkit-scrollbar { display: none; }
 .mgmt-tab {
   display: inline-flex; align-items: center; gap: 8px; padding: 11px 16px;
   border: 0; background: transparent; color: #6a706d;
   font: 500 13.5px/1 'Poppins', system-ui, sans-serif;
   cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;
-  transition: all .18s ease;
+  transition: all .18s ease; flex-shrink: 0; white-space: nowrap;
 }
 .mgmt-tab:hover { color: #1f2b26; }
 .mgmt-tab.active { color: #1f2b26; border-bottom-color: #2d6a4f; }
