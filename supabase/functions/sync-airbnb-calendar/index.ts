@@ -191,6 +191,11 @@ Deno.serve(async (req: Request) => {
 
   const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
+  // 'YYYY-MM-DD' — matches the plain-date strings this table already
+  // stores, so the past-vs-not-yet-finished check below is a safe
+  // string comparison with no timezone-sensitive Date math.
+  const todayStr = new Date().toISOString().slice(0, 10);
+
   let totalSynced = 0;
   let failures = 0;
 
@@ -221,7 +226,7 @@ Deno.serve(async (req: Request) => {
     // so one query correctly serves both.
     const { data: existingRows, error: existingError } = await supabase
       .from("external_calendar_blocks")
-      .select("uid")
+      .select("uid, end_date")
       .eq("source", feed.source);
     if (existingError) {
       console.error("sync-airbnb-calendar: fetch existing uids error", feed.source, existingError.message);
@@ -229,6 +234,7 @@ Deno.serve(async (req: Request) => {
       continue;
     }
     const existingUids = new Set((existingRows ?? []).map((r) => r.uid));
+    const existingEndDates = new Map((existingRows ?? []).map((r) => [r.uid, r.end_date]));
     const newEvents = events.filter((e) => !existingUids.has(e.uid));
 
     if (events.length > 0) {
@@ -267,8 +273,19 @@ Deno.serve(async (req: Request) => {
     // by an explicit uid list (rather than a hand-built NOT IN string)
     // so a UID containing a comma or quote can't produce a malformed
     // or unintended filter.
+    //
+    // Airbnb's own export feed drops a reservation once its checkout
+    // date has passed — that's normal, not a cancellation. Treating
+    // "missing from today's feed" as "stale, delete it" was wiping out
+    // every completed stay within one sync cycle (as tight as every 30
+    // minutes), so the admin dashboard never showed a guest's history.
+    // Only a row whose stay HASN'T finished yet (end_date still today
+    // or later) but vanished from the feed is a genuine cancellation;
+    // anything already in the past is left alone forever as a record.
     const currentUids = new Set(events.map((e) => e.uid));
-    const staleUids = [...existingUids].filter((uid) => !currentUids.has(uid));
+    const staleUids = [...existingUids].filter(
+      (uid) => !currentUids.has(uid) && (existingEndDates.get(uid) ?? "") >= todayStr
+    );
     if (staleUids.length > 0) {
       const { error: deleteError } = await supabase
         .from("external_calendar_blocks")
