@@ -17,6 +17,10 @@ export default function AdminLayout() {
   const [open, setOpen] = useState(false);
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [newEnquiries, setNewEnquiries] = useState(0);
+  const [bookingsSeenAt, setBookingsSeenAt] = useState(
+    () => localStorage.getItem('admin_bookings_seen_at') || '1970-01-01T00:00:00.000Z'
+  );
+  const [hasNewBookings, setHasNewBookings] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -74,6 +78,43 @@ export default function AdminLayout() {
     return () => { supabase.removeChannel(sub); };
   }, []);
 
+  // A new site booking OR a newly-synced Airbnb block since the admin
+  // last opened /admin/bookings gets a small dot on the nav item —
+  // 'new' is `created_at`/`first_seen_at` past `bookingsSeenAt`, not a
+  // live count (unlike Enquiries/Messages), since Bookings has no
+  // single 'unread' concept of its own to count.
+  useEffect(() => {
+    const checkNewBookings = async () => {
+      const [{ count: newSite }, { count: newAirbnb }] = await Promise.all([
+        supabase.from('bookings').select('id', { count: 'exact', head: true }).gt('created_at', bookingsSeenAt),
+        supabase.from('external_calendar_blocks').select('id', { count: 'exact', head: true }).gt('first_seen_at', bookingsSeenAt),
+      ]);
+      setHasNewBookings((newSite || 0) + (newAirbnb || 0) > 0);
+    };
+    checkNewBookings();
+
+    const sub = supabase
+      .channel('admin-sidebar-bookings')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, checkNewBookings)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'external_calendar_blocks' }, checkNewBookings)
+      .subscribe();
+
+    return () => { supabase.removeChannel(sub); };
+  }, [bookingsSeenAt]);
+
+  // Landing on the Bookings page itself clears the dot right away —
+  // updates the shared `bookingsSeenAt` state (not just localStorage)
+  // so the check above re-runs against the new cutoff immediately,
+  // rather than waiting for the next realtime event to notice.
+  useEffect(() => {
+    if (location.pathname === '/admin/bookings') {
+      const now = new Date().toISOString();
+      localStorage.setItem('admin_bookings_seen_at', now);
+      setBookingsSeenAt(now);
+      setHasNewBookings(false);
+    }
+  }, [location.pathname]);
+
   const signOut = async () => { await supabase.auth.signOut(); navigate('/'); };
 
   if (loading) return (
@@ -94,7 +135,7 @@ export default function AdminLayout() {
   const NAV = [
     { to: '/admin', icon: LayoutDashboard, label: 'Overview', end: true },
     { to: '/admin/enquiries', icon: Inbox, label: 'Enquiries', badge: newEnquiries || null },
-    { to: '/admin/bookings', icon: CalendarDays, label: 'Bookings' },
+    { to: '/admin/bookings', icon: CalendarDays, label: 'Bookings', dot: hasNewBookings },
     { to: '/admin/guests', icon: Users, label: 'Guests' },
     { to: '/admin/reviews', icon: Star, label: 'Reviews' },
     { to: '/admin/messages', icon: MessageSquare, label: 'Messages', badge: unreadMessages || null },
@@ -135,12 +176,12 @@ export default function AdminLayout() {
         <div className="mgmt-nav-block">
           <p className="mgmt-nav-label">MANAGE</p>
           <nav>
-            {NAV.map(({ to, icon: Icon, label, badge, end }) => (
+            {NAV.map(({ to, icon: Icon, label, badge, dot, end }) => (
               <NavLink key={to} to={to} end={!!end}
                 className={({ isActive }) => `mgmt-nav-link${isActive ? ' active' : ''}`}
                 onClick={() => setOpen(false)}>
                 <Icon size={16}/> <span>{label}</span>
-                {badge && <span className="mgmt-badge">{badge}</span>}
+                {badge ? <span className="mgmt-badge">{badge}</span> : dot ? <span className="mgmt-nav-dot" aria-label="New"/> : null}
               </NavLink>
             ))}
           </nav>
