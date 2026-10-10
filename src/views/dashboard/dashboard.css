@@ -1,0 +1,723 @@
+/* =====================================================================
+   HomeOffice Apartments — Guest Dashboard
+   Deliberately its own visual register from the admin ("mgmt-*")
+   panel: a serif display face (Fraunces, shared with the public site) on headings for an editorial,
+   boutique-hotel warmth, a soft cream backdrop instead of flat grey,
+   and slightly richer shadows/radii throughout. Same Inter for body
+   text and controls — only the register changes, not the whole kit.
+   ===================================================================== */
+
+/* Hide site chrome */
+body:has(.dash-shell) .site-header,
+body:has(.dash-shell) .site-footer { display: none !important; }
+body:has(.dash-shell) main { padding: 0 !important; }
+
+/* ── SHELL ──
+   Sidebar on the left (desktop), sticky alongside the page as it
+   scrolls, with main content and the footer stacked in the other
+   column — not the old fixed-100vh/overflow:hidden double-scroll-pane
+   version, since the footer needs the page to scroll as a whole. */
+.dash-shell {
+  display: grid;
+  grid-template-columns: 252px 1fr;
+  min-height: 100vh;
+  background: #f7f4ee;
+  color: #1b2420;
+  font-family: var(--font-ui);
+  font-size: 14.5px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  box-sizing: border-box;
+}
+.dash-shell * { box-sizing: border-box; }
+.dash-shell h1, .dash-shell h2 { font-family: var(--font-serif); }
+
+/* Most sizes here are fixed px rather than em/rem, so a plain
+   font-size bump on the shell wouldn't cascade proportionally to
+   them — a rendering-level scale does, same fix as the admin
+   dashboard's .mgmt-shell. Desktop only; mobile is already tight. */
+@media (min-width: 901px) {
+  .dash-shell { zoom: 1.1; }
+}
+
+/* ── LOADING ── */
+.dash-loading {
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 16px; padding: 40px;
+  font-family: var(--font-ui);
+  background: #f5f2ec;
+}
+.dash-loading p { color: #6a706d; margin: 0; font-size: 13px; }
+.dash-loading-brand { font-weight: 700; font-size: 22px; letter-spacing: -.025em; }
+
+/* ── SIDEBAR ──
+   Solid green, not white/cream like the main content area — the one
+   part of this dashboard that's deliberately a strong block of our
+   brand color rather than the paper-toned palette everywhere else. */
+.dash-sidebar {
+  width: 252px;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  background: linear-gradient(180deg, #1f3d30 0%, #15281f 100%);
+  border-right: 1px solid #15281f;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.dash-sidebar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 16px 16px;
+  border-bottom: 1px solid rgba(255,255,255,.14);
+  flex-shrink: 0;
+}
+
+/* Brand — same markup in the mobile top bar (white background) and
+   the sidebar (solid green, below), so the white-text/inverted-icon
+   treatment is scoped to .dash-sidebar specifically rather than these
+   base rules, which stay dark for the mobile bar. */
+.dash-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-decoration: none;
+  color: #1b2420;
+  min-width: 0;
+}
+.dash-brand-logo {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+.dash-brand-icon {
+  height: 28px;
+  width: auto;
+  flex-shrink: 0;
+  display: block;
+}
+.dash-brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.dash-brand-primary {
+  font-weight: 700;
+  font-size: 13.5px;
+  letter-spacing: -.02em;
+  color: #1b2420;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dash-brand-sub {
+  font-weight: 400;
+  font-size: 10px;
+  color: #9aa19d;
+  white-space: nowrap;
+}
+.dash-brand-accent { color: #2d6a4f; font-weight: 500; }
+
+/* Sidebar overrides — white text/inverted mark on the solid green. */
+.dash-sidebar .dash-brand-icon { filter: brightness(0) invert(1); }
+.dash-sidebar .dash-brand,
+.dash-sidebar .dash-brand-primary { color: #fff; }
+.dash-sidebar .dash-brand-sub { color: rgba(255,255,255,.65); }
+.dash-sidebar .dash-brand-accent { color: #d4e9b8; }
+
+/* Nav — active state inverts to a white pill, since the sidebar
+   itself is already the solid green a "green pill" would otherwise
+   use to stand out. */
+.dash-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 10px;
+  flex: 1;
+  overflow-y: auto;
+}
+.dash-nav a {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 11px;
+  border-radius: 9px;
+  color: rgba(255,255,255,.75);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 13.5px;
+  transition: background .15s ease, color .15s ease;
+}
+.dash-nav a:hover { background: rgba(255,255,255,.1); color: #fff; }
+.dash-nav a.active { background: #fff; color: #2d6a4f; box-shadow: 0 4px 10px rgba(0,0,0,.15); }
+.dash-nav a svg { flex-shrink: 0; }
+
+/* Sidebar footer — pinned to bottom, no empty space */
+.dash-sidebar-foot {
+  flex-shrink: 0;
+  padding: 12px 10px 20px;
+  border-top: 1px solid rgba(255,255,255,.14);
+}
+
+/* ── MOBILE ──
+   Primary nav is a horizontal tab bar (.dash-mobile-tabs) under the
+   top bar, always visible — not a hamburger-triggered off-canvas
+   drawer. A full-height green panel for 4 short links left most of
+   the screen empty; a tab row uses the space it actually needs. The
+   .dash-sidebar drawer is desktop-only now (see below), and account/
+   sign-out moved to a small dropdown off the avatar button. */
+.dash-mobile-bar {
+  display: none;
+  padding: 14px 20px;
+  background: #fff;
+  border-bottom: 1px solid #e8e2d7;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+.dash-account-btn {
+  width: 34px; height: 34px; min-width: 34px;
+  border-radius: 999px; border: 0; padding: 0;
+  background: #2d6a4f; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 600; font-size: 13px; cursor: pointer; overflow: hidden;
+}
+.dash-account-btn img { width: 100%; height: 100%; object-fit: cover; }
+.dash-account-menu {
+  position: absolute; top: 62px; right: 16px; z-index: 45;
+  width: 240px; background: #fff; border: 1px solid #e8e2d7;
+  border-radius: 14px; box-shadow: 0 10px 28px rgba(31,43,38,.14);
+  padding: 12px;
+}
+.dash-account-menu .dash-user { color: #1b2420; }
+.dash-account-menu .dash-avatar-small { background: #2d6a4f; color: #fff; }
+.dash-account-menu .dash-user-name { color: #1b2420; }
+.dash-account-menu .dash-user-email { color: #9aa19d; }
+.dash-account-menu .dash-signout { color: #b3261e; }
+.dash-account-menu .dash-signout:hover { background: #fbe9e7; color: #b3261e; }
+
+.dash-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  margin-bottom: 4px;
+  overflow: hidden;
+}
+.dash-avatar-small {
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  border-radius: 999px;
+  background: #fff;
+  color: #2d6a4f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 12px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.dash-avatar-small img { width: 100%; height: 100%; object-fit: cover; }
+.dash-user-meta { min-width: 0; flex: 1; overflow: hidden; }
+.dash-user-name {
+  font-weight: 600;
+  font-size: 13px;
+  color: #fff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dash-user-email {
+  font-size: 11px;
+  color: rgba(255,255,255,.6);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dash-signout {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 11px;
+  border: 0;
+  background: transparent;
+  color: rgba(255,255,255,.75);
+  font: 500 13px/1 var(--font-ui);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease;
+}
+.dash-signout:hover { background: rgba(255,255,255,.1); color: #fff; }
+
+/* ── TABS (mobile) ── */
+.dash-mobile-tabs {
+  display: none;
+  position: sticky;
+  top: 62px;
+  z-index: 39;
+  background: #fff;
+  border-bottom: 1px solid #e8e2d7;
+  padding: 0 8px;
+}
+.dash-mobile-tabs a {
+  flex: 1;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 13px 4px;
+  color: #9aa19d;
+  text-decoration: none;
+  font-weight: 500; font-size: 12.5px;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+}
+.dash-mobile-tabs a svg { flex-shrink: 0; }
+.dash-mobile-tabs a.active { color: #2d6a4f; border-bottom-color: #2d6a4f; }
+
+.dash-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.4);
+  z-index: 40;
+}
+
+@media (max-width: 900px) {
+  .dash-shell { grid-template-columns: 1fr; }
+  .dash-mobile-bar { display: flex; }
+  .dash-mobile-tabs { display: flex; }
+  .dash-sidebar { display: none; }
+  .dash-backdrop { display: block; }
+}
+
+/* Narrow phones: icon-over-label reads better than a cramped row */
+@media (max-width: 420px) {
+  .dash-mobile-tabs a { flex-direction: column; gap: 3px; font-size: 10.5px; padding: 9px 2px 10px; }
+}
+
+/* ── MAIN ── */
+.dash-main-inner {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 72px 44px 120px;
+}
+@media (max-width: 900px) {
+  .dash-main-inner { padding: 32px 20px 80px; }
+}
+
+/* ── FOOTER ──
+   Simple and clean: copyright on one side, real contact details on
+   the other — same phone/email the public site's own footer uses. */
+.dash-footer { grid-column: 1 / -1; border-top: 1px solid #e8e2d7; background: #fff; padding: 22px 20px; }
+.dash-footer-inner {
+  max-width: 1160px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px 24px;
+}
+.dash-footer-copy { font-size: 12.5px; color: #9aa19d; margin: 0; }
+.dash-footer-contact { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 18px; font-size: 12.5px; }
+.dash-footer-help { color: #9aa19d; }
+.dash-footer-contact a {
+  display: inline-flex; align-items: center; gap: 6px;
+  color: #6a706d; text-decoration: none; font-weight: 500;
+  transition: color .15s ease;
+}
+.dash-footer-contact a:hover { color: #2d6a4f; }
+@media (max-width: 600px) { .dash-footer-inner { justify-content: center; text-align: center; } }
+
+/* ── PAGE HEAD ── */
+.dash-page { }
+.dash-page-head { margin-bottom: 36px; }
+.dash-eyebrow {
+  display: inline-block;
+  font-size: 11px; letter-spacing: .22em; text-transform: uppercase;
+  color: #9aa19d; font-weight: 500; margin: 0 0 10px;
+}
+.dash-page-head h1 {
+  margin: 0 0 6px;
+  font-size: clamp(24px, 2.4vw, 30px);
+  font-weight: 500; letter-spacing: -.025em; line-height: 1.2; color: #1b2420;
+}
+.dash-lead { font-size: 14px; color: #6a706d; margin: 0; }
+.dash-text-muted { color: #6a706d; }
+
+/* ── BUTTONS ── */
+.dash-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 18px; border-radius: 999px; border: 1px solid transparent;
+  font: 500 13.5px/1 var(--font-ui);
+  cursor: pointer; text-decoration: none; transition: all .18s ease; line-height: 1;
+}
+.dash-btn-primary { background: #2d6a4f; color: #fff; }
+.dash-btn-primary:hover { background: #1f4d38; }
+.dash-btn-outline { background: transparent; color: #1b2420; border-color: #e8e2d7; }
+.dash-btn-outline:hover { border-color: #1b2420; }
+.dash-btn-ghost { background: transparent; color: #1b2420; }
+.dash-btn-ghost:hover { background: #f5f2ec; }
+.dash-btn-sm { padding: 7px 12px; font-size: 12.5px; }
+
+/* ── NEXT STAY HERO ── */
+.dash-next-stay {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  background: #fff;
+  border: 1px solid #e8e2d7;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(63,50,30,.08);
+  margin-bottom: 28px;
+}
+@media (max-width: 700px) { .dash-next-stay { grid-template-columns: 1fr; } }
+.dash-next-stay-img { position: relative; min-height: 220px; }
+.dash-next-stay-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.dash-next-stay-badge {
+  position: absolute; top: 14px; left: 14px;
+  display: inline-flex; align-items: center; gap: 4px;
+  background: rgba(255,255,255,.96); padding: 5px 11px;
+  border-radius: 999px; font-size: 11.5px; font-weight: 600; color: #2d6a4f;
+  backdrop-filter: blur(6px);
+}
+.dash-next-stay-body { padding: 28px 32px; display: flex; flex-direction: column; }
+.dash-next-stay-body h2 {
+  margin: 6px 0 4px; font-size: 20px;
+  font-weight: 500; letter-spacing: -.02em; color: #1b2420;
+}
+.dash-loc { display: inline-flex; align-items: center; gap: 4px; color: #6a706d; font-size: 13.5px; }
+.dash-next-stay-details {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+  margin: 20px 0; padding: 18px 0;
+  border-top: 1px solid #e8e2d7; border-bottom: 1px solid #e8e2d7;
+}
+@media (max-width: 600px) { .dash-next-stay-details { grid-template-columns: repeat(2, 1fr); } }
+.dash-detail-label {
+  font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase;
+  color: #9aa19d; font-weight: 500; margin-bottom: 4px;
+}
+.dash-detail-value { font-size: 14px; font-weight: 500; color: #1b2420; }
+.dash-mono { font-family: ui-monospace, Menlo, monospace; font-size: 12.5px; }
+.dash-next-stay-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* ── STATS ──
+   Featured + supporting instead of three identical boxes: upcoming
+   bookings (the one a guest actually acts on) gets a solid green
+   feature card; past stays and nights with us sit beside it as
+   smaller, quieter figures — real hierarchy, not three lookalikes. */
+.dash-stat-feature-row { display: grid; grid-template-columns: 1.3fr 1fr; gap: 16px; margin-bottom: 40px; }
+@media (max-width: 620px) { .dash-stat-feature-row { grid-template-columns: 1fr; } }
+
+.dash-stat-feature {
+  background: linear-gradient(150deg, #2d6a4f 0%, #1f4d38 100%);
+  border-radius: 18px; padding: 28px; color: #fff; position: relative; overflow: hidden;
+  display: flex; flex-direction: column; justify-content: space-between; min-height: 168px;
+}
+.dash-stat-feature::after {
+  content: ''; position: absolute; right: -30px; bottom: -40px; width: 160px; height: 160px;
+  border-radius: 50%; background: rgba(255,255,255,.07);
+}
+.dash-stat-feature-eyebrow { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,.7); font-weight: 600; }
+.dash-stat-feature-num {
+  font-family: var(--font-serif); font-weight: 500; font-size: 52px;
+  line-height: 1; letter-spacing: -.03em; margin: 10px 0 4px;
+  font-variant-numeric: tabular-nums;
+}
+.dash-stat-feature-caption { font-size: 14px; color: rgba(255,255,255,.85); }
+
+.dash-stat-support-stack { display: flex; flex-direction: column; gap: 14px; }
+.dash-stat-support {
+  background: #fff; border: 1px solid #e8e2d7; border-radius: 14px;
+  padding: 16px 18px; flex: 1; display: flex; align-items: center; justify-content: space-between;
+  box-shadow: 0 2px 10px rgba(63,50,30,.06);
+}
+.dash-stat-support-num {
+  font-family: var(--font-serif); font-weight: 500; font-size: 26px;
+  letter-spacing: -.02em; color: #1b2420; font-variant-numeric: tabular-nums;
+}
+.dash-stat-support-label { font-size: 12.5px; color: #6a706d; text-align: right; max-width: 100px; }
+
+/* ── TABS ── */
+.dash-tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid #e8e2d7; }
+.dash-tab {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 11px 16px; border: 0; background: transparent;
+  color: #6a706d; font: 500 13.5px/1 var(--font-ui);
+  cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;
+  transition: all .18s ease;
+}
+.dash-tab:hover { color: #1b2420; }
+.dash-tab.active { color: #1b2420; border-bottom-color: #2d6a4f; }
+.dash-tab-count {
+  background: #f5f2ec; padding: 2px 7px; border-radius: 999px;
+  font-size: 11px; font-weight: 600; color: #6a706d;
+}
+.dash-tab.active .dash-tab-count { background: #e2ece6; color: #2d6a4f; }
+
+/* ── BOOKINGS ── */
+.dash-booking-list { display: grid; gap: 14px; }
+.dash-booking {
+  display: grid; grid-template-columns: 200px 1fr;
+  background: #fff; border: 1px solid #e8e2d7; border-radius: 16px;
+  overflow: hidden; box-shadow: 0 2px 10px rgba(63,50,30,.06);
+}
+@media (max-width: 720px) { .dash-booking { grid-template-columns: 1fr; } }
+.dash-booking-img { width: 100%; height: 100%; min-height: 180px; object-fit: cover; }
+.dash-booking-body { padding: 20px 24px; }
+.dash-booking-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+.dash-booking-top h3 { margin: 0 0 4px; font-size: 16.5px; font-weight: 500; letter-spacing: -.015em; color: #1b2420; }
+.dash-booking-meta {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 12px 20px; padding: 14px 0;
+  border-top: 1px solid #f0ebe3; border-bottom: 1px solid #f0ebe3; margin-bottom: 14px;
+}
+.dash-booking-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* Status pill itself now comes from the shared StatusBadge component
+   (src/components/StatusBadge.jsx + .status-badge* in globals.css). */
+
+/* ── REVIEWS (on a trip card) ── */
+.star-rating { display: inline-flex; gap: 2px; align-items: center; }
+.dash-review-existing {
+  margin-top: 14px; padding-top: 14px; border-top: 1px solid #f0ebe3;
+}
+.dash-review-existing p { margin: 6px 0 0; font-size: 13.5px; color: #4a5450; line-height: 1.5; }
+.dash-review-form {
+  margin-top: 14px; padding: 14px; background: #f5f2ec; border-radius: 10px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.dash-review-form textarea {
+  width: 100%; border: 1px solid #e8e2d7; border-radius: 8px; padding: 8px 10px;
+  font: inherit; font-size: 13.5px; resize: vertical;
+}
+
+/* ── MESSAGES ── */
+.dash-messages-page .dash-page-head { margin-bottom: 20px; }
+.dash-messages {
+  display: grid; grid-template-columns: 300px 1fr;
+  background: #fff; border: 1px solid #e8e2d7;
+  border-radius: 14px; overflow: hidden;
+  height: calc(100vh - 280px); min-height: 480px;
+  box-shadow: 0 2px 10px rgba(63,50,30,.06);
+}
+@media (max-width: 900px) { .dash-messages { grid-template-columns: 1fr; height: auto; } }
+.dash-msg-list { border-right: 1px solid #e8e2d7; display: flex; flex-direction: column; overflow-y: auto; }
+.dash-msg-search {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 14px; border-bottom: 1px solid #e8e2d7; color: #9aa19d;
+}
+.dash-msg-search input { border: 0; outline: none; font: 13px var(--font-ui); flex: 1; background: transparent; }
+.dash-msg-item {
+  display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px;
+  border: 0; background: transparent; cursor: pointer; text-align: left;
+  border-bottom: 1px solid #f0ebe3; transition: background .15s ease; position: relative;
+  font-family: var(--font-ui);
+}
+.dash-msg-item:hover { background: #f5f2ec; }
+.dash-msg-item.active { background: #e2ece6; }
+.dash-msg-avatar {
+  width: 34px; height: 34px; border-radius: 999px; background: #1b2420;
+  color: #fff; display: flex; align-items: center; justify-content: center;
+  font-weight: 600; font-size: 11px; flex-shrink: 0;
+}
+.dash-msg-item-body { flex: 1; min-width: 0; }
+.dash-msg-item-top { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 2px; }
+.dash-msg-name { font-weight: 600; font-size: 13px; color: #1b2420; }
+.dash-msg-time { font-size: 10.5px; color: #9aa19d; flex-shrink: 0; }
+.dash-msg-apt { font-size: 11.5px; color: #9aa19d; margin-bottom: 4px; }
+.dash-msg-preview { font-size: 12.5px; color: #6a706d; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dash-msg-unread {
+  position: absolute; right: 16px; top: 14px; background: #2d6a4f;
+  color: #fff; width: 18px; height: 18px; border-radius: 999px;
+  font-size: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center;
+}
+.dash-msg-thread-wrap { display: flex; flex-direction: column; min-height: 0; }
+.dash-msg-thread-head { display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #e8e2d7; }
+.dash-msg-thread {
+  flex: 1; overflow-y: auto; padding: 18px;
+  display: flex; flex-direction: column; gap: 10px; background: #f5f2ec;
+}
+.dash-msg-bubble {
+  max-width: 65%; padding: 10px 14px; border-radius: 14px;
+  background: #fff; border: 1px solid #e8e2d7; font-size: 13.5px; line-height: 1.5;
+}
+.dash-msg-bubble.me { align-self: flex-end; background: #2d6a4f; color: #fff; border-color: #2d6a4f; }
+.dash-msg-at { font-size: 10.5px; color: #9aa19d; margin-top: 4px; }
+.dash-msg-bubble.me .dash-msg-at { color: rgba(255,255,255,.75); }
+.dash-msg-composer {
+  display: flex; gap: 8px; padding: 12px 14px; border-top: 1px solid #e8e2d7; background: #fff;
+}
+.dash-msg-composer input {
+  flex: 1; padding: 10px 16px; border: 1px solid #e8e2d7;
+  border-radius: 999px; outline: none; font: 13.5px var(--font-ui);
+  transition: border-color .2s ease;
+}
+.dash-msg-composer input:focus { border-color: #2d6a4f; }
+.dash-msg-composer button {
+  background: #2d6a4f; color: #fff; border: 0; width: 36px; height: 36px;
+  border-radius: 999px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: background .15s ease;
+}
+.dash-msg-composer button:hover:not(:disabled) { background: #1f4d38; }
+.dash-msg-composer button:disabled { background: #e8e2d7; color: #9aa19d; cursor: not-allowed; }
+
+/* ── PROFILE ── */
+.dash-profile { display: flex; flex-direction: column; gap: 18px; max-width: 780px; }
+.dash-card {
+  background: #fff; border: 1px solid #e8e2d7; border-radius: 16px;
+  padding: 24px 26px; box-shadow: 0 2px 10px rgba(63,50,30,.06);
+}
+.dash-card-h { margin: 0 0 4px; font-size: 17px; font-weight: 500; letter-spacing: -.01em; color: #1b2420; }
+.dash-card-sub { margin: 0 0 18px; font-size: 13.5px; color: #6a706d; }
+
+/* ── STAY FACTS (Room capacity/beds, above the facilities gallery) ── */
+.dash-stay-facts {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px;
+  padding-bottom: 18px; margin-bottom: 18px; border-bottom: 1px solid #e8e2d7;
+}
+.dash-stay-fact { display: flex; align-items: flex-start; gap: 10px; color: #2d6a4f; }
+.dash-stay-fact > div { display: flex; flex-direction: column; gap: 2px; }
+
+/* ── CHECK-IN DETAILS (guest dashboard) ── */
+.dash-checkin-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;
+  padding-bottom: 18px; margin-bottom: 18px; border-bottom: 1px solid #e8e2d7;
+}
+.dash-checkin-item {
+  display: flex; gap: 12px; padding: 14px 0;
+  border-top: 1px solid #f0ebe3;
+}
+.dash-checkin-item:first-of-type { border-top: 0; padding-top: 0; }
+.dash-checkin-item svg { flex: 0 0 auto; margin-top: 2px; color: #2d6a4f; }
+.dash-checkin-item-label {
+  font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase;
+  color: #9aa19d; font-weight: 500; margin-bottom: 4px;
+}
+.dash-checkin-item-body { font-size: 14px; color: #1b2420; line-height: 1.5; white-space: pre-line; }
+.dash-profile-head {
+  display: flex; align-items: center; gap: 18px; margin-bottom: 24px;
+  padding-bottom: 20px; border-bottom: 1px solid #e8e2d7;
+}
+.dash-profile-head h2 { margin: 0 0 3px; font-size: 20px; font-weight: 500; letter-spacing: -.02em; }
+.dash-profile-head p { margin: 0; font-size: 13.5px; color: #6a706d; }
+.dash-avatar-upload { position: relative; flex-shrink: 0; }
+.dash-avatar-lg {
+  width: 68px; height: 68px; min-width: 68px; border-radius: 999px;
+  background: #2d6a4f; color: #fff; display: flex; align-items: center;
+  justify-content: center; font-weight: 600; font-size: 24px; flex-shrink: 0;
+  overflow: hidden; position: relative;
+  box-shadow: 0 3px 10px rgba(45,106,79,.2);
+}
+.dash-avatar-lg img { width: 100%; height: 100%; object-fit: cover; }
+.dash-avatar-edit {
+  position: absolute; bottom: -2px; right: -2px;
+  width: 26px; height: 26px; border-radius: 999px;
+  background: #1b2420; color: #fff; border: 2px solid #fff;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: background .15s ease;
+}
+.dash-avatar-edit:hover { background: #2d6a4f; }
+.dash-avatar-edit:disabled { opacity: .6; cursor: default; }
+.dash-form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px 18px; }
+.dash-field { display: flex; flex-direction: column; gap: 6px; }
+.dash-field-label {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; letter-spacing: .06em; text-transform: uppercase;
+  font-weight: 600; color: #1b2420;
+}
+.dash-field input, .dash-field select {
+  padding: 10px 13px; border: 1px solid #e8e2d7; border-radius: 9px;
+  font: 14px var(--font-ui); background: #fff; outline: none;
+  transition: border-color .2s ease; color: #1b2420;
+}
+.dash-field input:focus, .dash-field select:focus { border-color: #2d6a4f; }
+.dash-field input:disabled { background: #f5f2ec; color: #9aa19d; }
+.dash-toggle {
+  display: flex; align-items: center; gap: 12px; padding: 10px 0;
+  cursor: pointer; font-size: 13.5px; color: #1b2420;
+}
+.dash-toggle input {
+  appearance: none; width: 38px; height: 22px; border-radius: 999px;
+  background: #e8e2d7; position: relative; cursor: pointer; transition: background .2s ease; flex-shrink: 0;
+}
+.dash-toggle input::after {
+  content: ''; position: absolute; top: 2px; left: 2px;
+  width: 18px; height: 18px; border-radius: 999px; background: #fff;
+  transition: transform .2s ease; box-shadow: 0 1px 3px rgba(0,0,0,.15);
+}
+.dash-toggle input:checked { background: #2d6a4f; }
+.dash-toggle input:checked::after { transform: translateX(16px); }
+.dash-toggle span { display: inline-flex; align-items: center; gap: 6px; }
+.dash-save-bar {
+  display: flex; align-items: center; justify-content: flex-end; gap: 16px;
+  padding: 14px 20px; background: #fff; border: 1px solid #e8e2d7;
+  border-radius: 14px; position: sticky; bottom: 20px;
+  box-shadow: 0 4px 14px rgba(0,0,0,.07);
+}
+.dash-save-note { display: inline-flex; align-items: center; gap: 6px; color: #2b7a55; font-size: 13.5px; font-weight: 500; }
+
+/* ── EMPTY ── */
+.dash-empty {
+  text-align: center; padding: 56px 20px;
+  background: #fff; border: 1px dashed #e8e2d7; border-radius: 14px; color: #9aa19d;
+}
+.dash-empty h3 { color: #1b2420; font-size: 17px; font-weight: 500; margin: 0 0 8px; }
+.dash-empty p { max-width: 380px; margin: 0 auto 20px; font-size: 13.5px; }
+.dash-empty-icon { color: #9aa19d; margin-bottom: 12px; }
+.dash-empty-inline { padding: 32px 20px; border: 1px solid #e8e2d7; background: #f5f2ec; }
+/* =====================================================================
+   APPEND TO src/pages/dashboard/dashboard.css
+   Single-pane message layout for guests (no thread list — one host only)
+   ===================================================================== */
+
+.dash-messages-single {
+  display: block !important;
+  grid-template-columns: none !important;
+}
+.dash-messages-single .dash-msg-thread-wrap {
+  height: calc(100vh - 320px);
+  min-height: 460px;
+  max-height: 600px;
+  margin-bottom: 24px;
+  background: #fff;
+  border: 1px solid #e8e2d7;
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+@media (max-width: 900px) {
+  .dash-messages-single .dash-msg-thread-wrap {
+    height: auto;
+    min-height: 420px;
+  }
+}
+
+/* =====================================================================
+   CALM REFRESH — matches the rebuilt public site: deep forest sidebar,
+   warm paper backgrounds, softer cards. Layout and every selector
+   above are unchanged.
+   ===================================================================== */
+.dash-shell h1, .dash-shell h2 { font-weight: 400; }
+.dash-page-head h1 { font-size: clamp(28px, 2.8vw, 36px); letter-spacing: -0.02em; }
+.dash-eyebrow { color: #2d6a4f; letter-spacing: .24em; }
+.dash-brand-primary { font-family: var(--font-serif); font-weight: 500; letter-spacing: -.01em; font-size: 14.5px; }
+.dash-sidebar .dash-brand-accent { color: #9db3a6; }
+.dash-nav a.active { background: #f7f4ee; color: #1f3d30; box-shadow: 0 6px 18px rgba(0,0,0,.18); }
+.dash-avatar-small { background: #f7f4ee; color: #1f3d30; }
+.dash-btn-primary, .dash-account-btn { background: #1f3d30; }
+.dash-btn-primary:hover { background: #15281f; }
+.dash-stat-feature { background: linear-gradient(150deg, #1f3d30 0%, #15281f 100%); border-radius: 22px; }
+.dash-next-stay, .dash-booking, .dash-card, .dash-stat-support {
+  border-color: #ece6dc;
+  box-shadow: 0 1px 0 rgba(27,36,32,.04), 0 16px 36px -30px rgba(27,36,32,.28);
+}
+.dash-card { border-radius: 20px; }
+.dash-card-h, .dash-booking-top h3, .dash-empty h3 { font-family: var(--font-serif); font-weight: 400; font-size: 19px; letter-spacing: -0.01em; }
+.dash-mobile-bar, .dash-mobile-tabs, .dash-footer { background: #fbf9f5; }
+.dash-loading { background: #f5f2ec; }
