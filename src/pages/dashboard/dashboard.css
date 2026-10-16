@@ -702,7 +702,7 @@ body:has(.dash-shell) main { padding: 0 !important; }
 /* =====================================================================
    GLASS LAYOUT
    The apartment photo shows at the top and blends down into a calm
-   light brand green, with one floating frosted-glass menu bar (no sidebar),
+   white, with one floating frosted-glass menu bar (no sidebar),
    white headings, and frosted-glass panels holding white tiles.
    ===================================================================== */
 .dash-shell {
@@ -710,9 +710,9 @@ body:has(.dash-shell) main { padding: 0 !important; }
   position: relative;
   isolation: isolate;
   overflow-x: clip;
-  /* The blend colour: the brand green, lightened — fresh and calm,
-     still deep enough for white text. */
-  background: linear-gradient(180deg, #5b8a74 0%, #4f7f69 45%, #46755f 100%);
+  --dash-photo-h: 1100px;
+  /* The blend colour: plain white — the photo fades into it. */
+  background: #fff;
 }
 .dash-shell::before,
 .dash-shell::after {
@@ -724,19 +724,21 @@ body:has(.dash-shell) main { padding: 0 !important; }
   z-index: -1;
   pointer-events: none;
 }
-/* The apartment, clearly visible at the top, fading into the green. */
+/* The apartment, clearly visible at the top, fading into white. */
 .dash-shell::before {
-  height: max(100vh, 980px);
+  height: var(--dash-photo-h);
   background: url('/images/exterior-1.jpg') center 35% / cover no-repeat;
   filter: blur(5px);
   transform: scale(1.05);
-  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 42%, rgba(0,0,0,.5) 68%, transparent 100%);
-  mask-image: linear-gradient(180deg, #000 0%, #000 42%, rgba(0,0,0,.5) 68%, transparent 100%);
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 72%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 0%, #000 72%, transparent 100%);
 }
 /* A light veil so white text stays readable on the photo. */
 .dash-shell::after {
-  bottom: 0;
-  background: linear-gradient(180deg, rgba(20,48,36,.28) 0%, rgba(20,48,36,.18) 45%, rgba(20,48,36,.06) 100%);
+  height: var(--dash-photo-h);
+  background: linear-gradient(180deg, rgba(20,48,36,.30) 0%, rgba(20,48,36,.22) 60%, rgba(20,48,36,0) 100%);
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 72%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 0%, #000 72%, transparent 100%);
 }
 
 /* Brand row, on the photo */
@@ -897,17 +899,8 @@ body:has(.dash-shell) main { padding: 0 !important; }
 .dash-shell .dash-tab.active .dash-tab-count { background: #fff; color: #2d6a4f; }
 .dash-shell .dash-empty { border-style: solid; border-color: transparent; }
 
-/* Footer, glass on the green */
-.dash-footer {
-  background: rgba(255,255,255,.1);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-  border-top: 1px solid rgba(255,255,255,.2);
-}
-.dash-footer-copy,
-.dash-footer-help { color: rgba(255,255,255,.72); }
-.dash-footer-contact a { color: #fff; }
-.dash-footer-contact a:hover { color: #fff; text-decoration: underline; }
+/* Footer sits on the white, plain and light */
+.dash-footer { background: #fff; border-top: 1px solid #ece7db; }
 
 /* Payment-due alert — deliberately loud */
 .dash-paydue-stack { display: grid; gap: 12px; margin-bottom: 26px; }
@@ -977,3 +970,6 @@ body:has(.dash-shell) main { padding: 0 !important; }
   .dash-tiles-3 .dash-tile { padding: 12px; }
   .dash-tiles-3 .dash-tile-label { font-size: 11.5px; }
 }
+
+/* Phones: the glass panels run longer, so the photo does too */
+@media (max-width: 900px) { .dash-shell { --dash-photo-h: 1500px; } }
