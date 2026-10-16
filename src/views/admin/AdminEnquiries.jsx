@@ -27,12 +27,12 @@ import StatusBadge from '../../components/StatusBadge';
  * it creates the booking as `awaiting_payment` (dates aren't held yet,
  * see is_date_range_available/bookings_no_date_overlap in
  * supabase/migrations/20260921120000_payment_gated_bookings.sql). From
- * there, confirming immediately creates the guest's Paystack checkout
- * for the agreed total (paystack-init, called with the admin's own
- * session), and saving that link emails + texts the guest a direct
- * "Pay now" link (notify_payment_requested → notify-enquiry). The
- * guest can also pay any time from their dashboard's "Pay now". The
- * booking only becomes `confirmed` — which is what actually locks the dates, confirms the guest by email, and
+ * there, payment itself happens entirely in the GUEST's own dashboard
+ * (Bookings.jsx's "Pay now" calls paystack-init directly, RLS-scoped
+ * to their own booking) — there is deliberately no admin-side "send a
+ * payment link" action here; the guest starts checkout themselves,
+ * whenever they're ready. The booking only becomes `confirmed` — which
+ * is what actually locks the dates, confirms the guest by email, and
  * lets it export to Airbnb — once Paystack's webhook verifies the
  * payment (supabase/functions/paystack-webhook). "Mark as paid" below
  * is the manual fallback for a guest who pays by direct mobile-money
@@ -254,23 +254,8 @@ export default function AdminEnquiries() {
       .update({ booking_id: inserted.id, status: e.status === 'new' ? 'replied' : e.status })
       .eq('id', e.id);
 
-    // Create the guest's Paystack checkout right away, as the signed-in
-    // admin (paystack-init's RLS read admits owners/managers). Saving
-    // the link is what emails + texts the guest their "Pay now" link
-    // with the agreed total — so confirming here is the only step an
-    // admin takes; the guest doesn't have to log in to pay.
-    let paymentUrl = null;
-    const { data: payData, error: payError } = await supabase.functions.invoke('paystack-init', {
-      body: { booking_id: inserted.id },
-    });
-    if (payError || !payData?.authorization_url) {
-      setBookError(`Booking ${inserted.reference} created, but the payment link couldn't be sent. The guest can still pay from their dashboard.`);
-    } else {
-      paymentUrl = payData.authorization_url;
-    }
-
     setEnquiries(prev => prev.map(row => row.id === e.id
-      ? { ...row, booking_id: inserted.id, bookings: { id: inserted.id, reference: inserted.reference, status: inserted.status, payment_url: paymentUrl }, status: row.status === 'new' ? 'replied' : row.status }
+      ? { ...row, booking_id: inserted.id, bookings: { id: inserted.id, reference: inserted.reference, status: inserted.status, payment_url: null }, status: row.status === 'new' ? 'replied' : row.status }
       : row));
     // Not added to `bookings` — an awaiting_payment row doesn't hold
     // its dates (see the query above), so it shouldn't appear as a

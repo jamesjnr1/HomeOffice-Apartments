@@ -460,33 +460,6 @@ async function sendBookingConfirmedSms(b: any): Promise<void> {
   }
 }
 
-// Guest-facing texts — the payment link the moment one is created for
-// their booking, and a receipt once it's paid. Same best-effort shape:
-// skipped quietly if there's no phone or no key.
-async function sendGuestSms(b: any, message: string, label: string): Promise<void> {
-  if (!ARKESEL_API_KEY || !b.guest_phone) return;
-  try {
-    const result = await sendSms(String(b.guest_phone), message);
-    if (!result.ok) console.error(`notify-enquiry: Arkesel SMS error (${label})`, result.status, result.body);
-  } catch (err) {
-    console.error(`notify-enquiry: Arkesel SMS fetch error (${label})`, err);
-  }
-}
-
-function paymentDueGuestSms(b: any): string {
-  const apartmentLabel = APARTMENT_NAMES[b.apartment] || "Home-Office Apartments";
-  const dateRange = `${formatDateShort(b.check_in)}-${formatDateShort(b.check_out)}`;
-  return `Home-Office Apartments: your stay at ${apartmentLabel}, ${dateRange}, is approved. ` +
-    `Amount due GHS ${Number(b.total).toLocaleString()} (ref ${b.reference}). ` +
-    `Pay by card or Mobile Money here: ${b.payment_url}`;
-}
-
-function paidGuestSms(b: any): string {
-  const dateRange = `${formatDateShort(b.check_in)}-${formatDateShort(b.check_out)}`;
-  return `Home-Office Apartments: payment received - booking ${b.reference} (${dateRange}) is confirmed. ` +
-    `See it at ${SITE_URL}/dashboard/bookings. Questions? Call 0206301032.`;
-}
-
 Deno.serve(async (req: Request) => {
   if (req.method !== "POST") {
     return new Response("Method not allowed", { status: 405 });
@@ -587,14 +560,14 @@ Deno.serve(async (req: Request) => {
     }),
   });
 
-  // SMS is a supplementary channel: the admin is texted about a new
-  // enquiry and a paid booking; the guest is texted their "Pay now"
-  // link when an admin confirms (payment_requested) and a receipt once
-  // payment lands (confirmed). Other types are email-only.
+  // The SMS is a supplementary channel for the two events an admin
+  // actually needs to know about right away: a new enquiry to act on,
+  // and a real, paid booking. Every other type (declined, payment
+  // link, welcome email, review request) is guest-facing only — no
+  // text either way.
   const smsPromise =
     type === "new_enquiry" ? sendEnquirySms(e) :
-    type === "confirmed" ? Promise.all([sendBookingConfirmedSms(e), sendGuestSms(e, paidGuestSms(e), "paid")]) :
-    type === "payment_requested" ? sendGuestSms(e, paymentDueGuestSms(e), "payment due") :
+    type === "confirmed" ? sendBookingConfirmedSms(e) :
     Promise.resolve();
 
   const [res] = await Promise.all([emailPromise, smsPromise]);
