@@ -1,0 +1,522 @@
+/* =====================================================================
+   HOME-OFFICE APARTMENTS — design system
+   Calm and quiet: warm ivory paper, deep forest ink, the brand green
+   used sparingly as an accent, a soft serif for display type.
+   Tailwind v4 drives the public site; the admin portal and guest
+   dashboard keep their own class-based stylesheets (admin.css,
+   dashboard.css), retuned onto these same tokens.
+   ===================================================================== */
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+
+  --color-ivory: #f7f4ee;
+  --color-paper: #fbf9f5;
+  --color-sand: #efe9df;
+  --color-stone: #e4ddd1;
+  --color-ink: #1b2420;
+  --color-ink-soft: #46504b;
+  --color-muted: #737a75;
+  --color-forest: #1f3d30;
+  --color-forest-deep: #15281f;
+  --color-accent: #2d6a4f;
+  --color-accent-soft: #e3ebe5;
+  --color-sage: #9db3a6;
+  --color-brick: #a6512b;
+  --color-gold: #b58a4a;
+
+  --ease-calm: cubic-bezier(.22, .61, .36, 1);
+}
+
+:root {
+  /* Shared custom properties for the class-based components below
+     (status badges, receipts, property gallery, accessibility panel)
+     and the portal stylesheets. */
+  --ink: #1b2420;
+  --ink-2: #46504b;
+  --muted: #737a75;
+  --muted-2: #9aa09b;
+  --line: #e4ddd1;
+  --line-2: #eee8de;
+  --bg: #ffffff;
+  --bg-soft: #f7f4ee;
+  --bg-cream: #efe9df;
+  --accent: #2d6a4f;
+  --accent-2: #1f3d30;
+  --accent-soft: #e3ebe5;
+  --accent-mint: #a7d4bd;
+  --brick: #a6512b;
+  --success: #2b7a55;
+  --danger: #b3261e;
+  --radius: 14px;
+  --radius-lg: 22px;
+  --shadow-sm: 0 1px 2px rgba(27,36,32,.04), 0 1px 3px rgba(27,36,32,.05);
+  --shadow: 0 8px 24px rgba(27,36,32,.07);
+  --shadow-lg: 0 24px 60px rgba(27,36,32,.14);
+  --ease: cubic-bezier(.22,.61,.36,1);
+  --font-ui: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-fraunces), ui-serif, Georgia, serif;
+}
+
+@layer base {
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    background: var(--color-ivory);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection { background: #cfe0d5; color: var(--color-forest-deep); }
+  :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+}
+
+/* Scroll-in reveal — a gentle rise, nothing theatrical. */
+.reveal { opacity: 0; transform: translateY(18px); transition: opacity .9s var(--ease), transform .9s var(--ease); }
+.reveal.in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
+
+.spin { animation: spin 1s linear infinite; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* ---------------- FORMS (shared with the portals) ---------------- */
+.form-error {
+  background: #fbe9e7;
+  color: var(--danger);
+  padding: 12px 16px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+.field-note {
+  font-size: 12.5px;
+  color: var(--accent-2);
+  background: var(--accent-soft);
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin: 8px 0 0;
+  line-height: 1.45;
+}
+.field-note-warn { color: #8a6430; background: #fbf1dc; }
+
+/* ---------------- STATUS BADGE (src/components/StatusBadge.jsx) ---------------- */
+.status-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600; white-space: nowrap; line-height: 1.5;
+}
+.status-badge-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; border-radius: 6px; flex-shrink: 0;
+}
+.status-badge-good    { color: #2d6a4f; }
+.status-badge-good    .status-badge-icon { background: #e3ebe5; }
+.status-badge-warn    { color: #a37a3c; }
+.status-badge-warn    .status-badge-icon { background: #fbf1dc; }
+.status-badge-bad     { color: #b3261e; }
+.status-badge-bad     .status-badge-icon { background: #fbe9e7; }
+.status-badge-neutral { color: #737a75; }
+.status-badge-neutral .status-badge-icon { background: #f1ede6; }
+.status-badge-info    { color: #2f5fb3; }
+.status-badge-info    .status-badge-icon { background: #e1e9f8; }
+.status-badge-airbnb  { color: #e0484d; }
+.status-badge-airbnb  .status-badge-icon { background: #fde6e6; }
+
+.star-rating { display: inline-flex; gap: 2px; align-items: center; }
+
+/* =====================================================================
+   ACCESSIBILITY WIDGET
+   Floating "Aa" toggle + panel offering text size, high contrast, and
+   reduce-motion controls. Text size scales the whole page via CSS
+   `zoom` (rather than font-size) so nothing looks cramped or
+   overflowing — spacing scales right along with the type.
+   ===================================================================== */
+.a11y-toggle {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 500;
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff;
+  border: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-lg);
+  cursor: pointer;
+  transition: background .2s var(--ease), transform .2s var(--ease);
+}
+.a11y-toggle:hover { background: var(--accent-2); }
+.a11y-toggle:active { transform: scale(.94); }
+.a11y-toggle:focus-visible {
+  outline: 3px solid var(--accent-mint);
+  outline-offset: 2px;
+}
+
+.a11y-panel {
+  position: fixed;
+  right: 20px;
+  bottom: 84px;
+  z-index: 500;
+  width: 288px;
+  max-width: calc(100vw - 40px);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 20px;
+  animation: a11y-pop .18s var(--ease) both;
+}
+@keyframes a11y-pop {
+  from { opacity: 0; transform: translateY(8px) scale(.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.a11y-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.a11y-panel-head h2 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+.a11y-close {
+  background: transparent;
+  border: 0;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 4px;
+  display: inline-flex;
+  border-radius: 6px;
+}
+.a11y-close:hover { background: var(--bg-soft); color: var(--ink); }
+.a11y-sub {
+  font-size: 12.5px;
+  color: var(--muted);
+  margin: 4px 0 16px;
+}
+.a11y-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+}
+.a11y-row:first-of-type { border-top: 0; padding-top: 0; }
+.a11y-row-label { font-size: 14px; font-weight: 500; color: var(--ink); }
+.a11y-stepper { display: flex; align-items: center; gap: 8px; }
+.a11y-stepper button {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--ink);
+}
+.a11y-stepper button:hover:not(:disabled) { background: var(--bg-soft); }
+.a11y-stepper button:disabled { opacity: .35; cursor: not-allowed; }
+.a11y-stepper-value {
+  font-size: 12px;
+  color: var(--muted);
+  min-width: 36px;
+  text-align: center;
+}
+.a11y-switch {
+  position: relative;
+  width: 40px;
+  height: 24px;
+  border-radius: 999px;
+  background: var(--line);
+  border: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+}
+.a11y-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+  transition: transform .18s var(--ease);
+}
+.a11y-switch[aria-checked="true"] { background: var(--accent); }
+.a11y-switch[aria-checked="true"]::after { transform: translateX(16px); }
+.a11y-reset {
+  display: block;
+  margin: 16px 0 0;
+  width: 100%;
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.a11y-reset:hover { color: var(--ink); }
+
+@media (max-width: 420px) {
+  .a11y-toggle { right: 14px; bottom: 14px; }
+  .a11y-panel { right: 14px; bottom: 78px; }
+}
+
+/* Text size — page-wide zoom keeps layout proportions intact instead
+   of just growing fonts until they overflow their containers */
+html.a11y-scale-112 { zoom: 1.125; }
+html.a11y-scale-125 { zoom: 1.25; }
+html.a11y-scale-137 { zoom: 1.375; }
+
+/* High contrast — darker muted text and visible link underlines */
+html.a11y-contrast {
+  --muted: #2a2e28;
+  --muted-2: #2a2e28;
+  --line: #6b716a;
+}
+html.a11y-contrast a:not(.btn) { text-decoration: underline; }
+
+/* Reduce motion — same effect as the OS-level preference, opt-in */
+html.a11y-reduce-motion *,
+html.a11y-reduce-motion *::before,
+html.a11y-reduce-motion *::after {
+  animation: none !important;
+  transition: none !important;
+}
+html.a11y-reduce-motion .reveal { opacity: 1 !important; transform: none !important; }
+
+/* =====================================================================
+   RECEIPT / PRINT TEMPLATE
+   Used by src/components/Receipt.jsx from both the guest and admin
+   bookings pages. On screen it's a centered modal card; @media print
+   hides everything else on the page so "Print / Save as PDF" produces
+   a clean single-page receipt.
+   ===================================================================== */
+.receipt-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(20, 30, 25, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  overflow-y: auto;
+}
+.receipt-modal {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.receipt-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 20px;
+  background: var(--bg-soft);
+  border-bottom: 1px solid var(--line);
+}
+.receipt-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 999px;
+  padding: 9px 16px;
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--ink);
+}
+.receipt-btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.receipt-btn-close {
+  padding: 9px;
+  color: var(--muted);
+}
+
+.receipt-printable {
+  padding: 36px 32px 32px;
+  font-family: var(--font-ui);
+  color: var(--ink);
+}
+.receipt-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+.receipt-brand { display: flex; flex-direction: column; }
+.receipt-brand-primary { font-size: 16px; font-weight: 700; }
+.receipt-brand-sub { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+.receipt-accent { color: var(--accent); }
+.receipt-brand-addr { font-size: 12px; color: var(--muted-2); margin-top: 6px; }
+.receipt-title-block { text-align: right; display: flex; flex-direction: column; }
+.receipt-title { font-size: 20px; font-weight: 700; letter-spacing: 0.06em; color: var(--accent); }
+.receipt-issued { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+.receipt-divider { height: 1px; background: var(--line); margin: 20px 0; }
+
+.receipt-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 20px;
+}
+.receipt-label {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted-2);
+  margin-bottom: 3px;
+}
+.receipt-value { display: block; font-size: 14.5px; font-weight: 500; }
+.receipt-mono { font-family: ui-monospace, 'SF Mono', Menlo, monospace; }
+
+.receipt-table { width: 100%; border-collapse: collapse; }
+.receipt-table th {
+  text-align: left;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted-2);
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+.receipt-table td {
+  padding: 8px 0;
+  font-size: 14px;
+  border-bottom: 1px solid var(--line-2);
+}
+.receipt-table td:first-child { color: var(--muted); width: 40%; }
+.receipt-table td:last-child { font-weight: 500; text-align: right; }
+.receipt-table th:last-child { text-align: right; }
+
+.receipt-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 20px;
+  font-size: 15px;
+  font-weight: 600;
+}
+.receipt-total-value { font-size: 22px; font-weight: 700; color: var(--accent); }
+
+.receipt-foot { text-align: center; }
+.receipt-foot p { font-size: 13px; color: var(--muted); margin: 0 0 4px; }
+.receipt-foot-contact { font-size: 12px; color: var(--muted-2); }
+
+@media (max-width: 560px) {
+  .receipt-meta-grid { grid-template-columns: 1fr; }
+  .receipt-head { flex-direction: column; }
+  .receipt-title-block { text-align: left; }
+}
+
+@media print {
+  body * { visibility: hidden; }
+  .receipt-printable, .receipt-printable * { visibility: visible; }
+  .receipt-overlay {
+    position: static;
+    background: none;
+    padding: 0;
+    display: block;
+  }
+  .receipt-modal {
+    max-width: none;
+    max-height: none;
+    box-shadow: none;
+    border-radius: 0;
+  }
+  .receipt-toolbar { display: none; }
+  .receipt-printable {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 0;
+  }
+}
+
+/* ---------------- PROPERTY GALLERY (src/components/PropertyGallery.jsx) ----------------
+   Shared, unprefixed on purpose — used inside both the admin's mgmt-*
+   page shell (AdminGuestDetail) and the guest dashboard's dash-* shell
+   (Overview), loaded here in globals.css so it works in either without
+   duplicating the component or its styles. */
+.property-facility-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.property-facility-head h3 { margin: 0; font-size: 14px; font-weight: 500; color: #1f2b26; }
+.property-facility-list { font-size: 12px; color: #6a706d; }
+.property-gallery { display: flex; align-items: center; gap: 8px; }
+.property-gallery-thumb {
+  flex: 1; aspect-ratio: 4/3; border-radius: 10px; overflow: hidden; border: 0; padding: 0; cursor: pointer;
+  background: #f4f5f3; min-width: 0;
+}
+.property-gallery-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform .3s ease; }
+.property-gallery-thumb:hover img { transform: scale(1.06); }
+.property-gallery-nav {
+  width: 30px; height: 30px; border-radius: 999px; border: 1px solid #e8ebe8; background: #fff;
+  display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; color: #1f2b26;
+}
+.property-gallery-nav:hover { background: #f4f5f3; }
+.property-lightbox {
+  position: fixed; inset: 0; background: rgba(0,0,0,.82); z-index: 200;
+  display: flex; align-items: center; justify-content: center; padding: 40px; cursor: zoom-out;
+}
+.property-lightbox img { max-width: 100%; max-height: 100%; border-radius: 8px; cursor: default; }
+.property-lightbox-close {
+  position: absolute; top: 20px; right: 24px; width: 38px; height: 38px; border-radius: 999px;
+  background: rgba(255,255,255,.12); color: #fff; border: 0; display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.property-lightbox-close:hover { background: rgba(255,255,255,.2); }
+
+
+/* =====================================================================
+   PUBLIC SITE — motion
+   One soft fade-up as the hero settles in, and a very slow drift on
+   the hero photo. No curtains, no page wipes.
+   ===================================================================== */
+.hero-in { opacity: 0; animation: hero-in 1.4s var(--ease) forwards; }
+@keyframes hero-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+.slow-zoom { animation: slow-zoom 24s ease-in-out infinite alternate; transform-origin: 60% 40%; }
+@keyframes slow-zoom { from { transform: scale(1); } to { transform: scale(1.07); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-in { opacity: 1; animation: none; }
+  .slow-zoom { animation: none; }
+}
+html.a11y-reduce-motion .hero-in { opacity: 1 !important; }
+
+/* Fraunces: keep the display face calm — no "wonky" alternates, a
+   touch of softness on the terminals. */
+.font-display, .dash-shell h1, .dash-shell h2, .mgmt-page-head h1 {
+  font-variation-settings: "WONK" 0, "SOFT" 40;
+}
