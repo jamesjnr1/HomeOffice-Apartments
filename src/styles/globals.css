@@ -640,6 +640,62 @@ h4 { font-size: 16px; }
 }
 .book-price-estimate strong { font-size: 16px; }
 
+/* Line-by-line price on the Book page (see priceBreakdown in
+   src/lib/pricing.js) — nights × rate, discount, then the exact total. */
+.book-price-breakdown {
+  background: var(--accent-soft);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin: 4px 0 18px;
+  font-size: 14px;
+  display: grid;
+  gap: 6px;
+}
+.book-price-breakdown > div { display: flex; justify-content: space-between; gap: 12px; }
+.book-price-breakdown .is-discount { color: var(--success); }
+.book-price-breakdown .is-total { border-top: 1px solid rgba(45,106,79,.2); padding-top: 8px; margin-top: 2px; font-weight: 600; color: var(--ink); }
+.book-price-breakdown .is-total strong { font-size: 17px; }
+
+/* Booking stages (src/components/BookingSteps.jsx) */
+.booking-steps {
+  list-style: none;
+  margin: 0 0 32px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+}
+.booking-step { position: relative; display: flex; flex-direction: column; gap: 12px; padding-right: 14px; }
+.booking-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 16px; left: 40px; right: 6px;
+  height: 2px;
+  background: var(--line);
+}
+.booking-step.is-done:not(:last-child)::after { background: var(--accent); }
+.booking-step-dot {
+  position: relative; z-index: 1;
+  width: 32px; height: 32px;
+  border-radius: 999px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 600;
+  background: var(--bg); color: var(--muted-2);
+  border: 2px solid var(--line);
+  transition: all .25s var(--ease);
+}
+.booking-step.is-done .booking-step-dot { background: var(--accent); border-color: var(--accent); color: #fff; }
+.booking-step.is-active .booking-step-dot { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 0 0 0 5px var(--accent-soft); }
+.booking-step-text { display: flex; flex-direction: column; gap: 2px; }
+.booking-step-text strong { font-size: 14px; font-weight: 600; color: var(--muted); }
+.booking-step-text span { font-size: 12.5px; color: var(--muted-2); line-height: 1.4; }
+.booking-step.is-done .booking-step-text strong,
+.booking-step.is-active .booking-step-text strong { color: var(--ink); }
+@media (max-width: 760px) {
+  .booking-steps { grid-template-columns: 1fr; gap: 12px; }
+  .booking-step { flex-direction: row; align-items: center; padding-right: 0; }
+  .booking-step:not(:last-child)::after { top: 34px; bottom: -12px; left: 15px; right: auto; width: 2px; height: auto; }
+}
+
 .spin { animation: spin 1s linear infinite; }
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 

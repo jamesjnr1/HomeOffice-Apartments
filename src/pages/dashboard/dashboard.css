@@ -698,3 +698,281 @@ body:has(.dash-shell) main { padding: 0 !important; }
     min-height: 420px;
   }
 }
+
+/* =====================================================================
+   GLASS LAYOUT
+   The guest dashboard sits on a softly blurred photo of the property,
+   with one floating frosted-glass menu bar (no sidebar), white page
+   headings on the photo, and white tiles/cards inside frosted panels.
+   ===================================================================== */
+.dash-shell {
+  display: block;
+  position: relative;
+  isolation: isolate;
+  overflow-x: clip;
+  /* Base colour sampled from the photo's own greens, so wherever the
+     photo fades out the page just carries on in the same tone. */
+  background: linear-gradient(180deg, #4a5f52 0%, #34493d 38%, #26392f 70%, #1f3027 100%);
+}
+.dash-shell::before,
+.dash-shell::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+/* The property photo, softly blurred, fading into the base colour —
+   no hard edge however long the page is. */
+.dash-shell::before {
+  height: max(100vh, 960px);
+  background: url('/images/exterior-1.jpg') center 30% / cover no-repeat;
+  filter: blur(9px) saturate(105%);
+  transform: scale(1.08);
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 40%, rgba(0,0,0,.45) 70%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 0%, #000 40%, rgba(0,0,0,.45) 70%, transparent 100%);
+}
+/* One even green-tinted veil over everything for legible white text. */
+.dash-shell::after {
+  bottom: 0;
+  background: linear-gradient(180deg, rgba(26,42,34,.34) 0%, rgba(26,42,34,.46) 50%, rgba(26,42,34,.2) 100%);
+}
+
+/* Brand row, on the photo */
+.dash-brandrow {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 22px 24px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.dash-brandrow .dash-brand-icon { filter: brightness(0) invert(1); }
+.dash-brandrow .dash-brand-primary { color: #fff; font-size: 15px; }
+.dash-brandrow .dash-brand-sub { color: rgba(255,255,255,.7); }
+.dash-brandrow .dash-brand-accent { color: #d4e9b8; }
+.dash-brandrow-tag {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 18px;
+  color: rgba(255,255,255,.92);
+  letter-spacing: -.01em;
+}
+
+/* The floating glass menu bar */
+.dash-topbar {
+  position: sticky;
+  top: 12px;
+  z-index: 40;
+  padding: 0 24px;
+}
+.dash-topbar-inner {
+  max-width: 1160px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 8px 7px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.18);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+  border: 1px solid rgba(255,255,255,.32);
+  box-shadow: 0 10px 30px rgba(0,0,0,.18);
+}
+.dash-topbar-icons,
+.dash-topbar-right { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+.dash-topbar-right { margin-left: auto; }
+.dash-topbar-divider { width: 1px; height: 20px; background: rgba(255,255,255,.35); margin: 0 6px; }
+.dash-icon-btn {
+  width: 36px; height: 36px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 999px;
+  color: #fff;
+  text-decoration: none;
+  transition: background .15s ease;
+}
+.dash-icon-btn:hover { background: rgba(255,255,255,.16); }
+.dash-icon-btn.active { background: rgba(255,255,255,.24); }
+
+.dash-topnav { display: flex; align-items: center; gap: 2px; min-width: 0; }
+.dash-topnav a {
+  padding: 8px 14px;
+  border-radius: 999px;
+  color: rgba(255,255,255,.86);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 13.5px;
+  white-space: nowrap;
+  transition: background .15s ease, color .15s ease;
+}
+.dash-topnav a:hover { background: rgba(255,255,255,.14); color: #fff; }
+.dash-topnav a.active { background: #fff; color: #1f2b26; font-weight: 600; }
+
+.dash-account { position: relative; margin-left: 4px; }
+.dash-account-btn {
+  width: auto; height: auto; min-width: 0;
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 8px 3px 3px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.16);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.3);
+}
+.dash-account-avatar {
+  width: 30px; height: 30px;
+  border-radius: 999px;
+  background: #fff; color: #2d6a4f;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 600; font-size: 13px; overflow: hidden;
+}
+.dash-account-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.dash-account-menu { top: calc(100% + 10px); right: 0; }
+
+/* Main column, on the photo */
+.dash-main-inner { padding: 40px 24px 90px; }
+.dash-shell .dash-page-head h1 { color: #fff; font-size: clamp(28px, 3.4vw, 40px); }
+.dash-shell .dash-page-head .dash-lead { color: rgba(255,255,255,.82); font-size: 15px; }
+.dash-shell .dash-page-head .dash-eyebrow { color: rgba(255,255,255,.7); }
+.dash-welcome { margin-bottom: 26px; }
+
+/* Frosted panels with white tiles */
+.dash-glass {
+  background: rgba(255,255,255,.14);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid rgba(255,255,255,.28);
+  border-radius: 24px;
+  padding: 22px;
+  margin-bottom: 18px;
+  color: #fff;
+}
+.dash-glass-label {
+  display: block;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: .16em; text-transform: uppercase;
+  color: rgba(255,255,255,.78);
+  margin-bottom: 8px;
+}
+.dash-glass h2 { margin: 0 0 4px; font-size: 26px; font-weight: 500; color: #fff; letter-spacing: -.02em; }
+.dash-glass .dash-loc { color: rgba(255,255,255,.78); }
+.dash-glass-head {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  flex-wrap: wrap; gap: 16px; margin-bottom: 18px;
+}
+.dash-glass-head:last-child { margin-bottom: 0; }
+.dash-glass-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.dash-glass .dash-btn-primary { background: #fff; color: #1f2b26; }
+.dash-glass .dash-btn-primary:hover { background: #eef3ef; }
+.dash-glass .dash-btn-ghost { color: #fff; border: 1px solid rgba(255,255,255,.4); }
+.dash-glass .dash-btn-ghost:hover { background: rgba(255,255,255,.14); }
+
+.dash-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.dash-tile {
+  background: #fff;
+  border-radius: 14px;
+  padding: 14px 16px 15px;
+  display: flex; flex-direction: column; gap: 6px;
+  color: #1f2b26;
+  box-shadow: 0 4px 14px rgba(0,0,0,.08);
+  min-width: 0;
+}
+.dash-tile svg { color: #1f2b26; }
+.dash-tile-label { font-size: 13px; color: #4a5450; margin-top: 8px; }
+.dash-tile-value {
+  font-size: 17px; font-weight: 600; color: #2d6a4f;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.dash-tile-value.dash-mono { font-size: 15px; }
+
+/* Reservation tabs sit on the photo too */
+.dash-shell .dash-tabs { border-bottom-color: rgba(255,255,255,.25); }
+.dash-shell .dash-tab { color: rgba(255,255,255,.75); }
+.dash-shell .dash-tab:hover { color: #fff; }
+.dash-shell .dash-tab.active { color: #fff; border-bottom-color: #fff; }
+.dash-shell .dash-tab-count { background: rgba(255,255,255,.18); color: #fff; }
+.dash-shell .dash-tab.active .dash-tab-count { background: #fff; color: #2d6a4f; }
+.dash-shell .dash-empty { border-style: solid; border-color: transparent; }
+
+/* Footer, glass on the photo */
+.dash-footer {
+  background: rgba(20,33,27,.35);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(255,255,255,.14);
+}
+.dash-footer-copy,
+.dash-footer-help { color: rgba(255,255,255,.62); }
+.dash-footer-contact a { color: rgba(255,255,255,.9); }
+.dash-footer-contact a:hover { color: #fff; }
+
+/* Payment-due alert — deliberately loud */
+.dash-paydue-stack { display: grid; gap: 12px; margin-bottom: 26px; }
+.dash-paydue {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  background: #fff;
+  border: 2px solid #e8590c;
+  border-radius: 18px;
+  padding: 16px 18px;
+  box-shadow: 0 12px 32px rgba(0,0,0,.22);
+}
+.dash-paydue-icon {
+  position: relative;
+  width: 42px; height: 42px; flex-shrink: 0;
+  border-radius: 999px;
+  background: #fde8d7; color: #c2410c;
+  display: flex; align-items: center; justify-content: center;
+}
+.dash-paydue-icon::after {
+  content: '';
+  position: absolute; inset: -4px;
+  border-radius: 999px;
+  border: 2px solid rgba(232,89,12,.45);
+  animation: dash-paydue-pulse 1.8s ease-out infinite;
+}
+@keyframes dash-paydue-pulse {
+  from { transform: scale(.9); opacity: 1; }
+  to { transform: scale(1.35); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .dash-paydue-icon::after { animation: none; } }
+.dash-paydue-body { flex: 1; min-width: 220px; }
+.dash-paydue-body strong { display: block; font-size: 15.5px; color: #9a3412; margin-bottom: 2px; }
+.dash-paydue-body p { margin: 0; font-size: 13.5px; color: #4a5450; }
+.dash-paydue-error { color: #b3261e !important; margin-top: 6px !important; }
+.dash-paydue-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 12px 20px;
+  border: 0; border-radius: 999px;
+  background: #c2410c; color: #fff;
+  font: 600 14px/1 'Poppins', sans-serif;
+  cursor: pointer;
+  transition: background .15s ease;
+}
+.dash-paydue-btn:hover:not(:disabled) { background: #9a3412; }
+.dash-paydue-btn:disabled { opacity: .7; cursor: wait; }
+
+/* Phones: menu bar wraps — icons + account on top, pages below */
+@media (max-width: 900px) {
+  .dash-brandrow { padding: 16px 16px 10px; }
+  .dash-brandrow-tag { display: none; }
+  .dash-topbar { padding: 0 12px; top: 8px; }
+  .dash-topbar-inner { flex-wrap: wrap; border-radius: 22px; padding: 6px; gap: 4px; }
+  .dash-topnav { order: 3; width: 100%; justify-content: space-between; border-top: 1px solid rgba(255,255,255,.22); padding-top: 6px; }
+  .dash-topnav a { flex: 1; text-align: center; padding: 8px 4px; font-size: 12.5px; }
+  .dash-main-inner { padding: 28px 16px 70px; }
+  .dash-glass { padding: 16px; border-radius: 20px; }
+  .dash-glass h2 { font-size: 22px; }
+  .dash-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .dash-paydue-btn { width: 100%; }
+}
+@media (max-width: 380px) {
+  .dash-topnav a { font-size: 11.5px; padding: 8px 2px; }
+}
+.dash-backdrop { display: block; background: transparent; z-index: 39; }
+@media (max-width: 900px) {
+  .dash-tiles.dash-tiles-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .dash-tiles-3 .dash-tile { padding: 12px; }
+  .dash-tiles-3 .dash-tile-label { font-size: 11.5px; }
+}

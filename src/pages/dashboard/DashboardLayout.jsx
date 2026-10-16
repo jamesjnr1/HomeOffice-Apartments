@@ -1,18 +1,18 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useEffect, useState, useCallback } from 'react';
 import {
-  LayoutDashboard, CalendarDays,
-  MessageSquare, UserCircle, LogOut,
-  Phone, Mail,
+  Home, CalendarDays, Mail, LogOut, Phone,
+  PlusCircle, HelpCircle, ChevronDown,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import PaymentDueBanner from './PaymentDueBanner';
 import './dashboard.css';
 
 const NAV_ITEMS = [
-  { to: '/dashboard', end: true, icon: LayoutDashboard, label: 'Overview' },
-  { to: '/dashboard/bookings', icon: CalendarDays, label: 'Bookings' },
-  { to: '/dashboard/messages', icon: MessageSquare, label: 'Messages' },
-  { to: '/dashboard/profile', icon: UserCircle, label: 'Profile' },
+  { to: '/dashboard', end: true, label: 'Overview' },
+  { to: '/dashboard/bookings', label: 'Reservations' },
+  { to: '/dashboard/messages', label: 'Messages' },
+  { to: '/dashboard/profile', label: 'Profile' },
 ];
 
 export default function DashboardLayout() {
@@ -82,11 +82,11 @@ export default function DashboardLayout() {
 
   return (
     <div className="dash-shell">
-      {/* Mobile top bar — brand + an avatar button for account/sign-out.
-          Primary nav lives in .dash-mobile-tabs below, not behind a
-          hamburger — a full-height off-canvas drawer for just 4 short
-          links left most of the screen empty green space. */}
-      <div className="dash-mobile-bar">
+      {/* Brand sits on the photo above a single floating glass menu bar:
+          quick icons (site home, messages, reservations), the four
+          pages as text links, then Book / Help / account on the right.
+          Four pages never needed a full-height sidebar. */}
+      <div className="dash-brandrow">
         <a href="/" className="dash-brand dash-brand-logo">
           <img src="/images/logo-icon.png" alt="" className="dash-brand-icon" />
           <span className="dash-brand-text">
@@ -96,80 +96,63 @@ export default function DashboardLayout() {
             </span>
           </span>
         </a>
-        <button className="dash-account-btn" onClick={() => setAccountOpen(o => !o)} aria-label="Account menu">
-          {profile?.avatar_url ? <img src={profile.avatar_url} alt="" /> : initial}
-        </button>
-        {accountOpen && (
-          <div className="dash-account-menu">
-            <div className="dash-user">
-              <div className="dash-avatar-small">
-                {profile?.avatar_url ? <img src={profile.avatar_url} alt="" /> : initial}
-              </div>
-              <div className="dash-user-meta">
-                <div className="dash-user-name">{displayName}</div>
-                <div className="dash-user-email">{user?.email}</div>
-              </div>
-            </div>
-            <button className="dash-signout" onClick={handleSignOut}>
-              <LogOut size={16} /> Sign out
-            </button>
-          </div>
-        )}
+        <span className="dash-brandrow-tag">Your stay, all in one place</span>
       </div>
 
-      {/* Horizontal tab bar — mobile-only primary nav, always visible. */}
-      <nav className="dash-mobile-tabs">
-        {NAV_ITEMS.map(({ to, end, icon: Icon, label }) => (
-          <NavLink key={to} to={to} end={end}>
-            <Icon size={18} /> <span>{label}</span>
-          </NavLink>
-        ))}
-      </nav>
+      <header className="dash-topbar">
+        <div className="dash-topbar-inner">
+          <div className="dash-topbar-icons">
+            <a href="/" className="dash-icon-btn" aria-label="Back to the website" title="Website"><Home size={17} /></a>
+            <span className="dash-topbar-divider" />
+            <NavLink to="/dashboard/messages" className="dash-icon-btn" aria-label="Messages" title="Messages"><Mail size={17} /></NavLink>
+            <NavLink to="/dashboard/bookings" className="dash-icon-btn" aria-label="Reservations" title="Reservations"><CalendarDays size={17} /></NavLink>
+            <span className="dash-topbar-divider" />
+          </div>
+
+          <nav className="dash-topnav" aria-label="Dashboard">
+            {NAV_ITEMS.map(({ to, end, label }) => (
+              <NavLink key={to} to={to} end={end}>{label}</NavLink>
+            ))}
+          </nav>
+
+          <div className="dash-topbar-right">
+            <a href="/book" className="dash-icon-btn" aria-label="Book a stay" title="Book a stay"><PlusCircle size={17} /></a>
+            <a href="tel:+233206301032" className="dash-icon-btn" aria-label="Call us for help" title="Help: +233 20 630 1032"><HelpCircle size={17} /></a>
+            <div className="dash-account">
+              <button className="dash-account-btn" onClick={() => setAccountOpen(o => !o)} aria-label="Account menu" aria-expanded={accountOpen}>
+                <span className="dash-account-avatar">
+                  {profile?.avatar_url ? <img src={profile.avatar_url} alt="" /> : initial}
+                </span>
+                <ChevronDown size={14} />
+              </button>
+              {accountOpen && (
+                <div className="dash-account-menu">
+                  <div className="dash-user">
+                    <div className="dash-avatar-small">
+                      {profile?.avatar_url ? <img src={profile.avatar_url} alt="" /> : initial}
+                    </div>
+                    <div className="dash-user-meta">
+                      <div className="dash-user-name">{displayName}</div>
+                      <div className="dash-user-email">{user?.email}</div>
+                    </div>
+                  </div>
+                  <button className="dash-signout" onClick={handleSignOut}>
+                    <LogOut size={16} /> Sign out
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
 
       {accountOpen && (
         <div className="dash-backdrop" onClick={() => setAccountOpen(false)} />
       )}
 
-      {/* Sidebar — desktop only */}
-      <aside className="dash-sidebar">
-        <div className="dash-sidebar-head">
-          <a href="/" className="dash-brand dash-brand-logo">
-            <img src="/images/logo-icon.png" alt="" className="dash-brand-icon" />
-            <span className="dash-brand-text">
-              <span className="dash-brand-primary">Home-Office Apartments</span>
-              <span className="dash-brand-sub">
-                and Living<span className="dash-brand-accent">Spring</span> Gardens
-              </span>
-            </span>
-          </a>
-        </div>
-
-        <nav className="dash-nav">
-          {NAV_ITEMS.map(({ to, end, icon: Icon, label }) => (
-            <NavLink key={to} to={to} end={end}>
-              <Icon size={18} /> <span>{label}</span>
-            </NavLink>
-          ))}
-        </nav>
-
-        <div className="dash-sidebar-foot">
-          <div className="dash-user">
-            <div className="dash-avatar-small">
-              {profile?.avatar_url ? <img src={profile.avatar_url} alt="" /> : initial}
-            </div>
-            <div className="dash-user-meta">
-              <div className="dash-user-name">{displayName}</div>
-              <div className="dash-user-email">{user?.email}</div>
-            </div>
-          </div>
-          <button className="dash-signout" onClick={handleSignOut}>
-            <LogOut size={16} /> Sign out
-          </button>
-        </div>
-      </aside>
-
       <main className="dash-main">
         <div className="dash-main-inner">
+          <PaymentDueBanner userId={user.id} />
           <Outlet context={{ user, displayName, profile, refreshProfile: () => loadProfile(user.id) }} />
         </div>
       </main>

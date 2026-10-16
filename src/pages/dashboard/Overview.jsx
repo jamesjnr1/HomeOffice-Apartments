@@ -1,9 +1,8 @@
 import { Link, useOutletContext } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { differenceInCalendarDays, format, parseISO } from 'date-fns';
+import { differenceInCalendarDays, format, parseISO, startOfToday } from 'date-fns';
 import {
   MapPin,
-  Clock,
   ArrowRight,
   MessageSquare,
   Wifi,
@@ -12,6 +11,13 @@ import {
   Info,
   Users,
   BedDouble,
+  CalendarCheck,
+  CalendarX,
+  Moon,
+  Wallet,
+  Hash,
+  CalendarDays,
+  History,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { APARTMENTS, apartmentName } from '../../lib/apartments';
@@ -46,8 +52,12 @@ import PropertyGallery from '../../components/PropertyGallery';
 
 const APARTMENT = {
   location: 'Sunyani, Ghana',
-  coverImage: '/images/hero-property.jpg',
 };
+
+// Only a paid booking is a real stay — an `awaiting_payment` one isn't
+// held yet (see DashboardLayout's PaymentDueBanner), so it never
+// counts as "upcoming" or towards nights/past stays here.
+const PAID = ['confirmed', 'completed'];
 
 export default function Overview() {
   const { user, displayName } = useOutletContext();
@@ -136,17 +146,20 @@ export default function Overview() {
 
       if (!error && data) {
         const now = new Date();
-        const bookings = data.map((b) => ({ ...b, checkIn: parseISO(b.check_in), checkOut: parseISO(b.check_out) }));
+        const today = startOfToday();
+        const bookings = data
+          .filter((b) => PAID.includes(b.status))
+          .map((b) => ({ ...b, checkIn: parseISO(b.check_in), checkOut: parseISO(b.check_out) }));
 
-        const upcoming = bookings.filter((b) => b.checkIn > now);
-        const started = bookings.filter((b) => b.checkIn <= now);
+        const upcoming = bookings.filter((b) => b.checkIn >= today);
+        const started = bookings.filter((b) => b.checkIn < today);
 
         setNextStay(upcoming[0] || null);
-        setHasActiveStay(bookings.some((b) => b.checkOut >= now));
+        setHasActiveStay(bookings.some((b) => b.checkOut >= today));
         setStats({
           upcomingBookings: upcoming.length,
           pastStays: bookings.filter((b) => b.checkOut < now).length,
-          nightsWithUs: started.reduce((sum, b) => sum + b.nights, 0),
+          nightsWithUs: started.reduce((sum, b) => sum + (b.nights || 0), 0),
         });
       }
     } catch {
@@ -160,13 +173,16 @@ export default function Overview() {
   const daysUntil = nextStay
     ? differenceInCalendarDays(nextStay.checkIn, new Date())
     : null;
+  const countdown = daysUntil === null ? ''
+    : daysUntil <= 0 ? 'Today'
+    : daysUntil === 1 ? 'Tomorrow'
+    : `In ${daysUntil} days`;
 
   return (
     <div className="dash-page">
-      <header className="dash-page-head">
-        <span className="dash-eyebrow">DASHBOARD</span>
-        <h1>Welcome back, {displayName}.</h1>
-        <p className="dash-lead">Here's what's coming up.</p>
+      <header className="dash-page-head dash-welcome">
+        <h1>Welcome back, {displayName}</h1>
+        <p className="dash-lead">It's good to see you again!</p>
       </header>
 
       {loading ? (
@@ -175,72 +191,66 @@ export default function Overview() {
         <>
           {openEnquiry && <EnquiryStatusCard enquiry={openEnquiry} />}
 
-          {/* Next stay hero */}
-          {nextStay && (
-            <section className="dash-next-stay">
-              <div className="dash-next-stay-img">
-                <img
-                  src={APARTMENT.coverImage}
-                  alt={apartmentName(nextStay.apartment)}
-                />
-                <span className="dash-next-stay-badge">
-                  <Clock size={12} /> In {daysUntil} day{daysUntil !== 1 ? 's' : ''}
-                </span>
-              </div>
-              <div className="dash-next-stay-body">
-                <span className="dash-eyebrow">YOUR NEXT STAY</span>
-                <h2>{apartmentName(nextStay.apartment)}</h2>
-                <div className="dash-loc">
-                  <MapPin size={14} />
-                  {APARTMENT.location}
+          {nextStay ? (
+            <section className="dash-glass">
+              <div className="dash-glass-head">
+                <div>
+                  <span className="dash-glass-label">Your next stay · {countdown}</span>
+                  <h2>{apartmentName(nextStay.apartment)}</h2>
+                  <div className="dash-loc"><MapPin size={13} /> {APARTMENT.location}</div>
                 </div>
-
-                <div className="dash-next-stay-details">
-                  <div>
-                    <div className="dash-detail-label">CHECK-IN</div>
-                    <div className="dash-detail-value">
-                      {format(nextStay.checkIn, 'EEE, d MMM')}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="dash-detail-label">CHECK-OUT</div>
-                    <div className="dash-detail-value">
-                      {format(nextStay.checkOut, 'EEE, d MMM')}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="dash-detail-label">NIGHTS</div>
-                    <div className="dash-detail-value">{nextStay.nights}</div>
-                  </div>
-                  <div>
-                    <div className="dash-detail-label">GUESTS</div>
-                    <div className="dash-detail-value">{nextStay.guests}</div>
-                  </div>
-                </div>
-
-                <div className="dash-next-stay-actions">
-                  <Link
-                    to="/dashboard/bookings"
-                    className="dash-btn dash-btn-primary"
-                  >
+                <div className="dash-glass-actions">
+                  <Link to="/dashboard/bookings" className="dash-btn dash-btn-primary">
                     View trip <ArrowRight size={16} />
                   </Link>
-                  <Link
-                    to="/dashboard/messages"
-                    className="dash-btn dash-btn-ghost"
-                  >
+                  <Link to="/dashboard/messages" className="dash-btn dash-btn-ghost">
                     <MessageSquare size={16} /> Message host
+                  </Link>
+                </div>
+              </div>
+              <div className="dash-tiles">
+                <Tile icon={CalendarCheck} label="Check-in" value={format(nextStay.checkIn, 'EEE, d MMM')} />
+                <Tile icon={CalendarX} label="Check-out" value={format(nextStay.checkOut, 'EEE, d MMM')} />
+                <Tile icon={Moon} label="Nights" value={nextStay.nights} />
+                <Tile icon={Users} label="Guests" value={nextStay.guests} />
+                <Tile icon={Wallet} label="Paid" value={`GHS ${Number(nextStay.total).toLocaleString()}`} />
+                <Tile icon={Hash} label="Reference" value={nextStay.reference} mono />
+              </div>
+            </section>
+          ) : (
+            <section className="dash-glass">
+              <div className="dash-glass-head">
+                <div>
+                  <span className="dash-glass-label">Your next stay</span>
+                  <h2>No confirmed stays yet</h2>
+                  <div className="dash-loc">Once a booking is paid, it shows up here.</div>
+                </div>
+                <div className="dash-glass-actions">
+                  <Link to="/book" className="dash-btn dash-btn-primary">
+                    Book a stay <ArrowRight size={16} />
                   </Link>
                 </div>
               </div>
             </section>
           )}
 
+          <section className="dash-glass">
+            <span className="dash-glass-label">At a glance</span>
+            <div className="dash-tiles dash-tiles-3">
+              <Tile icon={CalendarDays} label="Upcoming stays" value={stats.upcomingBookings} />
+              <Tile icon={History} label="Past stays" value={stats.pastStays} />
+              <Tile icon={Moon} label="Nights with us" value={stats.nightsWithUs} />
+            </div>
+          </section>
+
+          {/* Check-in details — only for guests with a current/upcoming paid stay */}
+          {checkInDetails && <CheckInDetailsCard details={checkInDetails} />}
+
           {/* Room capacity/beds + the real facilities gallery — same
               content AdminGuestDetail shows an admin for any guest
               (see PropertyGallery), just framed as "your stay". */}
           {nextStay && (
-            <section className="dash-card" style={{ marginBottom: 28 }}>
+            <section className="dash-card" style={{ marginTop: 18 }}>
               <div className="dash-stay-facts">
                 <div className="dash-stay-fact">
                   <Users size={14} />
@@ -254,38 +264,18 @@ export default function Overview() {
               <PropertyGallery />
             </section>
           )}
-
-          {/* Stats — upcoming bookings (the one a guest actually acts on)
-              gets a featured card; the other two are smaller supporting
-              figures beside it, rather than three identical boxes. */}
-          <section className="dash-stat-feature-row">
-            <div className="dash-stat-feature">
-              <span className="dash-stat-feature-eyebrow">Upcoming bookings</span>
-              <div>
-                <div className="dash-stat-feature-num">{stats.upcomingBookings}</div>
-                <div className="dash-stat-feature-caption">
-                  {nextStay
-                    ? `Next stay in ${daysUntil} day${daysUntil !== 1 ? 's' : ''}`
-                    : 'No trips booked yet'}
-                </div>
-              </div>
-            </div>
-            <div className="dash-stat-support-stack">
-              <div className="dash-stat-support">
-                <span className="dash-stat-support-num">{stats.pastStays}</span>
-                <span className="dash-stat-support-label">Past stays</span>
-              </div>
-              <div className="dash-stat-support">
-                <span className="dash-stat-support-num">{stats.nightsWithUs}</span>
-                <span className="dash-stat-support-label">Nights with us</span>
-              </div>
-            </div>
-          </section>
-
-          {/* Check-in details — only for guests with a current/upcoming stay */}
-          {checkInDetails && <CheckInDetailsCard details={checkInDetails} />}
         </>
       )}
+    </div>
+  );
+}
+
+function Tile({ icon: Icon, label, value, mono }) {
+  return (
+    <div className="dash-tile">
+      <Icon size={17} strokeWidth={1.8} />
+      <span className="dash-tile-label">{label}</span>
+      <span className={`dash-tile-value${mono ? ' dash-mono' : ''}`}>{value}</span>
     </div>
   );
 }
@@ -293,7 +283,7 @@ export default function Overview() {
 function CheckInDetailsCard({ details: d }) {
   const hasWifi = d.wifi_network || d.wifi_password;
   return (
-    <section className="dash-card" style={{ marginTop: 24 }}>
+    <section className="dash-card" style={{ marginTop: 18 }}>
       <h2 className="dash-card-h">Check-in details</h2>
       <p className="dash-card-sub">Everything you need for your stay.</p>
 
@@ -357,7 +347,7 @@ function CheckInDetailsCard({ details: d }) {
 function EnquiryStatusCard({ enquiry: en }) {
   const dates = `${format(parseISO(en.check_in), 'd MMM')} → ${format(parseISO(en.check_out), 'd MMM yyyy')}`;
   return (
-    <section className="dash-card" style={{ marginBottom: 24 }}>
+    <section className="dash-card" style={{ marginBottom: 18 }}>
       <h2 className="dash-card-h">Your enquiry</h2>
       <p className="dash-card-sub">{dates}</p>
       {en.status === 'declined' ? (

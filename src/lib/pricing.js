@@ -29,3 +29,22 @@ export function calculateTotal(nights) {
   }
   return Math.round(total * 100) / 100;
 }
+
+// Line-by-line version of calculateTotal for display — nights × rate,
+// the discount that applies (if any), and the same total book-and-pay
+// charges, so the Book page never shows an undiscounted "N × GHS 388"
+// next to a discounted total.
+export function priceBreakdown(nights) {
+  if (!nights || nights <= 0) return null;
+  const subtotal = nights * NIGHTLY_RATE_GHS;
+  let discount = 0;
+  let discountLabel = '';
+  if (nights >= 28 && nights <= 30) {
+    discount = Math.round(subtotal * LONG_STAY_DISCOUNT_PCT * 100) / 100;
+    discountLabel = `Long-stay discount (${LONG_STAY_DISCOUNT_PCT * 100}%)`;
+  } else if (nights >= 5) {
+    discount = MULTI_NIGHT_DISCOUNT_GHS;
+    discountLabel = '5+ night discount';
+  }
+  return { nights, rate: NIGHTLY_RATE_GHS, subtotal, discount, discountLabel, total: calculateTotal(nights) };
+}

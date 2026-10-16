@@ -2,7 +2,8 @@ import { useState, useMemo } from 'react';
 import { Mail, Phone, MessageCircle, Check, AlertCircle, CreditCard, Loader2 } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { APARTMENT_LIST, APARTMENTS, DEFAULT_APARTMENT } from '../lib/apartments';
-import { NIGHTLY_RATE_GHS, MULTI_NIGHT_DISCOUNT_GHS, LONG_STAY_DISCOUNT_PCT, nightsBetween, calculateTotal } from '../lib/pricing';
+import { NIGHTLY_RATE_GHS, MULTI_NIGHT_DISCOUNT_GHS, LONG_STAY_DISCOUNT_PCT, nightsBetween, calculateTotal, priceBreakdown } from '../lib/pricing';
+import BookingSteps from '../components/BookingSteps';
 
 /**
  * Book — the public booking page. Two ways to reach out:
@@ -52,6 +53,7 @@ export default function Book() {
 
   const nights = useMemo(() => nightsBetween(form.checkIn, form.checkOut), [form.checkIn, form.checkOut]);
   const total = useMemo(() => calculateTotal(nights), [nights]);
+  const breakdown = useMemo(() => priceBreakdown(nights), [nights]);
 
   const checkPendingEnquiry = async () => {
     if (!isSupabaseConfigured || !form.email.trim()) return;
@@ -171,6 +173,10 @@ export default function Book() {
     }
   };
 
+  const datesDone = nights > 0;
+  const detailsDone = datesDone && form.name.trim() && form.email.trim();
+  const currentStep = booking ? 3 : detailsDone ? 2 : datesDone ? 1 : 0;
+
   return (
     <>
       <section className="page-header page-header-v2">
@@ -185,6 +191,7 @@ export default function Book() {
 
       <section className="section" style={{ paddingTop: 20 }}>
         <div className="container">
+          <BookingSteps current={currentStep} />
           <div className="book-grid">
             {/* Form */}
             <form className="book-form" noValidate>
@@ -309,9 +316,12 @@ export default function Book() {
               </div>
 
               {nights > 0 && (
-                <div className="book-price-estimate">
-                  <span>{nights} night{nights === 1 ? '' : 's'} × GHS {NIGHTLY_RATE_GHS}</span>
-                  <strong>GHS {total.toLocaleString()}</strong>
+                <div className="book-price-breakdown">
+                  <div><span>{breakdown.nights} night{breakdown.nights === 1 ? '' : 's'} × GHS {breakdown.rate}</span><span>GHS {breakdown.subtotal.toLocaleString()}</span></div>
+                  {breakdown.discount > 0 && (
+                    <div className="is-discount"><span>{breakdown.discountLabel}</span><span>− GHS {breakdown.discount.toLocaleString()}</span></div>
+                  )}
+                  <div className="is-total"><span>Total to pay</span><strong>GHS {total.toLocaleString()}</strong></div>
                 </div>
               )}
 

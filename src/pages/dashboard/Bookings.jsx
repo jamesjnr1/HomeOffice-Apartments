@@ -1,12 +1,13 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, startOfToday } from 'date-fns';
 import { Download, MessageSquare, ArrowRight, MapPin, CreditCard, Star } from 'lucide-react';
 import Receipt from '../../components/Receipt';
 import StatusBadge from '../../components/StatusBadge';
 import StarRating from '../../components/StarRating';
 import { supabase } from '../../lib/supabase';
 import { apartmentName } from '../../lib/apartments';
+import { startPayment } from '../../lib/payBooking';
 
 /**
  * Bookings — real rows from the `bookings` table, scoped to this
@@ -16,10 +17,11 @@ import { apartmentName } from '../../lib/apartments';
  * admin-onboard-guest for the rarer manually-confirmed enquiry — see
  * AdminEnquiries.jsx's "Give dashboard access".
  *
- * Payment: an `awaiting_payment` booking's "Pay now" (see
- * PayNowButton below) is the ONLY way payment happens — there's no
- * admin-side "send a payment link" action. The guest starts checkout
- * themselves, whenever they're ready.
+ * Payment: an `awaiting_payment` booking shows "Pay now" (see
+ * PayNowButton below) for the total the admin confirmed. The guest is
+ * also emailed/texted a Pay link the moment the admin confirms (see
+ * AdminEnquiries.jsx), and DashboardLayout's banner flags it on every
+ * page. A receipt is only offered once a booking is actually paid.
  *
  * Home-Office Apartment and LivingSpring Gardens & Apartment are two
  * separate units in the same building, so the name shown per booking
@@ -95,7 +97,7 @@ export default function Bookings() {
     const now = new Date();
     return bookings.filter((b) => {
       if (tab === 'upcoming') return b.checkIn > now && b.status !== 'cancelled';
-      if (tab === 'current') return b.checkIn <= now && b.checkOut >= now;
+      if (tab === 'current') return b.checkIn <= now && b.checkOut >= now && b.status !== 'cancelled';
       if (tab === 'past') return b.checkOut < now || b.status === 'cancelled';
       return true;
     });
@@ -105,7 +107,7 @@ export default function Bookings() {
     const now = new Date();
     return {
       upcoming: bookings.filter((b) => b.checkIn > now && b.status !== 'cancelled').length,
-      current: bookings.filter((b) => b.checkIn <= now && b.checkOut >= now).length,
+      current: bookings.filter((b) => b.checkIn <= now && b.checkOut >= now && b.status !== 'cancelled').length,
       past: bookings.filter((b) => b.checkOut < now || b.status === 'cancelled').length,
     };
   }, [bookings]);
@@ -113,7 +115,7 @@ export default function Bookings() {
   return (
     <div className="dash-page">
       <header className="dash-page-head">
-        <span className="dash-eyebrow">BOOKINGS</span>
+        <span className="dash-eyebrow">RESERVATIONS</span>
         <h1>Your trips</h1>
         <p className="dash-lead">Everywhere you're staying with us, and everywhere you've been.</p>
       </header>
@@ -183,7 +185,10 @@ function BookingCard({ booking, review, onReceipt, onReviewSaved }) {
   // if the daily job hasn't flipped the status to `completed` yet —
   // mirrors the same check the reviews_insert_own RLS policy makes,
   // so this button never promises something the database will reject.
-  const canReview = !review && b.status !== 'cancelled' && b.checkOut <= new Date();
+  const canReview = !review && ['confirmed', 'completed'].includes(b.status) && b.checkOut <= new Date();
+  const isPaid = ['confirmed', 'completed'].includes(b.status);
+  const awaitingPayment = b.status === 'awaiting_payment';
+  const datesPassed = b.checkIn < startOfToday();
 
   return (
     <article className="dash-booking">
@@ -230,10 +235,15 @@ function BookingCard({ booking, review, onReceipt, onReviewSaved }) {
         </div>
 
         <div className="dash-booking-actions">
-          {b.status === 'awaiting_payment' && <PayNowButton booking={b} />}
-          <button className="dash-btn dash-btn-ghost dash-btn-sm" onClick={onReceipt}>
-            <Download size={14} /> Receipt
-          </button>
+          {awaitingPayment && !datesPassed && <PayNowButton booking={b} />}
+          {awaitingPayment && datesPassed && (
+            <span className="field-note" style={{ margin: 0 }}>These dates have passed without payment — message us to rebook.</span>
+          )}
+          {isPaid && (
+            <button className="dash-btn dash-btn-ghost dash-btn-sm" onClick={onReceipt}>
+              <Download size={14} /> Receipt
+            </button>
+          )}
           <Link to="/dashboard/messages" className="dash-btn dash-btn-ghost dash-btn-sm">
             <MessageSquare size={14} /> Message host
           </Link>
@@ -252,13 +262,8 @@ function BookingCard({ booking, review, onReceipt, onReviewSaved }) {
   );
 }
 
-// Payment lives entirely here in the guest's own dashboard — there is
-// no admin-side "send a payment link" action anymore. Clicking this
-// calls paystack-init directly (RLS's bookings_guest_select_own lets
-// a guest request a checkout link for their own booking, same as an
-// admin can for any booking) and redirects straight to Paystack's
-// hosted checkout the moment it's ready, whenever the guest chooses
-// to pay.
+// Starts Paystack checkout for this booking's confirmed total and
+// redirects there (see src/lib/payBooking.js).
 function PayNowButton({ booking }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -266,21 +271,17 @@ function PayNowButton({ booking }) {
   const payNow = async () => {
     setError('');
     setLoading(true);
-    const { data, error: fnError } = await supabase.functions.invoke('paystack-init', {
-      body: { booking_id: booking.id },
-    });
-    if (fnError || !data?.authorization_url) {
-      setError(data?.error || "Couldn't start payment. Please try again.");
+    const message = await startPayment(booking.id);
+    if (message) {
+      setError(message);
       setLoading(false);
-      return;
     }
-    window.location.href = data.authorization_url;
   };
 
   return (
     <>
       <button className="dash-btn dash-btn-primary dash-btn-sm" disabled={loading} onClick={payNow}>
-        <CreditCard size={14} /> {loading ? 'Preparing checkout…' : 'Pay now'}
+        <CreditCard size={14} /> {loading ? 'Preparing checkout…' : `Pay GHS ${Number(booking.total).toLocaleString()} now`}
       </button>
       {error && <p className="form-error" style={{ margin: '6px 0 0', fontSize: 12, flexBasis: '100%' }}>{error}</p>}
     </>
