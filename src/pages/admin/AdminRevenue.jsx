@@ -34,7 +34,8 @@ export default function AdminRevenue() {
     const { data, error } = await supabase
       .from('bookings')
       .select('*')
-      .neq('status', 'cancelled')
+      // Paid stays only — an awaiting_payment booking isn't money in yet.
+      .in('status', ['confirmed', 'completed'])
       .gte('check_in', `${year}-01-01`)
       .lte('check_in', `${year}-12-31`);
 

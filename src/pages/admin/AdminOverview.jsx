@@ -13,8 +13,9 @@ import { supabase } from '../../lib/supabase';
  *   ever signed up or been auto-registered on booking, not just the
  *   ones who happen to have sent a message
  * - New enquiries: real, count of enquiries.status = 'new'
- * - Upcoming bookings: real, count of bookings.check_in in the future
- *   and status != 'cancelled'
+ * - Upcoming bookings: real, count of PAID bookings (status
+ *   'confirmed') with check_in today or later — an awaiting_payment
+ *   booking isn't a held stay yet
  */
 
 export default function AdminOverview() {
@@ -37,7 +38,7 @@ export default function AdminOverview() {
         supabase.from('messages').select('*').order('created_at', { ascending: false }),
         supabase.from('profiles').select('id', { count: 'exact', head: true }),
         supabase.from('enquiries').select('id', { count: 'exact', head: true }).eq('status', 'new'),
-        supabase.from('bookings').select('id', { count: 'exact', head: true }).gte('check_in', today).neq('status', 'cancelled'),
+        supabase.from('bookings').select('id', { count: 'exact', head: true }).gte('check_in', today).eq('status', 'confirmed'),
       ]);
 
       const { data, error } = messagesRes;

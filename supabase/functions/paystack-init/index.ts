@@ -1,11 +1,10 @@
 // paystack-init — creates a Paystack hosted-checkout link for an
-// `awaiting_payment` booking. Called from the GUEST's own dashboard
-// (Bookings.jsx's "Pay now") when they're ready to pay — see
+// `awaiting_payment` booking. Called by the admin's "Confirm booking"
+// (AdminEnquiries.jsx — so the guest is emailed/texted a Pay link
+// straight away) and by the GUEST's own dashboard "Pay now" — see
 // supabase/migrations/20260921120000_payment_gated_bookings.sql for
-// why a confirmed enquiry now sits as `awaiting_payment` instead of
-// going straight to `confirmed`. There is no admin-side "send a
-// payment link" action anymore; payment is entirely the guest's own
-// dashboard flow.
+// why a confirmed enquiry sits as `awaiting_payment` instead of
+// going straight to `confirmed`.
 //
 // Auth: verify_jwt is ON (the platform rejects any request without a
 // valid Supabase access token before this code even runs) — beyond
@@ -26,6 +25,8 @@
 // rejects a reference it's seen before, even if that transaction was
 // abandoned, so retrying with the same reference isn't an option (e.g.
 // the guest clicking "Pay now" again after abandoning checkout once).
+// Older links stay payable: paystack-webhook falls back to the
+// booking_id in the verified transaction's metadata.
 //
 // Saving `payment_url` on the booking (below) is what fires the
 // "payment_requested" guest email — see public.notify_payment_
@@ -114,7 +115,7 @@ Deno.serve(async (req: Request) => {
 
   const { data: booking, error: readError } = await callerClient
     .from("bookings")
-    .select("id, reference, guest_email, total, status")
+    .select("id, reference, guest_email, total, status, apartment, check_in, check_out")
     .eq("id", bookingId)
     .maybeSingle();
 
@@ -135,6 +136,36 @@ Deno.serve(async (req: Request) => {
   if (!booking.guest_email) {
     return new Response(JSON.stringify({ error: "This booking has no guest email to send a payment link to" }), {
       status: 400,
+      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+    });
+  }
+
+  // Never take money for a stay that can't happen: dates already in
+  // the past, or dates someone else has since booked and paid for
+  // (awaiting_payment rows don't hold the calendar, so that can
+  // happen) — the webhook could then never confirm this booking.
+  const today = new Date().toISOString().slice(0, 10);
+  if (String(booking.check_in) < today) {
+    return new Response(JSON.stringify({ error: "These dates have already passed. Please contact us to rebook." }), {
+      status: 409,
+      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+    });
+  }
+
+  const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+  const { data: available, error: availabilityError } = await admin.rpc("is_date_range_available", {
+    check_in: booking.check_in,
+    check_out: booking.check_out,
+    apartment: booking.apartment,
+  });
+  if (availabilityError || available === false) {
+    if (availabilityError) console.error("paystack-init: availability check failed", availabilityError);
+    return new Response(JSON.stringify({
+      error: availabilityError
+        ? "Couldn't check availability. Please try again."
+        : "Sorry — these dates have just been booked by someone else. Please contact us to pick new dates.",
+    }), {
+      status: availabilityError ? 500 : 409,
       headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
     });
   }
@@ -172,7 +203,6 @@ Deno.serve(async (req: Request) => {
   // UPDATE for owner/manager, which we've already established the
   // caller is by virtue of the read above succeeding, so this is just
   // avoiding a second round of policy evaluation, not bypassing one.
-  const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
   const { error: updateError } = await admin
     .from("bookings")
     .update({ paystack_reference: paystackReference, payment_url: authorizationUrl })

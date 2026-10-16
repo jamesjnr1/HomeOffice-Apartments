@@ -39,7 +39,7 @@ export default function AdminAnalytics() {
       const [visitsRes, enquiriesRes, bookingsRes] = await Promise.all([
         supabase.from('site_visits').select('session_id, created_at').order('created_at', { ascending: true }),
         supabase.from('enquiries').select('id', { count: 'exact', head: true }),
-        supabase.from('bookings').select('id', { count: 'exact', head: true }).neq('status', 'cancelled'),
+        supabase.from('bookings').select('id', { count: 'exact', head: true }).in('status', ['confirmed', 'completed']),
       ]);
 
       if (visitsRes.data) setVisits(visitsRes.data);

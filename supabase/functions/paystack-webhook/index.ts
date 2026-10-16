@@ -112,11 +112,28 @@ Deno.serve(async (req: Request) => {
   }
 
   const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-  const { data: booking, error: findError } = await admin
+  // paystack_reference only holds the NEWEST link (paystack-init mints
+  // a fresh one each time) — a guest paying an older link, e.g. the one
+  // emailed when the admin confirmed, is matched by the booking_id that
+  // paystack-init put in the transaction's metadata. That metadata comes
+  // from Paystack's own Verify API above, not the webhook body.
+  let { data: booking, error: findError } = await admin
     .from("bookings")
     .select("id, status, total")
     .eq("paystack_reference", reference)
     .maybeSingle();
+  let metadata = verifyJson.data.metadata;
+  if (typeof metadata === "string") {
+    try { metadata = JSON.parse(metadata); } catch { metadata = null; }
+  }
+  const metaBookingId = metadata?.booking_id;
+  if (!booking && !findError && metaBookingId) {
+    ({ data: booking, error: findError } = await admin
+      .from("bookings")
+      .select("id, status, total")
+      .eq("id", metaBookingId)
+      .maybeSingle());
+  }
 
   if (findError || !booking) {
     console.error("paystack-webhook: no booking for reference", reference, findError);
@@ -129,13 +146,23 @@ Deno.serve(async (req: Request) => {
     return new Response("Amount mismatch", { status: 200 });
   }
 
-  if (booking.status === "confirmed") {
+  if (booking.status === "confirmed" || booking.status === "completed") {
     return new Response("Already confirmed", { status: 200 });
+  }
+  if (booking.status !== "awaiting_payment") {
+    // e.g. an admin cancelled it before the guest paid an old link —
+    // never silently revive it; this needs a person to refund/rebook.
+    console.error("paystack-webhook: payment for a booking not awaiting payment", { reference, status: booking.status });
+    return new Response("Booking not awaiting payment", { status: 200 });
+  }
+  if (verifyJson.data.currency && verifyJson.data.currency !== "GHS") {
+    console.error("paystack-webhook: unexpected currency", { reference, currency: verifyJson.data.currency });
+    return new Response("Currency mismatch", { status: 200 });
   }
 
   const { error: updateError } = await admin
     .from("bookings")
-    .update({ status: "confirmed", paid_at: new Date().toISOString() })
+    .update({ status: "confirmed", paid_at: new Date().toISOString(), paystack_reference: reference })
     .eq("id", booking.id);
 
   if (updateError) {
