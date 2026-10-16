@@ -702,7 +702,7 @@ body:has(.dash-shell) main { padding: 0 !important; }
 /* =====================================================================
    GLASS LAYOUT
    The apartment photo shows at the top and blends down into a calm
-   muted sage, with one floating frosted-glass menu bar (no sidebar),
+   light brand green, with one floating frosted-glass menu bar (no sidebar),
    white headings, and frosted-glass panels holding white tiles.
    ===================================================================== */
 .dash-shell {
@@ -710,9 +710,9 @@ body:has(.dash-shell) main { padding: 0 !important; }
   position: relative;
   isolation: isolate;
   overflow-x: clip;
-  /* The blend colour: a muted sage taken from the photo's greenery —
-     soft enough to feel clean, deep enough for white text. */
-  background: linear-gradient(180deg, #73867a 0%, #66796d 45%, #5b6e62 100%);
+  /* The blend colour: the brand green, lightened — fresh and calm,
+     still deep enough for white text. */
+  background: linear-gradient(180deg, #5b8a74 0%, #4f7f69 45%, #46755f 100%);
 }
 .dash-shell::before,
 .dash-shell::after {
@@ -724,7 +724,7 @@ body:has(.dash-shell) main { padding: 0 !important; }
   z-index: -1;
   pointer-events: none;
 }
-/* The apartment, clearly visible at the top, fading into the sage. */
+/* The apartment, clearly visible at the top, fading into the green. */
 .dash-shell::before {
   height: max(100vh, 980px);
   background: url('/images/exterior-1.jpg') center 35% / cover no-repeat;
@@ -736,7 +736,7 @@ body:has(.dash-shell) main { padding: 0 !important; }
 /* A light veil so white text stays readable on the photo. */
 .dash-shell::after {
   bottom: 0;
-  background: linear-gradient(180deg, rgba(24,38,31,.30) 0%, rgba(24,38,31,.22) 45%, rgba(24,38,31,.08) 100%);
+  background: linear-gradient(180deg, rgba(20,48,36,.28) 0%, rgba(20,48,36,.18) 45%, rgba(20,48,36,.06) 100%);
 }
 
 /* Brand row, on the photo */
@@ -897,7 +897,7 @@ body:has(.dash-shell) main { padding: 0 !important; }
 .dash-shell .dash-tab.active .dash-tab-count { background: #fff; color: #2d6a4f; }
 .dash-shell .dash-empty { border-style: solid; border-color: transparent; }
 
-/* Footer, glass on the sage */
+/* Footer, glass on the green */
 .dash-footer {
   background: rgba(255,255,255,.1);
   -webkit-backdrop-filter: blur(12px);
