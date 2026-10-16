@@ -701,18 +701,18 @@ body:has(.dash-shell) main { padding: 0 !important; }
 
 /* =====================================================================
    GLASS LAYOUT
-   Light and clean: a soft cream page with the property photo showing
-   faintly at the top and fading away, one floating frosted-white menu
-   bar (no sidebar), and white frosted panels with white tiles. Dark
-   text everywhere, so it reads the same on the photo and below it.
+   The apartment photo shows at the top and blends down into a calm
+   muted sage, with one floating frosted-glass menu bar (no sidebar),
+   white headings, and frosted-glass panels holding white tiles.
    ===================================================================== */
 .dash-shell {
   display: block;
   position: relative;
   isolation: isolate;
   overflow-x: clip;
-  /* Soft, muted sage-grey — calm, not bright white and not dark. */
-  background: linear-gradient(180deg, #dfe4dd 0%, #d9dfd7 50%, #d3dad1 100%);
+  /* The blend colour: a muted sage taken from the photo's greenery —
+     soft enough to feel clean, deep enough for white text. */
+  background: linear-gradient(180deg, #73867a 0%, #66796d 45%, #5b6e62 100%);
 }
 .dash-shell::before,
 .dash-shell::after {
@@ -721,23 +721,25 @@ body:has(.dash-shell) main { padding: 0 !important; }
   left: 0;
   right: 0;
   top: 0;
-  height: 640px;
   z-index: -1;
   pointer-events: none;
 }
+/* The apartment, clearly visible at the top, fading into the sage. */
 .dash-shell::before {
+  height: max(100vh, 980px);
   background: url('/images/exterior-1.jpg') center 35% / cover no-repeat;
-  filter: blur(10px) saturate(70%);
-  opacity: .7;
-  transform: scale(1.08);
-  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 25%, transparent 100%);
-  mask-image: linear-gradient(180deg, #000 0%, #000 25%, transparent 100%);
+  filter: blur(5px);
+  transform: scale(1.05);
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 42%, rgba(0,0,0,.5) 68%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 0%, #000 42%, rgba(0,0,0,.5) 68%, transparent 100%);
 }
+/* A light veil so white text stays readable on the photo. */
 .dash-shell::after {
-  background: linear-gradient(180deg, rgba(223,228,221,.35) 0%, rgba(223,228,221,.7) 55%, #dadfd8 100%);
+  bottom: 0;
+  background: linear-gradient(180deg, rgba(24,38,31,.30) 0%, rgba(24,38,31,.22) 45%, rgba(24,38,31,.08) 100%);
 }
 
-/* Brand row */
+/* Brand row, on the photo */
 .dash-brandrow {
   max-width: 1160px;
   margin: 0 auto;
@@ -747,15 +749,19 @@ body:has(.dash-shell) main { padding: 0 !important; }
   justify-content: space-between;
   gap: 16px;
 }
-.dash-brandrow .dash-brand-primary { font-size: 15px; }
+.dash-brandrow .dash-brand-icon { filter: brightness(0) invert(1); }
+.dash-brandrow .dash-brand-primary { color: #fff; font-size: 15px; }
+.dash-brandrow .dash-brand-sub { color: rgba(255,255,255,.75); }
+.dash-brandrow .dash-brand-accent { color: #d4e9b8; }
 .dash-brandrow-tag {
   font-family: 'Fraunces', Georgia, serif;
   font-size: 18px;
-  color: #2d6a4f;
+  color: rgba(255,255,255,.95);
   letter-spacing: -.01em;
+  text-shadow: 0 1px 12px rgba(0,0,0,.2);
 }
 
-/* The floating frosted menu bar */
+/* The floating glass menu bar */
 .dash-topbar {
   position: sticky;
   top: 12px;
@@ -770,40 +776,40 @@ body:has(.dash-shell) main { padding: 0 !important; }
   gap: 10px;
   padding: 7px 8px 7px 10px;
   border-radius: 999px;
-  background: rgba(255,255,255,.78);
-  -webkit-backdrop-filter: blur(18px) saturate(160%);
-  backdrop-filter: blur(18px) saturate(160%);
-  border: 1px solid rgba(255,255,255,.95);
-  box-shadow: 0 8px 26px rgba(31,43,38,.08), 0 1px 2px rgba(31,43,38,.05);
+  background: rgba(255,255,255,.2);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255,255,255,.38);
+  box-shadow: 0 10px 30px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.3);
 }
 .dash-topbar-icons,
 .dash-topbar-right { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
 .dash-topbar-right { margin-left: auto; }
-.dash-topbar-divider { width: 1px; height: 20px; background: rgba(31,43,38,.12); margin: 0 6px; }
+.dash-topbar-divider { width: 1px; height: 20px; background: rgba(255,255,255,.4); margin: 0 6px; }
 .dash-icon-btn {
   width: 36px; height: 36px;
   display: inline-flex; align-items: center; justify-content: center;
   border-radius: 999px;
-  color: #1f2b26;
+  color: #fff;
   text-decoration: none;
-  transition: background .15s ease, color .15s ease;
+  transition: background .15s ease;
 }
-.dash-icon-btn:hover { background: rgba(31,43,38,.06); }
-.dash-icon-btn.active { background: #e2ece6; color: #2d6a4f; }
+.dash-icon-btn:hover { background: rgba(255,255,255,.18); }
+.dash-icon-btn.active { background: rgba(255,255,255,.26); }
 
 .dash-topnav { display: flex; align-items: center; gap: 2px; min-width: 0; }
 .dash-topnav a {
   padding: 8px 15px;
   border-radius: 999px;
-  color: #4a5450;
+  color: rgba(255,255,255,.9);
   text-decoration: none;
   font-weight: 500;
   font-size: 13.5px;
   white-space: nowrap;
   transition: background .15s ease, color .15s ease;
 }
-.dash-topnav a:hover { background: rgba(31,43,38,.05); color: #1f2b26; }
-.dash-topnav a.active { background: #2d6a4f; color: #fff; font-weight: 600; }
+.dash-topnav a:hover { background: rgba(255,255,255,.16); color: #fff; }
+.dash-topnav a.active { background: #fff; color: #1f2b26; font-weight: 600; }
 
 .dash-account { position: relative; margin-left: 4px; }
 .dash-account-btn {
@@ -811,74 +817,97 @@ body:has(.dash-shell) main { padding: 0 !important; }
   display: inline-flex; align-items: center; gap: 4px;
   padding: 3px 8px 3px 3px;
   border-radius: 999px;
-  background: #fff;
-  color: #1f2b26;
-  border: 1px solid #e8ebe8;
+  background: rgba(255,255,255,.18);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.35);
 }
 .dash-account-avatar {
   width: 30px; height: 30px;
   border-radius: 999px;
-  background: #2d6a4f; color: #fff;
+  background: #fff; color: #2d6a4f;
   display: flex; align-items: center; justify-content: center;
   font-weight: 600; font-size: 13px; overflow: hidden;
 }
 .dash-account-avatar img { width: 100%; height: 100%; object-fit: cover; }
 .dash-account-menu { top: calc(100% + 10px); right: 0; }
 
-/* Main column */
+/* Main column, white headings on the photo */
 .dash-main-inner { padding: 40px 24px 90px; }
-.dash-shell .dash-page-head h1 { font-size: clamp(28px, 3.4vw, 40px); }
-.dash-shell .dash-page-head .dash-lead { font-size: 15px; }
+.dash-shell .dash-page-head h1 { color: #fff; font-size: clamp(28px, 3.4vw, 40px); text-shadow: 0 2px 18px rgba(0,0,0,.18); }
+.dash-shell .dash-page-head .dash-lead { color: rgba(255,255,255,.88); font-size: 15px; }
+.dash-shell .dash-page-head .dash-eyebrow { color: rgba(255,255,255,.78); }
 .dash-welcome { margin-bottom: 26px; }
 
-/* Frosted white panels with white tiles */
+/* Frosted-glass panels with white tiles */
 .dash-glass {
-  background: rgba(255,255,255,.42);
-  -webkit-backdrop-filter: blur(16px) saturate(140%);
-  backdrop-filter: blur(16px) saturate(140%);
-  border: 1px solid rgba(255,255,255,.65);
+  background: rgba(255,255,255,.16);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  backdrop-filter: blur(20px) saturate(150%);
+  border: 1px solid rgba(255,255,255,.32);
   border-radius: 24px;
   padding: 22px;
   margin-bottom: 18px;
-  box-shadow: 0 8px 28px rgba(31,43,38,.06);
+  color: #fff;
+  box-shadow: 0 10px 30px rgba(0,0,0,.08), inset 0 1px 0 rgba(255,255,255,.25);
 }
 .dash-glass-label {
   display: block;
   font-size: 11px; font-weight: 600;
   letter-spacing: .16em; text-transform: uppercase;
-  color: #2d6a4f;
+  color: rgba(255,255,255,.82);
   margin-bottom: 8px;
 }
-.dash-glass h2 { margin: 0 0 4px; font-size: 26px; font-weight: 500; color: #1f2b26; letter-spacing: -.02em; }
+.dash-glass h2 { margin: 0 0 4px; font-size: 26px; font-weight: 500; color: #fff; letter-spacing: -.02em; }
+.dash-glass .dash-loc { color: rgba(255,255,255,.82); }
 .dash-glass-head {
   display: flex; align-items: flex-end; justify-content: space-between;
   flex-wrap: wrap; gap: 16px; margin-bottom: 18px;
 }
 .dash-glass-head:last-child { margin-bottom: 0; }
 .dash-glass-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-.dash-glass .dash-btn-ghost { background: #fff; border: 1px solid #e2e6e2; }
-.dash-glass .dash-btn-ghost:hover { border-color: #c9d2cc; background: #fff; }
+.dash-glass .dash-btn-primary { background: #fff; color: #1f2b26; }
+.dash-glass .dash-btn-primary:hover { background: #eef3ef; }
+.dash-glass .dash-btn-ghost { color: #fff; border: 1px solid rgba(255,255,255,.45); }
+.dash-glass .dash-btn-ghost:hover { background: rgba(255,255,255,.14); }
 
 .dash-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
 .dash-tile {
   background: #fff;
-  border: 1px solid #efebe2;
   border-radius: 14px;
   padding: 14px 16px 15px;
   display: flex; flex-direction: column; gap: 6px;
   color: #1f2b26;
-  box-shadow: 0 2px 8px rgba(31,43,38,.04);
+  box-shadow: 0 4px 14px rgba(0,0,0,.08);
   min-width: 0;
 }
-.dash-tile svg { color: #2d6a4f; }
-.dash-tile-label { font-size: 13px; color: #6a706d; margin-top: 8px; }
+.dash-tile svg { color: #1f2b26; }
+.dash-tile-label { font-size: 13px; color: #4a5450; margin-top: 8px; }
 .dash-tile-value {
-  font-size: 17px; font-weight: 600; color: #1f2b26;
+  font-size: 17px; font-weight: 600; color: #2d6a4f;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .dash-tile-value.dash-mono { font-size: 15px; }
 
-.dash-shell .dash-empty { border-style: solid; border-color: #efebe2; }
+/* Reservation tabs on the photo */
+.dash-shell .dash-tabs { border-bottom-color: rgba(255,255,255,.3); }
+.dash-shell .dash-tab { color: rgba(255,255,255,.8); }
+.dash-shell .dash-tab:hover { color: #fff; }
+.dash-shell .dash-tab.active { color: #fff; border-bottom-color: #fff; }
+.dash-shell .dash-tab-count { background: rgba(255,255,255,.2); color: #fff; }
+.dash-shell .dash-tab.active .dash-tab-count { background: #fff; color: #2d6a4f; }
+.dash-shell .dash-empty { border-style: solid; border-color: transparent; }
+
+/* Footer, glass on the sage */
+.dash-footer {
+  background: rgba(255,255,255,.1);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(255,255,255,.2);
+}
+.dash-footer-copy,
+.dash-footer-help { color: rgba(255,255,255,.72); }
+.dash-footer-contact a { color: #fff; }
+.dash-footer-contact a:hover { color: #fff; text-decoration: underline; }
 
 /* Payment-due alert — deliberately loud */
 .dash-paydue-stack { display: grid; gap: 12px; margin-bottom: 26px; }
@@ -931,7 +960,7 @@ body:has(.dash-shell) main { padding: 0 !important; }
   .dash-brandrow-tag { display: none; }
   .dash-topbar { padding: 0 12px; top: 8px; }
   .dash-topbar-inner { flex-wrap: wrap; border-radius: 22px; padding: 6px; gap: 4px; }
-  .dash-topnav { order: 3; width: 100%; justify-content: space-between; border-top: 1px solid rgba(31,43,38,.08); padding-top: 6px; }
+  .dash-topnav { order: 3; width: 100%; justify-content: space-between; border-top: 1px solid rgba(255,255,255,.25); padding-top: 6px; }
   .dash-topnav a { flex: 1; text-align: center; padding: 8px 4px; font-size: 12.5px; }
   .dash-main-inner { padding: 28px 16px 70px; }
   .dash-glass { padding: 16px; border-radius: 20px; }
@@ -948,6 +977,3 @@ body:has(.dash-shell) main { padding: 0 !important; }
   .dash-tiles-3 .dash-tile { padding: 12px; }
   .dash-tiles-3 .dash-tile-label { font-size: 11.5px; }
 }
-
-/* Footer tuned to the sage page instead of bright white */
-.dash-footer { background: rgba(255,255,255,.35); border-top-color: rgba(31,43,38,.08); }
