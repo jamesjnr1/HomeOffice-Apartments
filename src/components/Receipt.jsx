@@ -1,5 +1,3 @@
-'use client';
-
 import { format } from 'date-fns';
 import { X, Printer } from 'lucide-react';
 import { apartmentName } from '../lib/apartments';

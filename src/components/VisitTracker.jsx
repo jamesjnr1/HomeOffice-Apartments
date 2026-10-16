@@ -1,7 +1,5 @@
-'use client';
-
 import { useEffect } from 'react';
-import { useLocation } from '@/lib/router';
+import { useLocation } from 'react-router-dom';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { getVisitorId } from '../lib/visitorId';
 

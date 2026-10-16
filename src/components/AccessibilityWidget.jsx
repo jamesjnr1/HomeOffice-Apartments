@@ -1,5 +1,3 @@
-'use client';
-
 import { useEffect, useRef, useState } from 'react';
 import { Accessibility, Minus, Plus, X } from 'lucide-react';
 
@@ -38,27 +36,18 @@ function applyPrefs(prefs) {
 
 export default function AccessibilityWidget() {
   const [open, setOpen] = useState(false);
-  // Starts from the defaults on the server render, then picks up the
-  // saved preferences on mount — localStorage only exists in the browser.
-  const [prefs, setPrefs] = useState(DEFAULT_PREFS);
-  const [loaded, setLoaded] = useState(false);
+  const [prefs, setPrefs] = useState(loadPrefs);
   const panelRef = useRef(null);
   const buttonRef = useRef(null);
 
   useEffect(() => {
-    setPrefs(loadPrefs());
-    setLoaded(true);
-  }, []);
-
-  useEffect(() => {
-    if (!loaded) return;
     applyPrefs(prefs);
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
     } catch {
       // Private browsing / storage disabled — preference just won't persist.
     }
-  }, [prefs, loaded]);
+  }, [prefs]);
 
   useEffect(() => {
     if (!open) return;

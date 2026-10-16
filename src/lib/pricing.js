@@ -30,9 +30,10 @@ export function calculateTotal(nights) {
   return Math.round(total * 100) / 100;
 }
 
-// The same math as calculateTotal, broken into the lines a guest sees
-// on the Book page — so the estimate never shows "5 nights × GHS 388"
-// next to a total that silently has a discount taken off it.
+// Line-by-line version of calculateTotal for display — nights × rate,
+// the discount that applies (if any), and the same total book-and-pay
+// charges, so the Book page never shows an undiscounted "N × GHS 388"
+// next to a discounted total.
 export function priceBreakdown(nights) {
   if (!nights || nights <= 0) return null;
   const subtotal = nights * NIGHTLY_RATE_GHS;
