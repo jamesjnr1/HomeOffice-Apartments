@@ -1,7 +1,5 @@
-'use client';
-
 import { useEffect } from 'react';
-import { useLocation } from '@/lib/router';
+import { useLocation } from 'react-router-dom';
 import Lenis from 'lenis';
 
 // Routes with their own fixed-sidebar + independently-scrolling-pane layout.

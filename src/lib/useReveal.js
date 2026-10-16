@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useLocation } from '@/lib/router';
+import { useLocation } from 'react-router-dom';
 
 /**
  * Adds `.in` to elements with `.reveal` when they scroll into view.

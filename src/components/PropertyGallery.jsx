@@ -1,5 +1,3 @@
-'use client';
-
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { FACILITIES, GALLERY_IMAGES } from '../lib/propertyContent';

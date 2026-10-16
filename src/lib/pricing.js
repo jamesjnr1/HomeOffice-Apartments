@@ -29,21 +29,3 @@ export function calculateTotal(nights) {
   }
   return Math.round(total * 100) / 100;
 }
-
-// The same math as calculateTotal, broken into the lines a guest sees
-// on the Book page — so the estimate never shows "5 nights × GHS 388"
-// next to a total that silently has a discount taken off it.
-export function priceBreakdown(nights) {
-  if (!nights || nights <= 0) return null;
-  const subtotal = nights * NIGHTLY_RATE_GHS;
-  let discount = 0;
-  let discountLabel = '';
-  if (nights >= 28 && nights <= 30) {
-    discount = Math.round(subtotal * LONG_STAY_DISCOUNT_PCT * 100) / 100;
-    discountLabel = `Long-stay discount (${LONG_STAY_DISCOUNT_PCT * 100}%)`;
-  } else if (nights >= 5) {
-    discount = MULTI_NIGHT_DISCOUNT_GHS;
-    discountLabel = '5+ night discount';
-  }
-  return { nights, rate: NIGHTLY_RATE_GHS, subtotal, discount, discountLabel, total: calculateTotal(nights) };
-}

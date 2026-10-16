@@ -1,5 +1,3 @@
-'use client';
-
 import { CheckCircle2, Clock, XCircle, Archive, Sparkles, MessageCircle, CalendarClock, UserCheck } from 'lucide-react';
 
 /**
