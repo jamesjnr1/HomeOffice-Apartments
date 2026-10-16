@@ -2,10 +2,11 @@
 
 import { useState, useMemo } from 'react';
 import { Mail, Phone, MessageCircle, Check, AlertCircle, CreditCard, Loader2 } from 'lucide-react';
+import BookingSteps from '../components/BookingSteps';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { APARTMENT_LIST, APARTMENTS, DEFAULT_APARTMENT } from '../lib/apartments';
 import { container, Eyebrow, btn } from '../components/ui';
-import { NIGHTLY_RATE_GHS, MULTI_NIGHT_DISCOUNT_GHS, LONG_STAY_DISCOUNT_PCT, nightsBetween, calculateTotal } from '../lib/pricing';
+import { NIGHTLY_RATE_GHS, MULTI_NIGHT_DISCOUNT_GHS, LONG_STAY_DISCOUNT_PCT, nightsBetween, calculateTotal, priceBreakdown } from '../lib/pricing';
 
 /**
  * Book — the public booking page. Two ways to reach out:
@@ -178,6 +179,10 @@ export default function Book() {
   const input =
     'w-full rounded-xl border border-stone bg-white/80 px-4 py-3 text-[15.5px] text-ink outline-none transition placeholder:text-muted/70 focus:border-accent focus:bg-white focus:ring-4 focus:ring-accent/10 disabled:opacity-60';
   const apt = APARTMENTS[form.apartment];
+  const breakdown = priceBreakdown(nights);
+  const datesDone = nights > 0;
+  const detailsDone = datesDone && form.name.trim() && form.email.trim();
+  const currentStep = booking ? 3 : detailsDone ? 2 : datesDone ? 1 : 0;
 
   return (
     <>
@@ -196,6 +201,9 @@ export default function Book() {
       </section>
 
       <section className="pb-28">
+        <div className={`${container} mb-10`}>
+          <BookingSteps current={currentStep} />
+        </div>
         <div className={`${container} grid items-start gap-10 lg:grid-cols-[1.25fr_0.75fr] lg:gap-14`}>
           {/* Form */}
           <form className="rounded-[28px] bg-paper p-6 shadow-[0_1px_0_rgba(27,36,32,0.06),0_30px_60px_-40px_rgba(27,36,32,0.25)] sm:p-10" noValidate>
@@ -326,10 +334,22 @@ export default function Book() {
               />
             </div>
 
-            {nights > 0 && (
-              <div className="mt-8 flex items-center justify-between rounded-2xl bg-accent-soft px-5 py-4 text-[15px] text-forest">
-                <span>{nights} night{nights === 1 ? '' : 's'} × GHS {NIGHTLY_RATE_GHS}</span>
-                <strong className="font-display text-[22px] font-normal">GHS {total.toLocaleString()}</strong>
+            {breakdown && (
+              <div className="mt-8 rounded-2xl bg-accent-soft px-5 py-4 text-[14.5px] text-forest">
+                <div className="flex items-center justify-between">
+                  <span>{breakdown.nights} night{breakdown.nights === 1 ? '' : 's'} × GHS {breakdown.rate.toLocaleString()}</span>
+                  <span>GHS {breakdown.subtotal.toLocaleString()}</span>
+                </div>
+                {breakdown.discount > 0 && (
+                  <div className="mt-1.5 flex items-center justify-between">
+                    <span>{breakdown.discountLabel}</span>
+                    <span>− GHS {breakdown.discount.toLocaleString()}</span>
+                  </div>
+                )}
+                <div className="mt-3 flex items-center justify-between border-t border-forest/15 pt-3">
+                  <span className="font-medium">Total to pay</span>
+                  <strong className="font-display text-[22px] font-normal">GHS {total.toLocaleString()}</strong>
+                </div>
               </div>
             )}
 
