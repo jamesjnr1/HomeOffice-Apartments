@@ -842,10 +842,12 @@ body:has(.dash-shell) main { padding: 0 !important; }
 
 /* Frosted-glass panels with white tiles */
 .dash-glass {
-  background: rgba(255,255,255,.16);
+  /* Green-tinted glass in the brand colour, so the figure tiles sit on
+     a clear green panel over the photo rather than a pale one. */
+  background: linear-gradient(160deg, rgba(45,106,79,.78) 0%, rgba(36,90,66,.72) 100%);
   -webkit-backdrop-filter: blur(20px) saturate(150%);
   backdrop-filter: blur(20px) saturate(150%);
-  border: 1px solid rgba(255,255,255,.32);
+  border: 1px solid rgba(255,255,255,.22);
   border-radius: 24px;
   padding: 22px;
   margin-bottom: 18px;
