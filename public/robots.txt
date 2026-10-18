@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /signin
+Disallow: /signup
+Disallow: /login
+
+Sitemap: https://apartments.home-officegroup.com/sitemap.xml

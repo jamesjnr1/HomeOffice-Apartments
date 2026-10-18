@@ -6,6 +6,7 @@ import AccessibilityWidget from './components/AccessibilityWidget';
 import VisitTracker from './components/VisitTracker';
 import SmoothScroll from './lib/SmoothScroll';
 import { useReveal } from './lib/useReveal';
+import { usePageMeta } from './lib/usePageMeta';
 
 // Public pages
 import Home from './pages/Home';
@@ -45,6 +46,7 @@ import {
 
 function AppContent() {
   useReveal();
+  usePageMeta();
   return (
     <>
       <Header />
