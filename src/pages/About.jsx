@@ -15,34 +15,6 @@ export default function About() {
         </div>
       </section>
 
-      <section className="section">
-        <div className="container">
-          <div className="two-col">
-            <div className="reveal">
-              <span className="eyebrow">THE STORY</span>
-              <h2>Why we built it.</h2>
-              <p className="prose">
-                LivingSpring Gardens has been part of our family for years — the trees older
-                than most of us. When more of the family started working remotely, and more friends
-                started visiting Sunyani for a week at a time, the question came up naturally:
-                could we make part of it a place other people would want to stay?
-              </p>
-              <p className="prose">
-                So we built an apartment on the edge of the compound — four bedrooms, well-considered,
-                and quiet, the kind of place we'd want to stay ourselves.
-              </p>
-            </div>
-            <div className="reveal">
-              <img
-                src="/images/hero-property.jpg"
-                alt="LivingSpring Gardens"
-                className="rounded-img"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Location — two-column text, no repeated photo */}
       <section className="section section-cream">
         <div className="container">
