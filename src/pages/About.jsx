@@ -48,7 +48,7 @@ export default function About() {
                 Home-Office Apartments and LivingSpring Gardens is in Fiapre, Sunyani, Bono Region.
               </p>
               <a
-                href="https://www.google.com/maps/search/?api=1&query=Fiapre%2C+Sunyani%2C+Ghana"
+                href="https://maps.app.goo.gl/WKGsbeXbNj9FYDt68"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn-outline"
@@ -60,7 +60,7 @@ export default function About() {
               <iframe
                 title="Map to Home-Office Apartments"
                 className="directions-map"
-                src="https://www.google.com/maps?q=Fiapre,+Sunyani,+Ghana&output=embed"
+                src="https://maps.google.com/maps?q=7.379433,-2.3537148&z=17&output=embed"
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
               />
