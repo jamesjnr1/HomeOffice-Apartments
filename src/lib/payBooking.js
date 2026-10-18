@@ -20,3 +20,18 @@ export async function startPayment(bookingId) {
   window.location.href = data.authorization_url;
   return null;
 }
+
+// Backup to the Paystack webhook: asks the server to check with Paystack
+// whether this awaiting_payment booking has actually been paid, and to
+// confirm it if so (supabase/functions/paystack-verify). Resolves true
+// when the booking is now paid.
+export async function syncPayment(bookingId) {
+  try {
+    const { data } = await supabase.functions.invoke('paystack-verify', {
+      body: { booking_id: bookingId },
+    });
+    return !!data?.paid;
+  } catch {
+    return false;
+  }
+}
