@@ -591,7 +591,12 @@ Deno.serve(async (req: Request) => {
   // enquiry and a paid booking; the guest is texted their "Pay now"
   // link when an admin confirms (payment_requested) and a receipt once
   // payment lands (confirmed). Other types are email-only.
+  // Test bookings (reference "TEST-…", e.g. a small Paystack test
+  // payment) still get their emails but never send an SMS — no texts to
+  // the admin phones or anyone else, so tests don't spend SMS credit.
+  const isTestBooking = String(e.reference ?? "").startsWith("TEST-");
   const smsPromise =
+    isTestBooking ? Promise.resolve() :
     type === "new_enquiry" ? sendEnquirySms(e) :
     type === "confirmed" ? Promise.all([sendBookingConfirmedSms(e), sendGuestSms(e, paidGuestSms(e), "paid")]) :
     type === "payment_requested" ? sendGuestSms(e, paymentDueGuestSms(e), "payment due") :
