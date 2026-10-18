@@ -25,7 +25,7 @@ export default function Home() {
             </p>
             <div className="hero-v2-actions">
               <Link to="/book" className="btn btn-primary btn-lg">Check availability</Link>
-              <Link to="/apartments" className="btn btn-ghost-light btn-lg">
+              <Link to="/gallery" className="btn btn-ghost-light btn-lg">
                 See the apartments <ArrowRight size={16} />
               </Link>
             </div>
