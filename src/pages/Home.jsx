@@ -36,7 +36,7 @@ export default function Home() {
       {/* Intro */}
       <section className="section section-narrow">
         <div className="container">
-          <div className="intro-v2-grid reveal">
+          <div className="intro-v2-grid intro-v2-grid-solo reveal">
             <div className="intro-v2">
               <span className="eyebrow">A HOME AWAY FROM HOME</span>
               <h2>
@@ -82,9 +82,6 @@ export default function Home() {
                   LivingSpring Gardens <ExternalLink size={13} />
                 </a>
               </div>
-            </div>
-            <div className="intro-v2-media intro-v2-media-icon">
-              <img src="/images/travel-suitcase-terracotta.png" alt="" />
             </div>
           </div>
         </div>

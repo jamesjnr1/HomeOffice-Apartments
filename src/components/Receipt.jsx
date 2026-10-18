@@ -1,6 +1,7 @@
 import { format } from 'date-fns';
 import { X, Printer } from 'lucide-react';
 import { apartmentName } from '../lib/apartments';
+import { paymentMethodLabel } from '../lib/payments';
 
 /**
  * Receipt — a printable booking receipt, used from the guest dashboard
@@ -13,13 +14,15 @@ import { apartmentName } from '../lib/apartments';
  * "Save as PDF" — produces a clean, single-page receipt.
  *
  * Expected `booking` shape:
- *   { reference, checkIn: Date, checkOut: Date, nights, guests, total, status, apartment? }
+ *   { reference, checkIn: Date, checkOut: Date, nights, guests, total, status, apartment?, payment_method? }
  * `guestName` / `guestEmail` / `apartment` are optional — omitted lines are skipped.
  */
 export default function Receipt({ booking, guestName, guestEmail, onClose }) {
   if (!booking) return null;
   const b = booking;
   const issuedAt = new Date();
+  const isPaid = ['confirmed', 'completed', 'CONFIRMED', 'COMPLETED'].includes(b.status);
+  const method = paymentMethodLabel(b.payment_method);
 
   return (
     <div className="receipt-overlay" onClick={onClose}>
@@ -65,6 +68,12 @@ export default function Receipt({ booking, guestName, guestEmail, onClose }) {
               <span className="receipt-label">Status</span>
               <span className="receipt-value">{formatStatus(b.status)}</span>
             </div>
+            {isPaid && method && (
+              <div>
+                <span className="receipt-label">Payment</span>
+                <span className="receipt-value">{method}</span>
+              </div>
+            )}
             {guestName && (
               <div>
                 <span className="receipt-label">Guest</span>
@@ -106,7 +115,7 @@ export default function Receipt({ booking, guestName, guestEmail, onClose }) {
           </table>
 
           <div className="receipt-total-row">
-            <span>Total paid</span>
+            <span>{isPaid ? 'Total paid' : 'Amount due'}</span>
             <span className="receipt-total-value">GHS {Number(b.total).toLocaleString()}</span>
           </div>
 
@@ -130,6 +139,7 @@ function formatStatus(status) {
     PENDING: 'Pending', pending: 'Pending',
     COMPLETED: 'Completed', completed: 'Completed',
     CANCELLED: 'Cancelled', cancelled: 'Cancelled',
+    awaiting_payment: 'Awaiting payment',
   };
   return map[status] || status || '—';
 }

@@ -162,7 +162,7 @@ Deno.serve(async (req: Request) => {
 
   const { error: updateError } = await admin
     .from("bookings")
-    .update({ status: "confirmed", paid_at: new Date().toISOString(), paystack_reference: reference })
+    .update({ status: "confirmed", paid_at: new Date().toISOString(), paystack_reference: reference, payment_method: "paystack" })
     .eq("id", booking.id);
 
   if (updateError) {
