@@ -1,5 +1,6 @@
-// sync-airbnb-calendar — pulls one or two Airbnb listings' iCal export
-// feeds and stores their busy date ranges in
+// sync-airbnb-calendar — pulls the Airbnb listings' (and, if set, the
+// Booking.com listings') iCal export feeds and stores their busy date
+// ranges in
 // public.external_calendar_blocks, so is_date_range_available() (used
 // by the Book page's proactive availability check) also treats
 // Airbnb-booked dates as unavailable.
@@ -26,6 +27,10 @@
 //   AIRBNB_ICAL_URL_2  — the second listing's calendar EXPORT url,
 //                        same place, for the other listing. Optional —
 //                        if unset, only the first feed is synced.
+//   BOOKING_ICAL_URL   — optional, Booking.com's calendar EXPORT url for
+//                        Home-Office Apartment (Extranet -> Rates &
+//                        Availability -> Sync calendars -> Export).
+//   BOOKING_ICAL_URL_2 — optional, the same for LivingSpring Gardens.
 //   SYNC_SECRET        — must exactly match the value stored in
 //                        Supabase Vault as 'airbnb_sync_secret' by the
 //                        migration
@@ -49,9 +54,14 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 // to fetch on a given run, its previously-synced blocks must be left
 // alone rather than wrongly treated as stale and deleted, which would
 // briefly reopen those dates for double-booking.
+// Booking.com feeds use "booking" / "booking-2" the same way (the
+// mapping to apartments lives in public.is_date_range_available and
+// src/lib/apartments.js CALENDAR_SOURCES).
 const AIRBNB_FEEDS = [
   { source: "airbnb", url: Deno.env.get("AIRBNB_ICAL_URL") },
   { source: "airbnb-2", url: Deno.env.get("AIRBNB_ICAL_URL_2") },
+  { source: "booking", url: Deno.env.get("BOOKING_ICAL_URL") },
+  { source: "booking-2", url: Deno.env.get("BOOKING_ICAL_URL_2") },
 ].filter((f): f is { source: string; url: string } => !!f.url);
 const SYNC_SECRET = Deno.env.get("SYNC_SECRET");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -144,6 +154,11 @@ function toArkeselRecipient(phone: string): string {
 const APARTMENT_NAMES: Record<string, string> = {
   airbnb: "Home-Office Apartment",
   "airbnb-2": "LivingSpring Gardens & Apartment",
+  booking: "Home-Office Apartment",
+  "booking-2": "LivingSpring Gardens & Apartment",
+};
+const CHANNEL_NAMES: Record<string, string> = {
+  airbnb: "Airbnb", "airbnb-2": "Airbnb", booking: "Booking.com", "booking-2": "Booking.com",
 };
 
 // Best-effort, same as notify-enquiry's own SMS step — a sync run
@@ -151,8 +166,9 @@ const APARTMENT_NAMES: Record<string, string> = {
 async function sendNewBookingSms(range: BusyRange, source: string): Promise<void> {
   if (!ARKESEL_API_KEY) return;
   const apartmentLabel = APARTMENT_NAMES[source] || "Airbnb";
+  const channel = CHANNEL_NAMES[source] || "Airbnb";
   const message =
-    `New booking (${apartmentLabel}): ${formatDateShort(range.start)}-${formatDateShort(range.end)}` +
+    `New ${channel} booking (${apartmentLabel}): ${formatDateShort(range.start)}-${formatDateShort(range.end)}` +
     (range.summary ? ` (${range.summary})` : "");
   try {
     const res = await fetch("https://sms.arkesel.com/api/v2/sms/send", {

@@ -6,16 +6,13 @@ import StatusBadge from '../../components/StatusBadge';
 import { supabase } from '../../lib/supabase';
 import { markBookingPaid, paymentMethodLabel } from '../../lib/payments';
 import { isStayingNow, stayingLabel } from '../../lib/stays';
-import { APARTMENTS, apartmentName } from '../../lib/apartments';
+import { APARTMENTS, apartmentName, sourceApartment, sourceChannel } from '../../lib/apartments';
 
 // external_calendar_blocks doesn't have its own apartment column — the
 // mapping is the Airbnb source label itself (see supabase/migrations/
 // 20260921090000_split_two_apartments.sql): the first listing synced
 // ('airbnb') is Home-Office Apartment, the second ('airbnb-2') is
 // LivingSpring Gardens & Apartment.
-function sourceApartment(source) {
-  return source === 'airbnb-2' ? 'livingspring' : 'home-office';
-}
 
 // Status filter tabs, most-actionable first — an admin opening this
 // page usually wants "what needs attention" (awaiting payment) before
@@ -224,7 +221,7 @@ export default function AdminBookings() {
           {loading ? (
             <div className="mgmt-empty"><p>Loading bookings…</p></div>
           ) : allReservations.length === 0 ? (
-            <div className="mgmt-empty"><p>{tab === 'all' ? 'No reservations yet. Guests can book directly from the site, or sync Airbnb.' : `No ${TAB_LABELS[tab].toLowerCase()} bookings.`}</p></div>
+            <div className="mgmt-empty"><p>{tab === 'all' ? 'No reservations yet. Guests can book directly from the site, or via Airbnb / Booking.com.' : `No ${TAB_LABELS[tab].toLowerCase()} bookings.`}</p></div>
           ) : (
             <div className="mgmt-table-wrap">
               <table className="mgmt-table">
@@ -272,12 +269,12 @@ export default function AdminBookings() {
                     </tr>
                   ) : (
                     <tr key={r.key} className={`mgmt-row-${dateState(r)}`}>
-                      <td><span className="mgmt-source mgmt-source-airbnb">Airbnb</span></td>
+                      <td><span className={`mgmt-source ${sourceChannel(r.source) === 'Airbnb' ? 'mgmt-source-airbnb' : 'mgmt-source-bookingcom'}`}>{sourceChannel(r.source)}</span></td>
                       <td className="mgmt-td-sub">{apartmentName(sourceApartment(r.source))}</td>
                       <td className="mgmt-td-mono mgmt-td-muted">—</td>
                       <td>
-                        <div className="mgmt-td-primary mgmt-td-muted" title="Airbnb's calendar sync only shares blocked dates, never the guest's name, email or phone — that's a limit on their end, not something this site can pull in.">
-                          Airbnb guest
+                        <div className="mgmt-td-primary mgmt-td-muted" title="Airbnb and Booking.com calendar sync only share blocked dates, never the guest's name, email or phone — that's a limit on their end, not something this site can pull in.">
+                          {sourceChannel(r.source)} guest
                         </div>
                         <div className="mgmt-td-sub">{r.summary}</div>
                       </td>
@@ -306,6 +303,7 @@ export default function AdminBookings() {
           <div className="mgmt-cal-legend">
             <span><i className="mgmt-cal-dot" style={{ background: 'var(--accent)' }} /> Site booking</span>
             <span><i className="mgmt-cal-dot" style={{ background: 'var(--airbnb)' }} /> Airbnb reservation</span>
+            <span><i className="mgmt-cal-dot" style={{ background: 'var(--bookingcom)' }} /> Booking.com reservation</span>
           </div>
           <div className="mgmt-cal-grid">
             {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d => (
@@ -324,8 +322,8 @@ export default function AdminBookings() {
                     </span>
                   ))}
                   {abs.map(x => (
-                    <span key={x.id} className="mgmt-cal-event" style={{ background: 'var(--airbnb)' }} title={apartmentName(sourceApartment(x.source))}>
-                      Airbnb · {APARTMENTS[sourceApartment(x.source)]?.shortName}
+                    <span key={x.id} className="mgmt-cal-event" style={{ background: sourceChannel(x.source) === 'Airbnb' ? 'var(--airbnb)' : 'var(--bookingcom)' }} title={apartmentName(sourceApartment(x.source))}>
+                      {sourceChannel(x.source)} · {APARTMENTS[sourceApartment(x.source)]?.shortName}
                     </span>
                   ))}
                 </div>
