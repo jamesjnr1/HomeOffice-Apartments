@@ -62,6 +62,9 @@ const PAID = ['confirmed', 'completed'];
 export default function Overview() {
   const { user, displayName } = useOutletContext();
   const [nextStay, setNextStay] = useState(null);
+  // True when nextStay is the stay the guest is in right now (checked in,
+  // not yet past check-out day) rather than a future one.
+  const [stayingNow, setStayingNow] = useState(false);
   const [stats, setStats] = useState({ upcomingBookings: 0, pastStays: 0, nightsWithUs: 0 });
   const [hasActiveStay, setHasActiveStay] = useState(false);
   const [checkInDetails, setCheckInDetails] = useState(null);
@@ -151,10 +154,12 @@ export default function Overview() {
           .filter((b) => PAID.includes(b.status))
           .map((b) => ({ ...b, checkIn: parseISO(b.check_in), checkOut: parseISO(b.check_out) }));
 
-        const upcoming = bookings.filter((b) => b.checkIn >= today);
-        const started = bookings.filter((b) => b.checkIn < today);
+        const current = bookings.find((b) => b.checkIn <= today && b.checkOut >= today);
+        const upcoming = bookings.filter((b) => b.checkIn > today);
+        const started = bookings.filter((b) => b.checkIn <= today);
 
-        setNextStay(upcoming[0] || null);
+        setNextStay(current || upcoming[0] || null);
+        setStayingNow(!!current);
         setHasActiveStay(bookings.some((b) => b.checkOut >= today));
         setStats({
           upcomingBookings: upcoming.length,
@@ -195,7 +200,11 @@ export default function Overview() {
             <section className="dash-glass">
               <div className="dash-glass-head">
                 <div>
-                  <span className="dash-glass-label">Your next stay · {countdown}</span>
+                  <span className="dash-glass-label">
+                    {stayingNow
+                      ? `You're staying with us · ${differenceInCalendarDays(nextStay.checkOut, new Date()) <= 0 ? 'check-out today' : `leaves ${format(nextStay.checkOut, 'EEE d MMM')}`}`
+                      : `Your next stay · ${countdown}`}
+                  </span>
                   <h2>{apartmentName(nextStay.apartment)}</h2>
                   <div className="dash-loc"><MapPin size={13} /> {APARTMENT.location}</div>
                 </div>

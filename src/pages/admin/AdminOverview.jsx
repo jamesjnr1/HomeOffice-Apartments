@@ -1,7 +1,11 @@
 import { useOutletContext, Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { ArrowRight, MessageSquare, Users, Inbox, CalendarDays } from 'lucide-react';
+import { ArrowRight, MessageSquare, Users, Inbox, CalendarDays, UserCheck } from 'lucide-react';
+import { format, parseISO } from 'date-fns';
 import { supabase } from '../../lib/supabase';
+import { apartmentName } from '../../lib/apartments';
+import StatusBadge from '../../components/StatusBadge';
+import { stayingLabel } from '../../lib/stays';
 
 /**
  * AdminOverview
@@ -27,6 +31,10 @@ export default function AdminOverview() {
     upcomingBookings: 0,
   });
   const [recentThreads, setRecentThreads] = useState([]);
+  // Who is in the apartments right now: paid site bookings whose dates
+  // cover today, plus Airbnb reservations covering today (Airbnb shares
+  // dates only, never the guest's name).
+  const [stayingNow, setStayingNow] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => { loadDashboard(); }, []);
@@ -34,11 +42,30 @@ export default function AdminOverview() {
   const loadDashboard = async () => {
     try {
       const today = new Date().toISOString().slice(0, 10);
-      const [messagesRes, guestsRes, enquiriesRes, bookingsRes] = await Promise.all([
+      const [messagesRes, guestsRes, enquiriesRes, bookingsRes, stayRes, airbnbRes] = await Promise.all([
         supabase.from('messages').select('*').order('created_at', { ascending: false }),
         supabase.from('profiles').select('id', { count: 'exact', head: true }),
         supabase.from('enquiries').select('id', { count: 'exact', head: true }).eq('status', 'new'),
         supabase.from('bookings').select('id', { count: 'exact', head: true }).gte('check_in', today).eq('status', 'confirmed'),
+        supabase.from('bookings')
+          .select('id, reference, guest_name, guest_phone, apartment, check_in, check_out, guests, status')
+          .in('status', ['confirmed', 'completed'])
+          .lte('check_in', today).gte('check_out', today)
+          .order('check_out', { ascending: true }),
+        supabase.from('external_calendar_blocks')
+          .select('id, source, start_date, end_date, summary')
+          .lte('start_date', today).gte('end_date', today),
+      ]);
+
+      setStayingNow([
+        ...(stayRes.data || []).map((b) => ({ ...b, kind: 'site' })),
+        ...(airbnbRes.data || [])
+          .filter((x) => /reserved/i.test(x.summary || ''))
+          .map((x) => ({
+            id: x.id, kind: 'airbnb',
+            apartment: x.source === 'airbnb-2' ? 'livingspring' : 'home-office',
+            check_in: x.start_date, check_out: x.end_date,
+          })),
       ]);
 
       const { data, error } = messagesRes;
@@ -97,6 +124,38 @@ export default function AdminOverview() {
           </Link>
         ))}
       </div>
+
+      <section className="mgmt-card" style={{ marginBottom: 24 }}>
+        <div className="mgmt-card-head">
+          <h2><UserCheck size={18} style={{ verticalAlign: -3, marginRight: 6 }} />Staying now</h2>
+          <Link to="/admin/bookings" className="mgmt-linky">All bookings <ArrowRight size={14} /></Link>
+        </div>
+        {stayingNow.length === 0 ? (
+          <div className="mgmt-empty"><p>{loading ? 'Loading…' : 'No guests checked in right now.'}</p></div>
+        ) : (
+          <div className="mgmt-table-wrap">
+            <table className="mgmt-table">
+              <thead>
+                <tr><th>Guest</th><th>Apartment</th><th>Checked in</th><th>Leaves</th><th>Status</th></tr>
+              </thead>
+              <tbody>
+                {stayingNow.map((b) => (
+                  <tr key={b.id} className="mgmt-row-current">
+                    <td>
+                      <div className="mgmt-td-primary">{b.kind === 'site' ? b.guest_name : 'Airbnb guest'}</div>
+                      <div className="mgmt-td-sub">{b.kind === 'site' ? [b.reference, b.guest_phone].filter(Boolean).join(' · ') : 'Booked on Airbnb'}</div>
+                    </td>
+                    <td className="mgmt-td-sub">{apartmentName(b.apartment)}</td>
+                    <td className="mgmt-td-nowrap">{format(parseISO(b.check_in), 'EEE d MMM')}</td>
+                    <td className="mgmt-td-nowrap">{format(parseISO(b.check_out), 'EEE d MMM')}</td>
+                    <td><StatusBadge status="checked_in" label={stayingLabel(b)} /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
 
       <section className="mgmt-card">
         <div className="mgmt-card-head">

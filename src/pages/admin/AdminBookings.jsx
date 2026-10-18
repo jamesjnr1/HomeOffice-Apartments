@@ -5,6 +5,7 @@ import Receipt from '../../components/Receipt';
 import StatusBadge from '../../components/StatusBadge';
 import { supabase } from '../../lib/supabase';
 import { markBookingPaid, paymentMethodLabel } from '../../lib/payments';
+import { isStayingNow, stayingLabel } from '../../lib/stays';
 import { APARTMENTS, apartmentName } from '../../lib/apartments';
 
 // external_calendar_blocks doesn't have its own apartment column — the
@@ -25,8 +26,8 @@ function sourceApartment(source) {
 // includes Airbnb reservations too, since those never have a
 // `bookings.status` of their own. Covers BOTH apartments — the query
 // below never filters by apartment, so this isn't scoped to one unit.
-const TABS = ['all', 'awaiting_payment', 'confirmed', 'past', 'cancelled'];
-const TAB_LABELS = { all: 'All', awaiting_payment: 'Awaiting payment', confirmed: 'Confirmed', past: 'Past', cancelled: 'Cancelled' };
+const TABS = ['all', 'current', 'awaiting_payment', 'confirmed', 'past', 'cancelled'];
+const TAB_LABELS = { all: 'All', current: 'Staying now', awaiting_payment: 'Awaiting payment', confirmed: 'Confirmed', past: 'Past', cancelled: 'Cancelled' };
 
 /**
  * AdminBookings — real rows from the `bookings` table, now mostly
@@ -168,7 +169,10 @@ export default function AdminBookings() {
     ...bookings.map((b) => ({ kind: 'site', key: b.id, ...b })),
     ...airbnbBlocks.map((x) => ({ kind: 'airbnb', key: x.id, ...x })),
   ]
-    .filter((r) => tab === 'all' || (tab === 'past' ? isPast(r) : r.kind === 'site' && r.status === tab))
+    .filter((r) => tab === 'all'
+      || (tab === 'past' ? isPast(r)
+        : tab === 'current' ? (r.kind === 'site' ? isStayingNow(r) : dateState(r) === 'current')
+        : r.kind === 'site' && r.status === tab))
     .sort((a, b) => {
       const stateOrder = { current: 0, upcoming: 1, past: 2 };
       const sa = stateOrder[dateState(a)];
@@ -184,6 +188,9 @@ export default function AdminBookings() {
     if (t === 'all') return [t, bookings.length + airbnbBlocks.length];
     if (t === 'past') {
       return [t, bookings.filter((b) => b.check_out < todayStr).length + airbnbBlocks.filter((x) => x.end_date < todayStr).length];
+    }
+    if (t === 'current') {
+      return [t, bookings.filter((b) => isStayingNow(b, todayStr)).length + airbnbBlocks.filter((x) => x.start_date <= todayStr && x.end_date >= todayStr).length];
     }
     return [t, bookings.filter((b) => b.status === t).length];
   }));
@@ -236,7 +243,12 @@ export default function AdminBookings() {
                       <td>{r.nights}</td>
                       <td>GHS {Number(r.total).toLocaleString()}</td>
                       <td>
-                        <StatusBadge status={r.status} />
+                        {isStayingNow(r) ? (
+                          <>
+                            <StatusBadge status="checked_in" />
+                            <div className="mgmt-td-sub mgmt-td-nowrap">{stayingLabel(r).replace('Checked in · l', 'L')}</div>
+                          </>
+                        ) : <StatusBadge status={r.status} />}
                         {paymentMethodLabel(r.payment_method) && (
                           <div className="mgmt-td-sub">{paymentMethodLabel(r.payment_method)}</div>
                         )}
