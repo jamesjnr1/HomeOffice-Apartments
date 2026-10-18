@@ -35,3 +35,21 @@ export const DEFAULT_APARTMENT = 'home-office';
 export function apartmentName(value) {
   return APARTMENTS[value]?.name || 'Apartment';
 }
+
+// Calendar feeds synced into external_calendar_blocks (see
+// supabase/functions/sync-airbnb-calendar), by `source` label: which
+// channel each one comes from and which apartment it belongs to.
+export const CALENDAR_SOURCES = {
+  airbnb: { channel: 'Airbnb', apartment: 'home-office' },
+  'airbnb-2': { channel: 'Airbnb', apartment: 'livingspring' },
+  booking: { channel: 'Booking.com', apartment: 'home-office' },
+  'booking-2': { channel: 'Booking.com', apartment: 'livingspring' },
+};
+
+export function sourceApartment(source) {
+  return CALENDAR_SOURCES[source]?.apartment || 'home-office';
+}
+
+export function sourceChannel(source) {
+  return CALENDAR_SOURCES[source]?.channel || 'Airbnb';
+}

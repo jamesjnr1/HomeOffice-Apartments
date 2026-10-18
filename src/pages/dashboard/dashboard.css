@@ -842,7 +842,9 @@ body:has(.dash-shell) main { padding: 0 !important; }
 
 /* Frosted-glass panels with white tiles */
 .dash-glass {
-  background: rgba(255,255,255,.16);
+  /* Dark-tinted glass so white figures stay readable over the bright
+     sky and walls in the photo, while the photo still shows through. */
+  background: linear-gradient(160deg, rgba(20,34,28,.46) 0%, rgba(20,34,28,.38) 100%);
   -webkit-backdrop-filter: blur(20px) saturate(150%);
   backdrop-filter: blur(20px) saturate(150%);
   border: 1px solid rgba(255,255,255,.32);
@@ -856,7 +858,7 @@ body:has(.dash-shell) main { padding: 0 !important; }
   display: block;
   font-size: 11px; font-weight: 600;
   letter-spacing: .16em; text-transform: uppercase;
-  color: rgba(255,255,255,.82);
+  color: rgba(255,255,255,.92);
   margin-bottom: 8px;
 }
 .dash-glass h2 { margin: 0 0 4px; font-size: 26px; font-weight: 500; color: #fff; letter-spacing: -.02em; }
@@ -872,23 +874,42 @@ body:has(.dash-shell) main { padding: 0 !important; }
 .dash-glass .dash-btn-ghost { color: #fff; border: 1px solid rgba(255,255,255,.45); }
 .dash-glass .dash-btn-ghost:hover { background: rgba(255,255,255,.14); }
 
-.dash-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+/* Figures sit straight on the glass — no cards. Columns are split by
+   thin light rules; the overflow + -1px margin trims the rule off the
+   first column so only inner dividers show. */
+.dash-tiles {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  overflow: hidden;
+}
+.dash-tiles-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.dash-glass-head + .dash-tiles,
+.dash-glass-label + .dash-tiles {
+  border-top: 1px solid rgba(255,255,255,.3);
+  padding-top: 18px;
+}
+.dash-glass-label + .dash-tiles { margin-top: 10px; }
 .dash-tile {
-  background: #fff;
-  border-radius: 14px;
-  padding: 14px 16px 15px;
-  display: flex; flex-direction: column; gap: 6px;
-  color: #1f2b26;
-  box-shadow: 0 4px 14px rgba(0,0,0,.08);
+  margin-left: -1px;
+  border-left: 1px solid rgba(255,255,255,.3);
+  padding: 6px 20px 8px;
+  display: flex; flex-direction: column; gap: 4px;
+  color: #fff;
   min-width: 0;
 }
-.dash-tile svg { color: #1f2b26; }
-.dash-tile-label { font-size: 13px; color: #4a5450; margin-top: 8px; }
+.dash-tile svg { color: #fff; }
+.dash-tile-label {
+  font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
+  color: rgba(255,255,255,.92); margin-top: 6px;
+  text-shadow: 0 1px 6px rgba(0,0,0,.35);
+}
 .dash-tile-value {
-  font-size: 17px; font-weight: 600; color: #2d6a4f;
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 25px; font-weight: 600; letter-spacing: -.01em; color: #fff;
+  text-shadow: 0 1px 10px rgba(0,0,0,.4);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.dash-tile-value.dash-mono { font-size: 15px; }
+.dash-tile-value.dash-mono { font-family: ui-monospace, Menlo, monospace; font-size: 18px; font-weight: 700; padding-top: 4px; }
 
 /* Reservation tabs on the photo */
 .dash-shell .dash-tabs { border-bottom-color: rgba(255,255,255,.3); }
@@ -958,7 +979,10 @@ body:has(.dash-shell) main { padding: 0 !important; }
   .dash-main-inner { padding: 28px 16px 70px; }
   .dash-glass { padding: 16px; border-radius: 20px; }
   .dash-glass h2 { font-size: 22px; }
-  .dash-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .dash-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dash-tile { padding: 12px 16px; }
+  /* 2 columns on phones: a light rule between rows too */
+  .dash-tiles:not(.dash-tiles-3) .dash-tile:nth-child(n+3) { border-top: 1px solid rgba(255,255,255,.3); }
   .dash-paydue-btn { width: 100%; }
 }
 @media (max-width: 380px) {
@@ -967,8 +991,8 @@ body:has(.dash-shell) main { padding: 0 !important; }
 .dash-backdrop { display: block; background: transparent; z-index: 39; }
 @media (max-width: 900px) {
   .dash-tiles.dash-tiles-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .dash-tiles-3 .dash-tile { padding: 12px; }
-  .dash-tiles-3 .dash-tile-label { font-size: 11.5px; }
+  .dash-tiles-3 .dash-tile { padding: 8px 12px; }
+  .dash-tiles-3 .dash-tile-label { font-size: 10px; letter-spacing: .08em; }
 }
 
 /* Phones: the glass panels run longer, so the photo does too */

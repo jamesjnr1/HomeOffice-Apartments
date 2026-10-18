@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { ArrowRight, MessageSquare, Users, Inbox, CalendarDays, UserCheck } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { supabase } from '../../lib/supabase';
-import { apartmentName } from '../../lib/apartments';
+import { apartmentName, sourceApartment, sourceChannel } from '../../lib/apartments';
 import StatusBadge from '../../components/StatusBadge';
 import { stayingLabel } from '../../lib/stays';
 
@@ -60,10 +60,13 @@ export default function AdminOverview() {
       setStayingNow([
         ...(stayRes.data || []).map((b) => ({ ...b, kind: 'site' })),
         ...(airbnbRes.data || [])
-          .filter((x) => /reserved/i.test(x.summary || ''))
+          // Airbnb marks guest stays "Reserved" and host-blocked days
+          // "Not available"; Booking.com's export labels every booking
+          // "CLOSED - Not available", so all its rows count.
+          .filter((x) => sourceChannel(x.source) !== 'Airbnb' || /reserved/i.test(x.summary || ''))
           .map((x) => ({
-            id: x.id, kind: 'airbnb',
-            apartment: x.source === 'airbnb-2' ? 'livingspring' : 'home-office',
+            id: x.id, kind: 'airbnb', channel: sourceChannel(x.source),
+            apartment: sourceApartment(x.source),
             check_in: x.start_date, check_out: x.end_date,
           })),
       ]);
@@ -142,8 +145,8 @@ export default function AdminOverview() {
                 {stayingNow.map((b) => (
                   <tr key={b.id} className="mgmt-row-current">
                     <td>
-                      <div className="mgmt-td-primary">{b.kind === 'site' ? b.guest_name : 'Airbnb guest'}</div>
-                      <div className="mgmt-td-sub">{b.kind === 'site' ? [b.reference, b.guest_phone].filter(Boolean).join(' · ') : 'Booked on Airbnb'}</div>
+                      <div className="mgmt-td-primary">{b.kind === 'site' ? b.guest_name : `${b.channel} guest`}</div>
+                      <div className="mgmt-td-sub">{b.kind === 'site' ? [b.reference, b.guest_phone].filter(Boolean).join(' · ') : `Booked on ${b.channel}`}</div>
                     </td>
                     <td className="mgmt-td-sub">{apartmentName(b.apartment)}</td>
                     <td className="mgmt-td-nowrap">{format(parseISO(b.check_in), 'EEE d MMM')}</td>
