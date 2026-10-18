@@ -8,6 +8,7 @@ import {
 import { supabase } from '../../lib/supabase';
 import { APARTMENTS, apartmentName } from '../../lib/apartments';
 import StatusBadge from '../../components/StatusBadge';
+import { isStayingNow, stayingLabel } from '../../lib/stays';
 import Receipt from '../../components/Receipt';
 import PropertyGallery from '../../components/PropertyGallery';
 
@@ -158,7 +159,9 @@ export default function AdminGuestDetail() {
                   <div className="mgmt-td-muted" style={{ fontSize: 12 }}>Booking ID #{current.reference}</div>
                   <div className="mgmt-current-booking-title">{apartmentName(current.apartment)}</div>
                 </div>
-                <StatusBadge status={current.status} />
+                {isStayingNow(current)
+                  ? <StatusBadge status="checked_in" label={stayingLabel(current)} />
+                  : <StatusBadge status={current.status} />}
               </div>
 
               <div className="mgmt-current-booking-stats">
@@ -222,7 +225,7 @@ export default function AdminGuestDetail() {
                       </td>
                       <td>{b.guests}</td>
                       <td>GHS {Number(b.total).toLocaleString()}</td>
-                      <td><StatusBadge status={b.status} /></td>
+                      <td>{isStayingNow(b) ? <StatusBadge status="checked_in" label={stayingLabel(b)} /> : <StatusBadge status={b.status} />}</td>
                       <td>
                         <button className="mgmt-btn mgmt-btn-outline mgmt-btn-sm" onClick={() => setReceiptBooking(b)}>
                           <Download size={13} /> Receipt

@@ -4,6 +4,7 @@ import { format, parseISO, startOfToday } from 'date-fns';
 import { Download, MessageSquare, ArrowRight, MapPin, CreditCard, Star } from 'lucide-react';
 import Receipt from '../../components/Receipt';
 import StatusBadge from '../../components/StatusBadge';
+import { isStayingNow, stayingLabel } from '../../lib/stays';
 import StarRating from '../../components/StarRating';
 import { supabase } from '../../lib/supabase';
 import { apartmentName } from '../../lib/apartments';
@@ -206,7 +207,7 @@ function BookingCard({ booking, review, onReceipt, onReviewSaved }) {
               {APARTMENT.location}
             </div>
           </div>
-          <StatusBadge status={b.status} />
+          {isStayingNow(b) ? <StatusBadge status="checked_in" label={stayingLabel(b)} /> : <StatusBadge status={b.status} />}
         </div>
 
         <div className="dash-booking-meta">
