@@ -49,7 +49,7 @@ export default function Footer() {
               <Phone size={14} /> +233 54 962 4125
             </a>
             <a
-              href="https://www.google.com/maps/search/?api=1&query=Fiapre%2C+Sunyani%2C+Ghana"
+              href="https://maps.app.goo.gl/WKGsbeXbNj9FYDt68"
               target="_blank"
               rel="noopener noreferrer"
               className="footer-loc"
