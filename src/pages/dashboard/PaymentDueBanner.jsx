@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { format, parseISO } from 'date-fns';
 import { AlertTriangle, CreditCard } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { apartmentName } from '../../lib/apartments';
-import { startPayment } from '../../lib/payBooking';
+import { startPayment, syncPayment } from '../../lib/payBooking';
 
 /**
  * PaymentDueBanner — shown at the top of every dashboard page while
@@ -15,17 +15,30 @@ import { startPayment } from '../../lib/payBooking';
  */
 export default function PaymentDueBanner({ userId }) {
   const [due, setDue] = useState([]);
+  // Bookings already checked with Paystack this visit (see below).
+  const checked = useRef(new Set());
 
   const load = useCallback(async () => {
     const today = format(new Date(), 'yyyy-MM-dd');
     const { data } = await supabase
       .from('bookings')
-      .select('id, reference, apartment, check_in, check_out, total, status')
+      .select('id, reference, apartment, check_in, check_out, total, status, paystack_reference')
       .eq('guest_id', userId)
       .eq('status', 'awaiting_payment')
       .gte('check_in', today)
       .order('check_in', { ascending: true });
     setDue(data || []);
+
+    // A booking that has had a checkout started may already be paid
+    // even if Paystack's webhook hasn't reached us — ask the server to
+    // check with Paystack directly (once per booking per visit). If it
+    // was paid, the booking is confirmed and the realtime update below
+    // reloads this list, so the alert disappears by itself.
+    for (const b of data || []) {
+      if (!b.paystack_reference || checked.current.has(b.id)) continue;
+      checked.current.add(b.id);
+      syncPayment(b.id).then((paid) => { if (paid) load(); });
+    }
   }, [userId]);
 
   useEffect(() => {

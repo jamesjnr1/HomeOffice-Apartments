@@ -183,7 +183,9 @@ Deno.serve(async (req: Request) => {
       amount: Math.round(Number(booking.total) * 100), // GHS -> pesewas
       currency: "GHS",
       reference: paystackReference,
-      callback_url: SITE_URL,
+      // Back to the guest's dashboard, which double-checks the payment
+      // with Paystack (paystack-verify) in case the webhook is slow.
+      callback_url: `${SITE_URL}/dashboard`,
       metadata: { booking_id: booking.id, booking_reference: booking.reference },
     }),
   });
