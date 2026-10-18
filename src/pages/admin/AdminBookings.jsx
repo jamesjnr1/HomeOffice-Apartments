@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, parseISO, differenceInCalendarDays } from 'date-fns';
-import { List, CalendarDays, ChevronLeft, ChevronRight, Download } from 'lucide-react';
+import { List, CalendarDays, ChevronLeft, ChevronRight, Download, CircleDollarSign } from 'lucide-react';
 import Receipt from '../../components/Receipt';
 import StatusBadge from '../../components/StatusBadge';
 import { supabase } from '../../lib/supabase';
+import { markBookingPaid, paymentMethodLabel } from '../../lib/payments';
 import { APARTMENTS, apartmentName } from '../../lib/apartments';
 
 // external_calendar_blocks doesn't have its own apartment column — the
@@ -52,6 +53,19 @@ export default function AdminBookings() {
   const [airbnbBlocks, setAirbnbBlocks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [receiptBooking, setReceiptBooking] = useState(null);
+  const [markingPaidId, setMarkingPaidId] = useState(null);
+
+  // A guest who paid on site (cash / in person) rather than through
+  // Paystack — confirm the booking and record how it was paid. The
+  // realtime subscription refreshes the row.
+  const markPaidOnSite = async (r) => {
+    if (!window.confirm(`Mark ${r.reference} (${r.guest_name}) as paid on site — GHS ${Number(r.total).toLocaleString()}? The guest is sent a receipt.`)) return;
+    setMarkingPaidId(r.id);
+    const error = await markBookingPaid(r.id, 'on_site');
+    setMarkingPaidId(null);
+    if (error) { window.alert("Couldn't mark this booking as paid. Please try again."); return; }
+    loadBookings();
+  };
 
   useEffect(() => {
     loadBookings();
@@ -221,9 +235,23 @@ export default function AdminBookings() {
                       <td className="mgmt-td-nowrap">{format(parseISO(r.check_out), 'd MMM yyyy')}</td>
                       <td>{r.nights}</td>
                       <td>GHS {Number(r.total).toLocaleString()}</td>
-                      <td><StatusBadge status={r.status} /></td>
+                      <td>
+                        <StatusBadge status={r.status} />
+                        {paymentMethodLabel(r.payment_method) && (
+                          <div className="mgmt-td-sub">{paymentMethodLabel(r.payment_method)}</div>
+                        )}
+                      </td>
                       <td>
                         <div className="mgmt-row-actions">
+                          {r.status === 'awaiting_payment' && (
+                            <button
+                              title="Guest paid on site — mark as paid"
+                              disabled={markingPaidId === r.id}
+                              onClick={() => markPaidOnSite(r)}
+                            >
+                              <CircleDollarSign size={14} />
+                            </button>
+                          )}
                           <button title="Print receipt" onClick={() => setReceiptBooking(r)}>
                             <Download size={14} />
                           </button>
@@ -306,6 +334,7 @@ export default function AdminBookings() {
             total: receiptBooking.total,
             status: receiptBooking.status,
             apartment: receiptBooking.apartment,
+            payment_method: receiptBooking.payment_method,
           }}
           guestName={receiptBooking.guest_name}
           guestEmail={receiptBooking.guest_email}

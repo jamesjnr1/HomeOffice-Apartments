@@ -2,6 +2,7 @@ import { Fragment, useState, useEffect } from 'react';
 import { Check, Reply, Archive, Trash2, CalendarCheck, Ban, AlertTriangle, CircleDollarSign, UserPlus } from 'lucide-react';
 import { formatDistanceToNow, format, parseISO } from 'date-fns';
 import { supabase } from '../../lib/supabase';
+import { markBookingPaid } from '../../lib/payments';
 import { DEFAULT_APARTMENT, apartmentName } from '../../lib/apartments';
 import StatusBadge from '../../components/StatusBadge';
 
@@ -33,9 +34,9 @@ import StatusBadge from '../../components/StatusBadge';
  * booking only becomes `confirmed` — which is what actually locks the
  * dates, confirms the guest by email, and
  * lets it export to Airbnb — once Paystack's webhook verifies the
- * payment (supabase/functions/paystack-webhook). "Mark as paid" below
- * is the manual fallback for a guest who pays by direct mobile-money
- * transfer instead of using the dashboard.
+ * payment (supabase/functions/paystack-webhook). "Paid on site" /
+ * "Paid by MoMo transfer" below are the manual fallback for a guest
+ * who pays outside Paystack.
  *
  * Reservation conflicts: since 20260910100100_prevent_overlapping_
  * bookings.sql, two confirmed bookings can never actually overlap —
@@ -278,18 +279,15 @@ export default function AdminEnquiries() {
     setConfirmingId(null);
   };
 
-  // Manual fallback for a guest who pays by direct mobile-money
-  // transfer instead of Paystack — the admin attests payment was
-  // received and confirms the booking directly. Same UPDATE the
-  // Paystack webhook itself performs, so it triggers the same
-  // confirmation email and Airbnb-export eligibility.
-  const markPaidManually = async (bookingId) => {
+  // Manual fallback for a guest who pays outside Paystack — on site
+  // (cash / in person) or by a direct mobile-money transfer. The admin
+  // attests payment was received and confirms the booking, recording
+  // how it was paid (see src/lib/payments.js). Same status change the
+  // Paystack webhook makes, so it sends the same receipt email/SMS.
+  const markPaidManually = async (bookingId, method) => {
     setBookError('');
     setMarkingPaidId(bookingId);
-    const { error } = await supabase
-      .from('bookings')
-      .update({ status: 'confirmed', paid_at: new Date().toISOString() })
-      .eq('id', bookingId);
+    const error = await markBookingPaid(bookingId, method);
     if (error) {
       setBookError("Couldn't confirm this booking. Please try again.");
       setMarkingPaidId(null);
@@ -501,15 +499,24 @@ export default function AdminEnquiries() {
                                 </div>
                                 <div className="mgmt-decline-box">
                                   <p className="mgmt-td-muted" style={{ margin: '0 0 10px' }}>
-                                    Guest paid another way (e.g. direct mobile money)?
+                                    Guest paid another way? Record it here.
                                   </p>
-                                  <button
-                                    className="mgmt-btn mgmt-btn-outline"
-                                    disabled={markingPaidId === e.bookings.id}
-                                    onClick={() => markPaidManually(e.bookings.id)}
-                                  >
-                                    <CircleDollarSign size={14}/> {markingPaidId === e.bookings.id ? 'Confirming…' : 'Mark as paid'}
-                                  </button>
+                                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                    <button
+                                      className="mgmt-btn mgmt-btn-outline"
+                                      disabled={markingPaidId === e.bookings.id}
+                                      onClick={() => markPaidManually(e.bookings.id, 'on_site')}
+                                    >
+                                      <CircleDollarSign size={14}/> {markingPaidId === e.bookings.id ? 'Confirming…' : 'Paid on site'}
+                                    </button>
+                                    <button
+                                      className="mgmt-btn mgmt-btn-outline"
+                                      disabled={markingPaidId === e.bookings.id}
+                                      onClick={() => markPaidManually(e.bookings.id, 'mobile_money')}
+                                    >
+                                      <CircleDollarSign size={14}/> Paid by MoMo transfer
+                                    </button>
+                                  </div>
                                 </div>
                                 {bookError && markingPaidId === null && (
                                   <span className="form-error" style={{ margin: 0 }}>{bookError}</span>
