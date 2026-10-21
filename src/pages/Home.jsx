@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, ExternalLink } from 'lucide-react';
+import WalkthroughSection from '../components/WalkthroughSection';
 
 export default function Home() {
   return (
@@ -86,6 +87,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Video walkthrough of the property */}
+      <WalkthroughSection />
 
       {/* Two-card teaser */}
       <section className="section section-cream">
