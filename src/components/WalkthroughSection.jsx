@@ -11,7 +11,8 @@ import { Volume2, VolumeX } from 'lucide-react';
 export default function WalkthroughSection() {
   const videoRef = useRef(null);
   const visible = useRef(false);
-  const [src, setSrc] = useState(null);
+  // Sources are attached only once the video nears the screen.
+  const [load, setLoad] = useState(false);
   const [muted, setMuted] = useState(true);
   const [reduced] = useState(() =>
     typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
@@ -20,11 +21,11 @@ export default function WalkthroughSection() {
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return undefined;
-    if (reduced) { setSrc('/videos/walkthrough.mp4'); return undefined; }
+    if (reduced) { setLoad(true); return undefined; }
 
     // Load the file shortly before it's on screen…
     const loader = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting) { setSrc('/videos/walkthrough.mp4'); loader.disconnect(); }
+      if (e.isIntersecting) { setLoad(true); loader.disconnect(); }
     }, { rootMargin: '400px 0px' });
     // …and play only while at least 40% of it is visible.
     const player = new IntersectionObserver(([e]) => {
@@ -41,8 +42,11 @@ export default function WalkthroughSection() {
   // The file is attached a moment after the video first comes near the
   // screen — if it's already in view by then, start it now.
   useEffect(() => {
-    if (src && !reduced && visible.current) videoRef.current?.play().catch(() => {});
-  }, [src, reduced]);
+    const v = videoRef.current;
+    if (!load || !v) return;
+    v.load(); // pick up the <source> elements just added
+    if (!reduced && visible.current) v.play().catch(() => {});
+  }, [load, reduced]);
 
   const toggleSound = () => {
     const v = videoRef.current;
@@ -58,7 +62,6 @@ export default function WalkthroughSection() {
         <video
           ref={videoRef}
           className="walk-video"
-          src={src || undefined}
           poster="/videos/walkthrough-poster.jpg"
           muted
           loop={!reduced}
@@ -66,7 +69,13 @@ export default function WalkthroughSection() {
           controls={reduced}
           preload="none"
           aria-label="Video tour of Home-Office Apartments and LivingSpring Gardens"
-        />
+        >
+          {/* MP4 (H.264) for Safari/iOS/Chrome; WebM (VP9) for browsers
+              without H.264, e.g. Chromium builds inside some apps. The
+              browser uses the first one it can play. */}
+          {load && <source src="/videos/walkthrough.mp4" type="video/mp4" />}
+          {load && <source src="/videos/walkthrough.webm" type="video/webm" />}
+        </video>
         {!reduced && (
           <button
             type="button"
