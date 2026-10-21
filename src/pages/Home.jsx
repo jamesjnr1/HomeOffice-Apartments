@@ -87,6 +87,29 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Video walkthrough of the property */}
+      <section className="section walkthrough-section">
+        <div className="container">
+          <div className="walkthrough-head reveal">
+            <span className="eyebrow">TAKE A LOOK AROUND</span>
+            <h2>Walk through the apartments.</h2>
+            <p className="prose">From the gate and gardens to the lounge, kitchen, bedrooms and bathrooms — a quick tour of where you'll stay.</p>
+          </div>
+          <div className="walkthrough-frame reveal">
+            <video
+              className="walkthrough-video"
+              src="/videos/walkthrough.mp4"
+              poster="/videos/walkthrough-poster.jpg"
+              controls
+              playsInline
+              preload="none"
+            >
+              Your browser can't play this video.
+            </video>
+          </div>
+        </div>
+      </section>
+
       {/* Two-card teaser */}
       <section className="section section-cream">
         <div className="container">
