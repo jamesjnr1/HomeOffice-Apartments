@@ -216,7 +216,7 @@ export default function AdminGuestDetail() {
           <div className="mgmt-table-wrap" style={{ marginTop: 16 }}>
             <table className="mgmt-table">
               <thead>
-                <tr><th>Apartment</th><th>Beds</th><th>Dates</th><th>Guests</th><th>Total</th><th>Status</th><th></th></tr>
+                <tr><th>Apartment</th><th>Beds</th><th>Dates</th><th>Guests</th><th>Total</th><th>Status</th><th className="mgmt-col-actions" aria-label="Actions"></th></tr>
               </thead>
               <tbody>
                 {history.map((b) => {
@@ -234,7 +234,7 @@ export default function AdminGuestDetail() {
                       <td>{b.guests}</td>
                       <td>GHS {Number(b.total).toLocaleString()}</td>
                       <td>{isStayingNow(b) ? <StatusBadge status="checked_in" label={stayingLabel(b)} /> : <StatusBadge status={b.status} />}</td>
-                      <td>
+                      <td className="mgmt-col-actions">
                         <div className="mgmt-row-actions">
                           <button title="Receipt" aria-label={`Receipt for ${b.reference}`} onClick={() => setReceiptBooking(b)}>
                             <Download size={14} />

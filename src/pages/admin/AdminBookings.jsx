@@ -242,7 +242,7 @@ export default function AdminBookings() {
             <div className="mgmt-table-wrap">
               <table className="mgmt-table">
                 <thead>
-                  <tr><th>Source</th><th>Apartment</th><th>Ref</th><th>Guest</th><th>Check-in</th><th>Check-out</th><th>Nights</th><th>Total</th><th>Status</th><th></th></tr>
+                  <tr><th>Source</th><th>Apartment</th><th>Ref</th><th>Guest</th><th>Check-in</th><th>Check-out</th><th>Nights</th><th>Total</th><th>Status</th><th className="mgmt-col-actions" aria-label="Actions"></th></tr>
                 </thead>
                 <tbody>
                   {allReservations.map((r) => r.kind === 'site' ? (
@@ -266,7 +266,7 @@ export default function AdminBookings() {
                           <div className="mgmt-td-sub">{paymentMethodLabel(r.payment_method)}</div>
                         )}
                       </td>
-                      <td>
+                      <td className="mgmt-col-actions">
                         <div className="mgmt-row-actions">
                           {r.status === 'awaiting_payment' && (
                             <button
@@ -307,7 +307,7 @@ export default function AdminBookings() {
                       <td>{differenceInCalendarDays(parseISO(r.end_date), parseISO(r.start_date))}</td>
                       <td className="mgmt-td-muted">—</td>
                       <td><StatusBadge status={airbnbDisplayStatus(r)} /></td>
-                      <td></td>
+                      <td className="mgmt-col-actions"></td>
                     </tr>
                   ))}
                 </tbody>
