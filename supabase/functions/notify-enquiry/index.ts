@@ -129,57 +129,106 @@ function nightsBetween(checkIn: string | undefined, checkOut: string | undefined
   return Math.round(ms / 86400000);
 }
 
-function newEnquiryEmail(e: any) {
-  const subject = `New enquiry — ${e.name ?? "Guest"} (${e.check_in ?? "?"} → ${e.check_out ?? "?"})`;
-  const nights = nightsBetween(e.check_in, e.check_out);
-  const nightsLabel = nights !== null ? ` (${nights} night${nights === 1 ? "" : "s"})` : "";
-
-  const html = `
+// Shared layout for every email except the receipt: one rounded white
+// card on a light grey page — a small icon, a heading, a short message,
+// the key details in a light panel, and one square button. Same colours
+// and spacing as the receipt (confirmedEmail) so they read as a family.
+// Table-based with inline styles for Gmail, Apple Mail and Outlook.
+function simpleEmail(o: {
+  icon: string;
+  title: string;
+  body: string;
+  rows?: [string, string][];
+  button?: { label: string; href: string };
+  note?: string;
+}) {
+  const muted = "#6b6f6d";
+  const dark = "#2b2f2d";
+  const rows = (o.rows ?? []).filter(([, v]) => v);
+  return `
     <!doctype html>
     <html>
-      <body style="margin:0;padding:0;background:#f4f5f3;font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;color:#1f2b26;">
-        <div style="max-width:560px;margin:0 auto;padding:32px 16px;">
-          <div style="background:#2d6a4f;border-radius:12px 12px 0 0;padding:22px 28px;">
-            <div style="color:#fff;font-size:17px;font-weight:700;letter-spacing:-.01em;">Home-Office Apartments</div>
-            <div style="color:#cfe3d7;font-size:12.5px;margin-top:2px;">New enquiry received</div>
-          </div>
-          <div style="background:#fff;border:1px solid #e8ebe8;border-top:0;border-radius:0 0 12px 12px;padding:28px;">
-            <h1 style="margin:0 0 20px;font-size:19px;font-weight:600;">${escapeHtml(e.name) || "A guest"} wants to stay with you</h1>
-
-            <table style="width:100%;border-collapse:collapse;font-size:14px;background:#f4f5f3;border-radius:10px;">
-              <tr>
-                <td style="padding:14px 16px 4px;color:#6a706d;width:90px;">Dates</td>
-                <td style="padding:14px 16px 4px;font-weight:600;">${formatDateLong(e.check_in)} → ${formatDateLong(e.check_out)}${nightsLabel}</td>
-              </tr>
-              <tr>
-                <td style="padding:4px 16px;color:#6a706d;">Guests</td>
-                <td style="padding:4px 16px;font-weight:600;">${escapeHtml(e.guests) || "—"}</td>
-              </tr>
-              <tr>
-                <td style="padding:4px 16px 14px;color:#6a706d;">Email</td>
-                <td style="padding:4px 16px 14px;"><a href="mailto:${escapeHtml(e.email)}" style="color:#2d6a4f;text-decoration:none;">${escapeHtml(e.email)}</a></td>
-              </tr>
-              ${e.phone ? `
-              <tr>
-                <td style="padding:0 16px 14px;color:#6a706d;">Phone</td>
-                <td style="padding:0 16px 14px;">${escapeHtml(e.phone)}</td>
-              </tr>` : ""}
-            </table>
-
-            ${e.message ? `
-            <div style="margin-top:20px;">
-              <div style="color:#9aa19d;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;">Message</div>
-              <p style="margin:0;font-size:14px;line-height:1.5;white-space:pre-wrap;">${escapeHtml(e.message)}</p>
-            </div>` : ""}
-
-            <a href="${SITE_URL}/admin/enquiries" style="display:inline-block;margin-top:24px;background:#2d6a4f;color:#fff;text-decoration:none;padding:11px 22px;border-radius:8px;font-weight:600;font-size:14px;">Open in dashboard →</a>
-
-            <p style="margin:22px 0 0;color:#9aa19d;font-size:12px;">Reply directly to this email to reach ${escapeHtml(e.name) || "the guest"} at ${escapeHtml(e.email)}.</p>
-          </div>
-        </div>
+      <head><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+      <body style="margin:0;padding:0;background:#e6e6e4;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:${dark};">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#e6e6e4;">
+          <tr>
+            <td align="center" style="padding:48px 12px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:28px;box-shadow:0 20px 50px rgba(0,0,0,.08);">
+                <tr>
+                  <td align="center" style="padding:56px 40px 0;">
+                    <table role="presentation" align="center" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="width:80px;height:80px;border-radius:50%;background:#e3f3ea;text-align:center;vertical-align:middle;">
+                          <div style="display:inline-block;width:56px;height:56px;line-height:56px;border-radius:50%;background:#2fa36b;color:#ffffff;font-size:26px;font-weight:700;">${o.icon}</div>
+                        </td>
+                      </tr>
+                    </table>
+                    <div style="margin-top:32px;font-size:24px;line-height:1.35;font-weight:600;color:${dark};">${o.title}</div>
+                    <div style="margin-top:14px;font-size:17px;line-height:1.65;color:${muted};">${o.body}</div>
+                  </td>
+                </tr>
+                ${rows.length ? `
+                <tr>
+                  <td style="padding:36px 32px 0;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f6f5f3;border-radius:20px;">
+                      <tr>
+                        <td style="padding:8px 24px;">
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                            ${rows.map(([k, v], i) => `
+                            <tr>
+                              <td valign="top" style="padding:16px 16px 16px 0;${i < rows.length - 1 ? "border-bottom:1px solid #e6e4e1;" : ""}font-size:16px;color:${muted};white-space:nowrap;">${k}</td>
+                              <td align="right" style="padding:16px 0;${i < rows.length - 1 ? "border-bottom:1px solid #e6e4e1;" : ""}font-size:16px;color:${dark};">${v}</td>
+                            </tr>`).join("")}
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>` : ""}
+                ${o.button ? `
+                <tr>
+                  <td style="padding:36px 32px 0;">
+                    <a href="${o.button.href}" style="display:block;background:#2d6a4f;color:#ffffff;text-decoration:none;padding:18px 24px;font-size:17px;font-weight:600;text-align:center;">${o.button.label}</a>
+                  </td>
+                </tr>` : ""}
+                <tr>
+                  <td align="center" style="padding:28px 40px 48px;font-size:14px;line-height:1.6;color:${muted};">
+                    ${o.note ?? ""}
+                  </td>
+                </tr>
+              </table>
+              <div style="margin-top:28px;font-size:14px;line-height:1.6;color:#8f9391;">
+                Questions? Reply to this email or call <span style="white-space:nowrap;">+233 20 630 1032</span><br>
+                Home-Office Apartments · Fiapre, Sunyani
+              </div>
+            </td>
+          </tr>
+        </table>
       </body>
     </html>
   `;
+}
+
+function newEnquiryEmail(e: any) {
+  const subject = `New enquiry — ${e.name ?? "Guest"} (${e.check_in ?? "?"} → ${e.check_out ?? "?"})`;
+  const nights = nightsBetween(e.check_in, e.check_out);
+  const html = simpleEmail({
+    icon: "&#9993;",
+    title: `New enquiry from ${escapeHtml(e.name) || "a guest"}`,
+    body: "Someone wants to stay with you. Open it in the dashboard to confirm or decline.",
+    rows: [
+      ["Apartment", escapeHtml(APARTMENT_NAMES[e.apartment] || "")],
+      ["Check-in", formatDateLong(e.check_in)],
+      ["Check-out", formatDateLong(e.check_out)],
+      ["Nights", nights !== null ? String(nights) : ""],
+      ["Guests", escapeHtml(e.guests)],
+      ["Email", e.email ? `<a href="mailto:${escapeHtml(e.email)}" style="color:#2d6a4f;text-decoration:none;">${escapeHtml(e.email)}</a>` : ""],
+      ["Phone", escapeHtml(e.phone)],
+      ["Message", e.message ? `<span style="white-space:pre-wrap;">${escapeHtml(e.message)}</span>` : ""],
+    ],
+    button: { label: "Open in dashboard", href: `${SITE_URL}/admin/enquiries` },
+    note: `Reply to this email to reach ${escapeHtml(e.name) || "the guest"} directly.`,
+  });
   return { to: NOTIFY_TO, subject, html, replyTo: e.email || undefined };
 }
 
@@ -324,116 +373,61 @@ function confirmedEmail(b: any) {
 function paymentRequestedEmail(b: any) {
   const subject = `Complete your payment — ${b.check_in ?? "?"} → ${b.check_out ?? "?"}`;
   const nights = nightsBetween(b.check_in, b.check_out);
-  const nightsLabel = nights !== null ? ` (${nights} night${nights === 1 ? "" : "s"})` : "";
   const apartmentLabel = APARTMENT_NAMES[b.apartment] || "Home-Office Apartments";
-
-  const html = `
-    <!doctype html>
-    <html>
-      <body style="margin:0;padding:0;background:#f4f5f3;font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;color:#1f2b26;">
-        <div style="max-width:560px;margin:0 auto;padding:32px 16px;">
-          <div style="background:#2d6a4f;border-radius:12px 12px 0 0;padding:22px 28px;">
-            <div style="color:#fff;font-size:17px;font-weight:700;letter-spacing:-.01em;">Home-Office Apartments</div>
-            <div style="color:#cfe3d7;font-size:12.5px;margin-top:2px;">One step left — payment</div>
-          </div>
-          <div style="background:#fff;border:1px solid #e8ebe8;border-top:0;border-radius:0 0 12px 12px;padding:28px;">
-            <h1 style="margin:0 0 12px;font-size:19px;font-weight:600;">Almost there, ${escapeHtml(b.guest_name) || "there"}</h1>
-            <p style="margin:0 0 20px;font-size:14px;line-height:1.5;color:#4a5450;">
-              We've held ${escapeHtml(apartmentLabel)} for your dates below. Pay securely with Paystack (card or Mobile Money) to lock it in — your booking is confirmed the moment payment goes through.
-            </p>
-
-            <table style="width:100%;border-collapse:collapse;font-size:14px;background:#f4f5f3;border-radius:10px;">
-              <tr>
-                <td style="padding:14px 16px 4px;color:#6a706d;width:100px;">Reference</td>
-                <td style="padding:14px 16px 4px;font-weight:600;">${escapeHtml(b.reference)}</td>
-              </tr>
-              <tr>
-                <td style="padding:4px 16px;color:#6a706d;">Apartment</td>
-                <td style="padding:4px 16px;font-weight:600;">${escapeHtml(apartmentLabel)}</td>
-              </tr>
-              <tr>
-                <td style="padding:4px 16px;color:#6a706d;">Dates</td>
-                <td style="padding:4px 16px;font-weight:600;">${formatDateLong(b.check_in)} → ${formatDateLong(b.check_out)}${nightsLabel}</td>
-              </tr>
-              <tr>
-                <td style="padding:4px 16px 14px;color:#6a706d;">Amount due</td>
-                <td style="padding:4px 16px 14px;font-weight:600;">GHS ${Number(b.total).toLocaleString()}</td>
-              </tr>
-            </table>
-
-            <a href="${escapeHtml(b.payment_url)}" style="display:inline-block;margin-top:24px;background:#2d6a4f;color:#fff;text-decoration:none;padding:11px 22px;border-radius:8px;font-weight:600;font-size:14px;">Pay now →</a>
-
-            <p style="margin:22px 0 0;color:#9aa19d;font-size:12px;">These dates are held on a first-to-pay basis, so it's best to complete payment soon. Questions? Just reply to this email.</p>
-          </div>
-        </div>
-      </body>
-    </html>
-  `;
+  const firstName = String(b.guest_name ?? "").trim().split(/\s+/)[0];
+  const html = simpleEmail({
+    icon: "&#8373;",
+    title: `One step left${firstName ? `, ${escapeHtml(firstName)}` : ""}`,
+    body: `Your stay at ${escapeHtml(apartmentLabel)} is approved. Pay securely by card or Mobile Money to confirm it.`,
+    rows: [
+      ["Check-in", formatDateLong(b.check_in)],
+      ["Check-out", formatDateLong(b.check_out)],
+      ["Nights", nights !== null ? String(nights) : ""],
+      ["Reference", escapeHtml(b.reference)],
+      ["Amount due", `<strong>GHS ${Number(b.total).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>`],
+    ],
+    button: { label: "Pay now", href: escapeHtml(b.payment_url) },
+    note: "Your dates aren't held until payment is made, so it's best to pay soon.",
+  });
   return { to: b.guest_email, subject, html, replyTo: NOTIFY_TO };
 }
 
 function welcomeAccountEmail(b: any) {
   const subject = `You're set up — manage your stay anytime`;
-  const html = `
-    <!doctype html>
-    <html>
-      <body style="margin:0;padding:0;background:#f4f5f3;font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;color:#1f2b26;">
-        <div style="max-width:560px;margin:0 auto;padding:32px 16px;">
-          <div style="background:#2d6a4f;border-radius:12px 12px 0 0;padding:22px 28px;">
-            <div style="color:#fff;font-size:17px;font-weight:700;letter-spacing:-.01em;">Home-Office Apartments</div>
-            <div style="color:#cfe3d7;font-size:12.5px;margin-top:2px;">Your account is ready</div>
-          </div>
-          <div style="background:#fff;border:1px solid #e8ebe8;border-top:0;border-radius:0 0 12px 12px;padding:28px;">
-            <h1 style="margin:0 0 12px;font-size:19px;font-weight:600;">Hi ${escapeHtml(b.guest_name) || "there"},</h1>
-            <p style="margin:0 0 20px;font-size:14px;line-height:1.5;color:#4a5450;">
-              We've set up an account for you with this email so your booking, receipts, and messages are all in one place — no need to fill in your details again next time.
-            </p>
-            <a href="${escapeHtml(b.action_link)}" style="display:inline-block;background:#2d6a4f;color:#fff;text-decoration:none;padding:11px 22px;border-radius:8px;font-weight:600;font-size:14px;">Set a password &amp; view your dashboard →</a>
-            <p style="margin:22px 0 0;color:#9aa19d;font-size:12px;">This link signs you in directly — set a password there so you can log back in anytime. Questions? Just reply to this email.</p>
-          </div>
-        </div>
-      </body>
-    </html>
-  `;
+  const firstName = String(b.guest_name ?? "").trim().split(/\s+/)[0];
+  const html = simpleEmail({
+    icon: "&#9786;",
+    title: `Welcome${firstName ? `, ${escapeHtml(firstName)}` : ""}`,
+    body: "We've set up an account with this email so your booking, receipts and messages are all in one place.",
+    button: { label: "Set a password", href: escapeHtml(b.action_link) },
+    note: "This link signs you in directly. Set a password there to log back in anytime.",
+  });
   return { to: b.guest_email, subject, html, replyTo: NOTIFY_TO };
 }
 
 function reviewRequestEmail(b: any) {
-  const subject = `How was your stay at ${APARTMENT_NAMES[b.apartment] || "Home-Office Apartments"}?`;
   const apartmentLabel = APARTMENT_NAMES[b.apartment] || "Home-Office Apartments";
-  const html = `
-    <!doctype html>
-    <html>
-      <body style="margin:0;padding:0;background:#f4f5f3;font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;color:#1f2b26;">
-        <div style="max-width:560px;margin:0 auto;padding:32px 16px;">
-          <div style="background:#2d6a4f;border-radius:12px 12px 0 0;padding:22px 28px;">
-            <div style="color:#fff;font-size:17px;font-weight:700;letter-spacing:-.01em;">Home-Office Apartments</div>
-            <div style="color:#cfe3d7;font-size:12.5px;margin-top:2px;">Thanks for staying with us</div>
-          </div>
-          <div style="background:#fff;border:1px solid #e8ebe8;border-top:0;border-radius:0 0 12px 12px;padding:28px;">
-            <h1 style="margin:0 0 12px;font-size:19px;font-weight:600;">How was ${escapeHtml(apartmentLabel)}, ${escapeHtml(b.guest_name) || "there"}?</h1>
-            <p style="margin:0 0 20px;font-size:14px;line-height:1.5;color:#4a5450;">
-              We hope you had a great stay (${formatDateLong(b.check_in)} → ${formatDateLong(b.check_out)}). A quick review helps other guests, and helps us too — it only takes a minute.
-            </p>
-            <a href="${SITE_URL}/dashboard/bookings" style="display:inline-block;background:#2d6a4f;color:#fff;text-decoration:none;padding:11px 22px;border-radius:8px;font-weight:600;font-size:14px;">Leave a review →</a>
-            <p style="margin:22px 0 0;color:#9aa19d;font-size:12px;">Log in with the email you booked with — your review is linked right to your trip. Thanks again for staying with us.</p>
-          </div>
-        </div>
-      </body>
-    </html>
-  `;
+  const subject = `How was your stay at ${apartmentLabel}?`;
+  const firstName = String(b.guest_name ?? "").trim().split(/\s+/)[0];
+  const html = simpleEmail({
+    icon: "&#9733;",
+    title: `How was your stay${firstName ? `, ${escapeHtml(firstName)}` : ""}?`,
+    body: `Thank you for staying at ${escapeHtml(apartmentLabel)} (${formatDateLong(b.check_in)} → ${formatDateLong(b.check_out)}). A quick review helps other guests and helps us too.`,
+    button: { label: "Leave a review", href: `${SITE_URL}/dashboard/bookings` },
+    note: "Sign in with the email you booked with. It only takes a minute.",
+  });
   return { to: b.guest_email, subject, html, replyTo: NOTIFY_TO };
 }
 
 function declinedEmail(e: any) {
   const subject = `About your enquiry — ${e.check_in ?? "?"} → ${e.check_out ?? "?"}`;
-  const html = `
-    <h2 style="margin:0 0 12px">Hi ${escapeHtml(e.name) || "there"},</h2>
-    <p>Unfortunately we can't host you for <strong>${escapeHtml(e.check_in)} → ${escapeHtml(e.check_out)}</strong> — those dates are no longer available.</p>
-    ${e.decline_reason ? `<p>${escapeHtml(e.decline_reason)}</p>` : ""}
-    <p>We'd love to have you another time — feel free to send a new enquiry with different dates whenever you're ready.</p>
-    <p style="color:#666;font-size:13px;margin-top:20px">— Home-Office Apartments</p>
-  `;
+  const firstName = String(e.name ?? "").trim().split(/\s+/)[0];
+  const html = simpleEmail({
+    icon: "!",
+    title: `Sorry${firstName ? `, ${escapeHtml(firstName)}` : ""} — those dates aren't available`,
+    body: `We can't host you for ${formatDateLong(e.check_in)} → ${formatDateLong(e.check_out)}.${e.decline_reason ? ` ${escapeHtml(e.decline_reason)}` : ""} We'd love to have you another time.`,
+    button: { label: "Choose new dates", href: `${SITE_URL}/book` },
+  });
   // Reply-to is the admin's own notify address here, not the guest's —
   // this email goes TO the guest, so a reply from them should land
   // back with the admin, same as it would if they'd emailed directly.

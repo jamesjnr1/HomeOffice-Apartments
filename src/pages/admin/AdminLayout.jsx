@@ -143,7 +143,7 @@ export default function AdminLayout() {
     { to: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
   ];
   const OWNER_NAV = [
-    { to: '/admin/revenue', icon: TrendingUp, label: 'Revenue' },
+    { to: '/admin/revenue', icon: TrendingUp, label: 'Performance' },
     { to: '/admin/settings', icon: Cog, label: 'Settings' },
   ];
 
