@@ -718,3 +718,5 @@ body:has(.auth-photo-admin) .site-footer { display: none !important; }
 .mgmt-btn-danger { background: #b3261e; color: #fff; }
 .mgmt-btn-danger:hover:not(:disabled) { background: #8f1d17; }
 .mgmt-btn-danger:disabled { opacity: .45; cursor: not-allowed; }
+.mgmt-btn-danger-outline { color: #b3261e; }
+.mgmt-btn-danger-outline:hover:not(:disabled) { border-color: #b3261e; background: #fbe9e7; }

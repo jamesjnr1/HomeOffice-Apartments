@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase';
 import { markBookingPaid } from '../../lib/payments';
 import { DEFAULT_APARTMENT, apartmentName } from '../../lib/apartments';
 import StatusBadge from '../../components/StatusBadge';
+import DeleteBookingDialog from './DeleteBookingDialog';
 
 /**
  * AdminEnquiries — real submissions from the public Book form, stored
@@ -83,6 +84,7 @@ export default function AdminEnquiries() {
   const [decliningId, setDecliningId] = useState(null);
   const [markingPaidId, setMarkingPaidId] = useState(null); // booking id currently being marked paid manually
   const [onboardingId, setOnboardingId] = useState(null); // booking id currently getting a guest account linked
+  const [deleteBooking, setDeleteBooking] = useState(null); // booking shown in the delete confirmation
   const [onboardError, setOnboardError] = useState('');
   const [bookError, setBookError] = useState('');
   const [loadError, setLoadError] = useState('');
@@ -113,7 +115,7 @@ export default function AdminEnquiries() {
       const [enquiriesRes, bookingsRes] = await Promise.all([
         supabase
           .from('enquiries')
-          .select('*, bookings!enquiries_booking_id_fkey(id, reference, status, payment_url, guest_id)')
+          .select('*, bookings!enquiries_booking_id_fkey(id, reference, status, payment_url, guest_id, guest_name, apartment, check_in, check_out, total)')
           .order('created_at', { ascending: false }),
         // All bookings' dates, for the overlap warning below — full
         // row detail is fine here, this page is already admin-only.
@@ -516,6 +518,12 @@ export default function AdminEnquiries() {
                                     >
                                       <CircleDollarSign size={14}/> Paid by MoMo transfer
                                     </button>
+                                    <button
+                                      className="mgmt-btn mgmt-btn-outline mgmt-btn-danger-outline"
+                                      onClick={() => setDeleteBooking(e.bookings)}
+                                    >
+                                      <Trash2 size={14}/> Delete booking
+                                    </button>
                                   </div>
                                 </div>
                                 {bookError && markingPaidId === null && (
@@ -610,6 +618,14 @@ export default function AdminEnquiries() {
           </div>
         )}
       </div>
+
+      {deleteBooking && (
+        <DeleteBookingDialog
+          booking={deleteBooking}
+          onClose={() => setDeleteBooking(null)}
+          onDeleted={() => { setDeleteBooking(null); loadEnquiries(); }}
+        />
+      )}
     </div>
   );
 }
