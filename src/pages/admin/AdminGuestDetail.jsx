@@ -3,8 +3,9 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { format, parseISO } from 'date-fns';
 import {
   Phone, Mail, KeyRound, Users, BedDouble, CalendarDays,
-  Filter, Download, MessageSquare,
+  Filter, Download, MessageSquare, Trash2,
 } from 'lucide-react';
+import DeleteBookingDialog from './DeleteBookingDialog';
 import { supabase } from '../../lib/supabase';
 import { APARTMENTS, apartmentName } from '../../lib/apartments';
 import StatusBadge from '../../components/StatusBadge';
@@ -41,6 +42,7 @@ export default function AdminGuestDetail() {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [receiptBooking, setReceiptBooking] = useState(null);
+  const [deleteBooking, setDeleteBooking] = useState(null);
 
   useEffect(() => { load(); }, [id]);
 
@@ -179,6 +181,12 @@ export default function AdminGuestDetail() {
                 </div>
               </div>
 
+              <div style={{ margin: '0 0 16px' }}>
+                <button className="mgmt-btn mgmt-btn-outline mgmt-btn-sm mgmt-btn-danger-outline" onClick={() => setDeleteBooking(current)}>
+                  <Trash2 size={13} /> Delete this booking
+                </button>
+              </div>
+
               <PropertyGallery />
             </>
           )}
@@ -227,9 +235,14 @@ export default function AdminGuestDetail() {
                       <td>GHS {Number(b.total).toLocaleString()}</td>
                       <td>{isStayingNow(b) ? <StatusBadge status="checked_in" label={stayingLabel(b)} /> : <StatusBadge status={b.status} />}</td>
                       <td>
-                        <button className="mgmt-btn mgmt-btn-outline mgmt-btn-sm" onClick={() => setReceiptBooking(b)}>
-                          <Download size={13} /> Receipt
-                        </button>
+                        <div className="mgmt-row-actions">
+                          <button title="Receipt" aria-label={`Receipt for ${b.reference}`} onClick={() => setReceiptBooking(b)}>
+                            <Download size={14} />
+                          </button>
+                          <button title="Delete booking" aria-label={`Delete booking ${b.reference}`} className="mgmt-action-danger" onClick={() => setDeleteBooking(b)}>
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -239,6 +252,14 @@ export default function AdminGuestDetail() {
           </div>
         )}
       </section>
+
+      {deleteBooking && (
+        <DeleteBookingDialog
+          booking={deleteBooking}
+          onClose={() => setDeleteBooking(null)}
+          onDeleted={() => { setDeleteBooking(null); load(); }}
+        />
+      )}
 
       {receiptBooking && (
         <Receipt
