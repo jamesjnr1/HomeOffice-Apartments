@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, parseISO, differenceInCalendarDays } from 'date-fns';
-import { List, CalendarDays, ChevronLeft, ChevronRight, Download, CircleDollarSign } from 'lucide-react';
+import { List, CalendarDays, ChevronLeft, ChevronRight, Download, CircleDollarSign, Trash2 } from 'lucide-react';
+import DeleteBookingDialog from './DeleteBookingDialog';
 import Receipt from '../../components/Receipt';
 import StatusBadge from '../../components/StatusBadge';
 import { supabase } from '../../lib/supabase';
@@ -53,6 +54,7 @@ export default function AdminBookings() {
   const [loading, setLoading] = useState(true);
   const [receiptBooking, setReceiptBooking] = useState(null);
   const [markingPaidId, setMarkingPaidId] = useState(null);
+  const [deleteBooking, setDeleteBooking] = useState(null);
 
   // A guest who paid on site (cash / in person) rather than through
   // Paystack — confirm the booking and record how it was paid. The
@@ -278,6 +280,14 @@ export default function AdminBookings() {
                           <button title="Print receipt" onClick={() => setReceiptBooking(r)}>
                             <Download size={14} />
                           </button>
+                          <button
+                            title="Delete booking"
+                            aria-label={`Delete booking ${r.reference}`}
+                            className="mgmt-action-danger"
+                            onClick={() => setDeleteBooking(r)}
+                          >
+                            <Trash2 size={14} />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -345,6 +355,14 @@ export default function AdminBookings() {
             })}
           </div>
         </div>
+      )}
+
+      {deleteBooking && (
+        <DeleteBookingDialog
+          booking={deleteBooking}
+          onClose={() => setDeleteBooking(null)}
+          onDeleted={() => { setDeleteBooking(null); loadBookings(); }}
+        />
       )}
 
       {receiptBooking && (
