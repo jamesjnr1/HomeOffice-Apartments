@@ -37,7 +37,7 @@ export const PAGE_META = {
 };
 
 // Pages that should never appear in search results.
-const PRIVATE_PREFIXES = ['/admin', '/dashboard', '/signin', '/signup', '/login'];
+const PRIVATE_PREFIXES = ['/admin', '/dashboard', '/signin', '/signup', '/login', '/payment'];
 
 export function isPrivatePath(path) {
   return PRIVATE_PREFIXES.some((p) => path === p || path.startsWith(`${p}/`));
