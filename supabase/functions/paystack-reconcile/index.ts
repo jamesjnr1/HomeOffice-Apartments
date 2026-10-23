@@ -4,8 +4,8 @@
 // the guest never opens their dashboard (paystack-verify's trigger).
 //
 // Two ways in:
-//   1. Scheduled (pg_cron, every 5 minutes — see
-//      supabase/migrations/20261023120000_paystack_reconcile_schedule.sql),
+//   1. Scheduled (pg_cron, every minute — see
+//      supabase/migrations/20261023163000_paystack_reconcile_every_minute.sql),
 //      authenticated with the x-webhook-secret header = SYNC_SECRET (the
 //      same shared secret sync-airbnb-calendar's job already uses). Lists
 //      Paystack's successful transactions from the last 14 days and

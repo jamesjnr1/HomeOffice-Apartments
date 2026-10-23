@@ -9,7 +9,7 @@ import { supabase } from '../lib/supabase';
  * Paystack and confirm the booking right away, so the guest — signed in
  * or not — sees the real result instead of "awaiting payment". If the
  * check can't finish here, the scheduled reconcile still confirms the
- * booking within a few minutes.
+ * booking within a minute or two.
  */
 export default function PaymentComplete() {
   const [params] = useSearchParams();
@@ -52,7 +52,7 @@ export default function PaymentComplete() {
     pending: {
       eyebrow: 'Almost there',
       title: "We're still confirming your payment.",
-      text: "If you completed payment, your booking will be confirmed automatically within a few minutes and you'll get an email. If you didn't finish checking out, you can pay from your dashboard.",
+      text: "If you completed payment, your booking will be confirmed automatically within a couple of minutes and you'll get an email. If you didn't finish checking out, you can pay from your dashboard.",
     },
     unknown: {
       eyebrow: 'Payment',
