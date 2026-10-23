@@ -650,3 +650,48 @@ body:has(.auth-photo-admin) .site-footer { display: none !important; }
 }
 .mgmt-date-filter input { border: 0; background: transparent; font: inherit; color: var(--ink); width: 108px; }
 .mgmt-date-filter input:focus { outline: none; }
+
+/* ── PERFORMANCE (AdminRevenue.jsx) ── */
+.perf-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.perf-month { display: inline-flex; align-items: center; gap: 6px; background: #fff; border: 1px solid #e8ebe8; border-radius: 12px; padding: 6px; }
+.perf-month span { min-width: 150px; text-align: center; font-size: 15px; font-weight: 600; color: #1f2b26; }
+.perf-month button { display: grid; place-items: center; width: 34px; height: 34px; border: 0; border-radius: 8px; background: #f4f5f3; color: #1f2b26; cursor: pointer; }
+.perf-month button:hover { background: #e2ece6; color: #2d6a4f; }
+.perf-delta { font-size: 12.5px; color: #9aa19d; }
+.perf-delta.up { color: #2d6a4f; }
+.perf-delta.down { color: #b3261e; }
+.perf-card { margin-bottom: 20px; }
+.perf-card-pad { padding: 22px 26px 14px; }
+.perf-stack { display: flex; height: 18px; border-radius: 999px; overflow: hidden; background: #f0f2ef; }
+.perf-seg { height: 100%; }
+.perf-site { background: #2d6a4f; }
+.perf-airbnb { background: #ff5a5f; }
+.perf-bookingcom { background: #2563eb; }
+.perf-blocked { background: #c9ccca; }
+.perf-empty { background: #f0f2ef; }
+.perf-legend { display: flex; flex-wrap: wrap; gap: 10px 22px; margin-top: 14px; font-size: 13.5px; color: #6a706d; }
+.perf-legend span { display: inline-flex; align-items: center; gap: 7px; }
+.perf-legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; border: 1px solid rgba(0,0,0,.06); }
+.perf-legend strong { color: #1f2b26; font-weight: 600; }
+.perf-list { margin: 0; }
+.perf-row { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px solid #f0f2ef; font-size: 14px; }
+.perf-row:last-child { border-bottom: 0; }
+.perf-row dt { color: #6a706d; }
+.perf-row dd { margin: 0; color: #1f2b26; font-weight: 500; white-space: nowrap; }
+.perf-row.strong dt, .perf-row.strong dd { color: #1f2b26; font-weight: 700; }
+.perf-row-delta { margin-left: 8px; font-size: 12px; font-weight: 500; }
+.perf-row-delta.up { color: #2d6a4f; }
+.perf-row-delta.down { color: #b3261e; }
+.perf-chart { height: 180px; }
+.perf-bar-col { background: none; border: 0; padding: 0; cursor: pointer; font: inherit; }
+.perf-bar-col .mgmt-bar { background: #b7d3c3; }
+.perf-bar-col.active .mgmt-bar { background: #2d6a4f; }
+.perf-bar-col.active .mgmt-bar-label { color: #1f2b26; font-weight: 700; }
+.perf-notes { font-size: 13px; line-height: 1.65; color: #6a706d; background: #fff; border: 1px solid #e8ebe8; border-radius: 12px; padding: 18px 22px; }
+@media (max-width: 500px) {
+  .perf-stats { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .perf-stats .mgmt-stat { padding: 18px 16px; gap: 8px; }
+  .perf-stats .mgmt-stat-value { font-size: 21px; }
+  .perf-stats .mgmt-stat-label { font-size: 12.5px; }
+  .perf-stats .perf-delta { font-size: 11.5px; }
+}
