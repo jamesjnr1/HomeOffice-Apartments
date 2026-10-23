@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, parseISO, differenceInCalendarDays } from 'date-fns';
 import { List, CalendarDays, ChevronLeft, ChevronRight, Download, CircleDollarSign } from 'lucide-react';
 import Receipt from '../../components/Receipt';
 import StatusBadge from '../../components/StatusBadge';
 import { supabase } from '../../lib/supabase';
 import { markBookingPaid, paymentMethodLabel } from '../../lib/payments';
+import { syncPayment } from '../../lib/payBooking';
 import { isStayingNow, stayingLabel } from '../../lib/stays';
 import { APARTMENTS, apartmentName, sourceApartment, sourceChannel } from '../../lib/apartments';
 
@@ -65,6 +66,9 @@ export default function AdminBookings() {
     loadBookings();
   };
 
+  // Bookings already checked with Paystack this visit (see loadBookings).
+  const syncedIds = useRef(new Set());
+
   useEffect(() => {
     loadBookings();
     loadAirbnbBlocks();
@@ -86,7 +90,17 @@ export default function AdminBookings() {
         .select('*')
         .order('check_in', { ascending: false });
 
-      if (!error && data) setBookings(data);
+      if (!error && data) {
+        setBookings(data);
+        // A started checkout may already be paid even if Paystack's
+        // webhook hasn't reached us — check each one with Paystack once
+        // per visit; a confirmed booking arrives via the realtime update.
+        for (const b of data) {
+          if (b.status !== 'awaiting_payment' || !b.paystack_reference || syncedIds.current.has(b.id)) continue;
+          syncedIds.current.add(b.id);
+          syncPayment(b.id);
+        }
+      }
     } catch {
       // A network-level failure would otherwise leave this stuck on
       // "Loading…" forever.

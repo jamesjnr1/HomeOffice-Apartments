@@ -336,7 +336,9 @@ Deno.serve(async (req: Request) => {
       amount: Math.round(total * 100),
       currency: "GHS",
       reference: paystackReference,
-      callback_url: SITE_URL,
+      // /payment/complete checks the payment with Paystack straight away
+      // (paystack-reconcile), so the guest sees it confirmed.
+      callback_url: `${SITE_URL}/payment/complete`,
       metadata: { booking_id: inserted.id, booking_reference: inserted.reference },
     }),
   });

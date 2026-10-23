@@ -19,6 +19,7 @@ import Book from './pages/Book';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import NotFound from './pages/NotFound';
+import PaymentComplete from './pages/PaymentComplete';
 
 // Guest dashboard
 import DashboardLayout from './pages/dashboard/DashboardLayout';
@@ -58,6 +59,7 @@ function AppContent() {
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/about" element={<About />} />
           <Route path="/book" element={<Book />} />
+          <Route path="/payment/complete" element={<PaymentComplete />} />
 
           {/* Auth */}
           <Route path="/signin" element={<SignIn />} />
