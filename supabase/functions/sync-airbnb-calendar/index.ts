@@ -167,9 +167,16 @@ async function sendNewBookingSms(range: BusyRange, source: string): Promise<void
   if (!ARKESEL_API_KEY) return;
   const apartmentLabel = APARTMENT_NAMES[source] || "Airbnb";
   const channel = CHANNEL_NAMES[source] || "Airbnb";
-  const message =
-    `New ${channel} booking (${apartmentLabel}): ${formatDateShort(range.start)}-${formatDateShort(range.end)}` +
-    (range.summary ? ` (${range.summary})` : "");
+  const dates = `${formatDateShort(range.start)}-${formatDateShort(range.end)}`;
+  // Airbnb's feed says "Reserved" for a real guest reservation and
+  // "Airbnb (Not available)" for nights blocked without one (blocked by
+  // hand, or imported from another calendar such as Booking.com) — say
+  // which, rather than calling every block a "booking". Booking.com's
+  // own feed marks every reservation "CLOSED - Not available", so only
+  // Airbnb feeds get the "blocked" wording.
+  const message = channel === "Airbnb" && /not available/i.test(range.summary ?? "")
+    ? `Dates blocked on Airbnb (no guest details) - ${apartmentLabel}: ${dates}. Check the Airbnb calendar.`
+    : `New ${channel} booking (${apartmentLabel}): ${dates}` + (channel === "Airbnb" && range.summary ? ` (${range.summary})` : "");
   try {
     const res = await fetch("https://sms.arkesel.com/api/v2/sms/send", {
       method: "POST",

@@ -192,68 +192,134 @@ const APARTMENT_NAMES: Record<string, string> = {
   livingspring: "LivingSpring Gardens & Apartment",
 };
 
+const PAYMENT_METHOD_LABELS: Record<string, string> = {
+  paystack: "Paystack",
+  on_site: "on site",
+  mobile_money: "Mobile Money",
+};
+const MAPS_URL = "https://maps.app.goo.gl/WKGsbeXbNj9FYDt68";
+
+// The guest's receipt, laid out like an Airbnb confirmation: a big
+// photo of the property, a friendly heading, check-in/check-out side by
+// side, then the receipt lines. White page, no boxes. Table-based with
+// inline styles so it renders the same in Gmail, Apple Mail and Outlook.
 function confirmedEmail(b: any) {
   const subject = `Payment received — receipt for ${b.reference ?? "your booking"}`;
   const nights = nightsBetween(b.check_in, b.check_out);
-  const nightsLabel = nights !== null ? ` (${nights} night${nights === 1 ? "" : "s"})` : "";
+  const guestCount = Number(b.guests) || 0;
   const apartmentLabel = APARTMENT_NAMES[b.apartment] || "Home-Office Apartments";
+  const firstName = String(b.guest_name ?? "").trim().split(/\s+/)[0];
+  const amount = Number(b.total).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const method = PAYMENT_METHOD_LABELS[b.payment_method] || null;
   // b.paid_at is a full timestamptz, unlike check_in/check_out — needs
   // its own formatting rather than formatDateLong (which assumes a
   // plain YYYY-MM-DD date and would otherwise mangle this into an
   // invalid date string).
   const paidAtDate = b.paid_at ? new Date(b.paid_at) : null;
   const paidOn = paidAtDate && !isNaN(paidAtDate.getTime())
-    ? paidAtDate.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" })
+    ? paidAtDate.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
     : null;
+  const paidNote = [method ? (method === "on site" ? "Paid on site" : `Paid with ${method}`) : "Paid", paidOn].filter(Boolean).join(" on ");
+  const stay = [
+    nights !== null ? `${nights} night${nights === 1 ? "" : "s"}` : null,
+    guestCount ? `${guestCount} guest${guestCount === 1 ? "" : "s"}` : null,
+  ].filter(Boolean).join(" · ");
+
+  const day = (iso: string | undefined, part: "weekday" | "date") => {
+    const d = iso ? new Date(`${iso}T00:00:00`) : null;
+    if (!d || isNaN(d.getTime())) return "—";
+    return part === "weekday"
+      ? d.toLocaleDateString("en-GB", { weekday: "short" })
+      : d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  };
+  const divider = `<tr><td style="padding:0;"><div style="height:1px;background:#ebebeb;line-height:1px;font-size:0;">&nbsp;</div></td></tr>`;
+  const line = (name: string, value: string, strong = false) => `
+                      <tr>
+                        <td style="padding:6px 0;font-size:16px;color:${strong ? "#222222" : "#6a6a6a"};${strong ? "font-weight:700;" : ""}">${name}</td>
+                        <td align="right" style="padding:6px 0;font-size:16px;color:#222222;white-space:nowrap;${strong ? "font-weight:700;" : ""}">${value}</td>
+                      </tr>`;
 
   const html = `
     <!doctype html>
     <html>
-      <body style="margin:0;padding:0;background:#f4f5f3;font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;color:#1f2b26;">
-        <div style="max-width:560px;margin:0 auto;padding:32px 16px;">
-          <div style="background:#2d6a4f;border-radius:12px 12px 0 0;padding:22px 28px;">
-            <div style="color:#fff;font-size:17px;font-weight:700;letter-spacing:-.01em;">Home-Office Apartments</div>
-            <div style="color:#cfe3d7;font-size:12.5px;margin-top:2px;">Payment received — booking confirmed</div>
-          </div>
-          <div style="background:#fff;border:1px solid #e8ebe8;border-top:0;border-radius:0 0 12px 12px;padding:28px;">
-            <h1 style="margin:0 0 12px;font-size:19px;font-weight:600;">You're all set, ${escapeHtml(b.guest_name) || "there"}</h1>
-            <p style="margin:0 0 20px;font-size:14px;line-height:1.5;color:#4a5450;">
-              We've received your payment and your stay at ${escapeHtml(apartmentLabel)} is confirmed. This email is your receipt — keep it for your records.
-            </p>
-
-            <table style="width:100%;border-collapse:collapse;font-size:14px;background:#f4f5f3;border-radius:10px;">
-              <tr>
-                <td style="padding:14px 16px 4px;color:#6a706d;width:100px;">Reference</td>
-                <td style="padding:14px 16px 4px;font-weight:600;">${escapeHtml(b.reference)}</td>
-              </tr>
-              <tr>
-                <td style="padding:4px 16px;color:#6a706d;">Apartment</td>
-                <td style="padding:4px 16px;font-weight:600;">${escapeHtml(apartmentLabel)}</td>
-              </tr>
-              <tr>
-                <td style="padding:4px 16px;color:#6a706d;">Dates</td>
-                <td style="padding:4px 16px;font-weight:600;">${formatDateLong(b.check_in)} → ${formatDateLong(b.check_out)}${nightsLabel}</td>
-              </tr>
-              <tr>
-                <td style="padding:4px 16px;color:#6a706d;">Guests</td>
-                <td style="padding:4px 16px;font-weight:600;">${escapeHtml(b.guests) || "—"}</td>
-              </tr>
-              <tr>
-                <td style="padding:4px 16px;${paidOn ? "" : "padding-bottom:14px;"}color:#6a706d;">Amount paid</td>
-                <td style="padding:4px 16px;${paidOn ? "" : "padding-bottom:14px;"}font-weight:600;">GHS ${Number(b.total).toLocaleString()}</td>
-              </tr>
-              ${paidOn ? `
-              <tr>
-                <td style="padding:4px 16px 14px;color:#6a706d;">Paid on</td>
-                <td style="padding:4px 16px 14px;font-weight:600;">${paidOn}</td>
-              </tr>` : ""}
-            </table>
-
-            <a href="${SITE_URL}/dashboard/bookings" style="display:inline-block;margin-top:22px;background:#2d6a4f;color:#fff;text-decoration:none;padding:11px 22px;border-radius:8px;font-weight:600;font-size:14px;">View or print full receipt →</a>
-
-            <p style="margin:18px 0 0;color:#9aa19d;font-size:12px;">Questions before you arrive? Just reply to this email.</p>
-          </div>
-        </div>
+      <head><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+      <body style="margin:0;padding:0;background:#ffffff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#222222;">
+        <div style="display:none;max-height:0;overflow:hidden;">Your stay at ${escapeHtml(apartmentLabel)} is confirmed.</div>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;">
+          <tr>
+            <td align="center" style="padding:32px 20px 40px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;">
+                <tr>
+                  <td style="padding:0 0 28px;">
+                    <img src="${SITE_URL}/images/logo-icon.png" width="40" height="40" alt="Home-Office Apartments" style="display:block;border:0;">
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:0;">
+                    <img src="${SITE_URL}/images/hero-property.jpg" width="560" alt="${escapeHtml(apartmentLabel)}" style="display:block;width:100%;max-width:560px;height:auto;border:0;border-radius:16px;">
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:32px 0 0;">
+                    <h1 style="margin:0;font-size:30px;line-height:1.2;font-weight:700;letter-spacing:-.02em;color:#222222;">You're going to Sunyani${firstName ? `, ${escapeHtml(firstName)}` : ""}!</h1>
+                    <p style="margin:12px 0 0;font-size:17px;line-height:1.5;color:#6a6a6a;">Your stay at ${escapeHtml(apartmentLabel)} is confirmed and paid.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:28px 0;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td width="50%" valign="top" style="padding-right:12px;border-right:1px solid #ebebeb;">
+                          <div style="font-size:14px;font-weight:600;color:#222222;">Check-in</div>
+                          <div style="margin-top:6px;font-size:16px;color:#222222;">${day(b.check_in, "weekday")}, ${day(b.check_in, "date")}</div>
+                        </td>
+                        <td width="50%" valign="top" style="padding-left:20px;">
+                          <div style="font-size:14px;font-weight:600;color:#222222;">Check-out</div>
+                          <div style="margin-top:6px;font-size:16px;color:#222222;">${day(b.check_out, "weekday")}, ${day(b.check_out, "date")}</div>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                ${divider}
+                <tr>
+                  <td style="padding:24px 0;">
+                    <div style="font-size:14px;font-weight:600;color:#222222;">Where you're staying</div>
+                    <div style="margin-top:6px;font-size:16px;color:#222222;">${escapeHtml(apartmentLabel)}</div>
+                    <div style="margin-top:2px;font-size:15px;color:#6a6a6a;">Fiapre, Sunyani${stay ? ` · ${stay}` : ""}</div>
+                    <a href="${MAPS_URL}" style="display:inline-block;margin-top:10px;font-size:15px;font-weight:600;color:#222222;text-decoration:underline;">Get directions</a>
+                  </td>
+                </tr>
+                ${divider}
+                <tr>
+                  <td style="padding:24px 0;">
+                    <div style="font-size:20px;font-weight:700;color:#222222;margin-bottom:10px;">Receipt</div>
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                      ${line("Reference", escapeHtml(b.reference))}
+                      ${line("Total paid", `GHS ${amount}`, true)}
+                    </table>
+                    <div style="margin-top:4px;font-size:14px;color:#6a6a6a;">${escapeHtml(paidNote)}</div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:8px 0 0;">
+                    <a href="${SITE_URL}/dashboard/bookings" style="display:block;background:#2d6a4f;color:#ffffff;text-decoration:none;padding:15px 24px;border-radius:10px;font-weight:600;font-size:16px;text-align:center;">View my booking</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:28px 0 0;font-size:14px;line-height:1.6;color:#6a6a6a;">
+                    Questions before you arrive? Reply to this email or call <a href="tel:+233206301032" style="color:#222222;font-weight:600;text-decoration:none;white-space:nowrap;">+233 20 630 1032</a>.
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:32px 0 0;font-size:12px;line-height:1.6;color:#a0a0a0;">
+                    Home-Office Apartments · Fiapre, Sunyani, Ghana
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
       </body>
     </html>
   `;
