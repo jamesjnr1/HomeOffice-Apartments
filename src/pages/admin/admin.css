@@ -720,3 +720,14 @@ body:has(.auth-photo-admin) .site-footer { display: none !important; }
 .mgmt-btn-danger:disabled { opacity: .45; cursor: not-allowed; }
 .mgmt-btn-danger-outline { color: #b3261e; }
 .mgmt-btn-danger-outline:hover:not(:disabled) { border-color: #b3261e; background: #fbe9e7; }
+
+/* Row actions (receipt, mark paid, delete) stay pinned to the right
+   edge of a table, so they're always on screen even when the table is
+   wider than the page and scrolls sideways. */
+.mgmt-table .mgmt-col-actions {
+  position: sticky; right: 0; z-index: 1;
+  background: #fff; box-shadow: -10px 0 12px -10px rgba(0,0,0,.18);
+  padding-left: 12px; padding-right: 12px; width: 1%; white-space: nowrap;
+}
+.mgmt-table th.mgmt-col-actions { background: #f4f5f3; }
+.mgmt-table tbody tr:hover td.mgmt-col-actions { background: #f4f5f3; }
