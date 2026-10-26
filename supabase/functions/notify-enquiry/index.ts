@@ -129,6 +129,28 @@ function nightsBetween(checkIn: string | undefined, checkOut: string | undefined
   return Math.round(ms / 86400000);
 }
 
+// Phone tweaks for both email layouts (Gmail, Apple Mail and most
+// mobile apps honour <style> media queries; clients that don't still
+// get the desktop spacing, which also fits — just roomier).
+const MOBILE_CSS = `
+  <style>
+    @media (max-width: 520px) {
+      .em-outer { padding: 20px 8px !important; }
+      .em-card { border-radius: 22px !important; }
+      .em-pad { padding-left: 20px !important; padding-right: 20px !important; }
+      .em-top { padding-top: 40px !important; }
+      .em-title { font-size: 21px !important; }
+      .em-text { font-size: 16px !important; }
+      .em-panel-pad { padding: 4px 16px !important; }
+      .em-row td { font-size: 15px !important; padding-top: 13px !important; padding-bottom: 13px !important; }
+      .em-col-pad { padding: 40px 12px 32px !important; }
+      .em-summary { padding: 28px 18px 30px !important; border-radius: 18px !important; }
+      .em-summary-inner { padding-left: 4px !important; padding-right: 4px !important; }
+      .em-total { font-size: 30px !important; }
+      .em-cardpad { padding: 8px !important; }
+    }
+  </style>`;
+
 // Shared layout for every email except the receipt: one rounded white
 // card on a light grey page — a small icon, a heading, a short message,
 // the key details in a light panel, and one square button. Same colours
@@ -138,7 +160,7 @@ function simpleEmail(o: {
   icon: string;
   title: string;
   body: string;
-  rows?: [string, string][];
+  rows?: [string, string, boolean?][];
   button?: { label: string; href: string };
   note?: string;
 }) {
@@ -148,14 +170,14 @@ function simpleEmail(o: {
   return `
     <!doctype html>
     <html>
-      <head><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+      <head><meta name="viewport" content="width=device-width,initial-scale=1">${MOBILE_CSS}</head>
       <body style="margin:0;padding:0;background:#e6e6e4;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:${dark};">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#e6e6e4;">
           <tr>
-            <td align="center" style="padding:48px 12px;">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:28px;box-shadow:0 20px 50px rgba(0,0,0,.08);">
+            <td class="em-outer" align="center" style="padding:48px 12px;">
+              <table class="em-card" role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:28px;box-shadow:0 20px 50px rgba(0,0,0,.08);">
                 <tr>
-                  <td align="center" style="padding:56px 40px 0;">
+                  <td class="em-pad em-top" align="center" style="padding:56px 40px 0;">
                     <table role="presentation" align="center" cellpadding="0" cellspacing="0">
                       <tr>
                         <td style="width:80px;height:80px;border-radius:50%;background:#e3f3ea;text-align:center;vertical-align:middle;">
@@ -163,22 +185,30 @@ function simpleEmail(o: {
                         </td>
                       </tr>
                     </table>
-                    <div style="margin-top:32px;font-size:24px;line-height:1.35;font-weight:600;color:${dark};">${o.title}</div>
-                    <div style="margin-top:14px;font-size:17px;line-height:1.65;color:${muted};">${o.body}</div>
+                    <div class="em-title" style="margin-top:32px;font-size:24px;line-height:1.35;font-weight:600;color:${dark};">${o.title}</div>
+                    <div class="em-text" style="margin-top:14px;font-size:17px;line-height:1.65;color:${muted};">${o.body}</div>
                   </td>
                 </tr>
                 ${rows.length ? `
                 <tr>
-                  <td style="padding:36px 32px 0;">
+                  <td class="em-pad" style="padding:36px 32px 0;">
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f6f5f3;border-radius:20px;">
                       <tr>
-                        <td style="padding:8px 24px;">
+                        <td class="em-panel-pad" style="padding:8px 24px;">
                           <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-                            ${rows.map(([k, v], i) => `
-                            <tr>
-                              <td valign="top" style="padding:16px 16px 16px 0;${i < rows.length - 1 ? "border-bottom:1px solid #e6e4e1;" : ""}font-size:16px;color:${muted};white-space:nowrap;">${k}</td>
-                              <td align="right" style="padding:16px 0;${i < rows.length - 1 ? "border-bottom:1px solid #e6e4e1;" : ""}font-size:16px;color:${dark};">${v}</td>
-                            </tr>`).join("")}
+                            ${rows.map(([k, v, stacked], i) => {
+                              const line = i < rows.length - 1 ? "border-bottom:1px solid #e6e4e1;" : "";
+                              return stacked ? `
+                            <tr class="em-row">
+                              <td colspan="2" style="padding:16px 0;${line}font-size:16px;color:${dark};line-height:1.55;">
+                                <div style="color:${muted};margin-bottom:6px;">${k}</div>${v}
+                              </td>
+                            </tr>` : `
+                            <tr class="em-row">
+                              <td valign="top" style="padding:16px 16px 16px 0;${line}font-size:16px;color:${muted};white-space:nowrap;">${k}</td>
+                              <td align="right" style="padding:16px 0;${line}font-size:16px;color:${dark};">${v}</td>
+                            </tr>`;
+                            }).join("")}
                           </table>
                         </td>
                       </tr>
@@ -187,12 +217,12 @@ function simpleEmail(o: {
                 </tr>` : ""}
                 ${o.button ? `
                 <tr>
-                  <td style="padding:36px 32px 0;">
+                  <td class="em-pad" style="padding:36px 32px 0;">
                     <a href="${o.button.href}" style="display:block;background:#2d6a4f;color:#ffffff;text-decoration:none;padding:18px 24px;font-size:17px;font-weight:600;text-align:center;">${o.button.label}</a>
                   </td>
                 </tr>` : ""}
                 <tr>
-                  <td align="center" style="padding:28px 40px 48px;font-size:14px;line-height:1.6;color:${muted};">
+                  <td class="em-pad" align="center" style="padding:28px 40px 48px;font-size:14px;line-height:1.6;color:${muted};">
                     ${o.note ?? ""}
                   </td>
                 </tr>
@@ -224,7 +254,7 @@ function newEnquiryEmail(e: any) {
       ["Guests", escapeHtml(e.guests)],
       ["Email", e.email ? `<a href="mailto:${escapeHtml(e.email)}" style="color:#2d6a4f;text-decoration:none;">${escapeHtml(e.email)}</a>` : ""],
       ["Phone", escapeHtml(e.phone)],
-      ["Message", e.message ? `<span style="white-space:pre-wrap;">${escapeHtml(e.message)}</span>` : ""],
+      ["Message", e.message ? `<span style="white-space:pre-wrap;">${escapeHtml(e.message)}</span>` : "", true],
     ],
     button: { label: "Open in dashboard", href: `${SITE_URL}/admin/enquiries` },
     note: `Reply to this email to reach ${escapeHtml(e.name) || "the guest"} directly.`,
@@ -283,25 +313,25 @@ function confirmedEmail(b: any) {
                 <div style="margin-top:26px;font-size:15px;color:${muted};">${k}</div>
                 <div style="margin-top:6px;font-size:17px;color:${dark};">${v}</div>`;
   const row = (k: string, v: string, last = false) => `
-                    <tr>
-                      <td style="padding:16px 16px 16px 0;${last ? "" : "border-bottom:1px solid #e6e4e1;"}font-size:16px;color:${muted};white-space:nowrap;">${k}</td>
+                    <tr class="em-row">
+                      <td style="padding:16px 12px 16px 0;${last ? "" : "border-bottom:1px solid #e6e4e1;"}font-size:16px;color:${muted};">${k}</td>
                       <td align="right" style="padding:16px 0;${last ? "" : "border-bottom:1px solid #e6e4e1;"}font-size:16px;color:${dark};white-space:nowrap;">${v}</td>
                     </tr>`;
 
   const html = `
     <!doctype html>
     <html>
-      <head><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+      <head><meta name="viewport" content="width=device-width,initial-scale=1">${MOBILE_CSS}</head>
       <body style="margin:0;padding:0;background:#e6e6e4;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:${dark};">
         <div style="display:none;max-height:0;overflow:hidden;">Your stay at ${escapeHtml(apartmentLabel)} is confirmed.</div>
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#e6e6e4;">
           <tr>
-            <td align="center" style="padding:48px 12px;">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:800px;background:#ffffff;border-radius:28px;box-shadow:0 20px 50px rgba(0,0,0,.08);">
+            <td class="em-outer" align="center" style="padding:48px 12px;">
+              <table class="em-card" role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:800px;background:#ffffff;border-radius:28px;box-shadow:0 20px 50px rgba(0,0,0,.08);">
                 <tr>
-                  <td style="padding:16px;font-size:0;text-align:center;">
+                  <td class="em-cardpad" style="padding:16px;font-size:0;text-align:center;">
                     <div style="${col}text-align:center;">
-                      <div style="padding:72px 36px 56px;">
+                      <div class="em-col-pad" style="padding:72px 36px 56px;">
                         <table role="presentation" align="center" cellpadding="0" cellspacing="0">
                           <tr>
                             <td style="width:96px;height:96px;border-radius:50%;background:#e3f3ea;text-align:center;vertical-align:middle;">
@@ -309,20 +339,20 @@ function confirmedEmail(b: any) {
                             </td>
                           </tr>
                         </table>
-                        <div style="margin-top:36px;font-size:24px;line-height:1.35;font-weight:600;color:${dark};">Your stay is confirmed${firstName ? `, ${escapeHtml(firstName)}` : ""}!</div>
-                        <div style="margin-top:14px;font-size:17px;line-height:1.65;color:${muted};">We've received your payment. This email is your receipt — we look forward to hosting you.</div>
+                        <div class="em-title" style="margin-top:36px;font-size:24px;line-height:1.35;font-weight:600;color:${dark};">Your stay is confirmed${firstName ? `, ${escapeHtml(firstName)}` : ""}!</div>
+                        <div class="em-text" style="margin-top:14px;font-size:17px;line-height:1.65;color:${muted};">We've received your payment. This email is your receipt — we look forward to hosting you.</div>
                         <a href="${SITE_URL}/dashboard/bookings" style="display:block;margin-top:48px;background:${green};color:#ffffff;text-decoration:none;padding:18px 24px;font-size:17px;font-weight:600;">View my booking</a>
                         <a href="${MAPS_URL}" style="display:block;margin-top:12px;background:#f2f1ef;color:${dark};text-decoration:none;padding:18px 24px;font-size:17px;font-weight:600;">Get directions</a>
                       </div>
                     </div><!--
                     --><div style="${col}text-align:left;">
-                      <div style="background:#f6f5f3;border-radius:20px;padding:40px 32px 44px;">
+                      <div class="em-summary" style="background:#f6f5f3;border-radius:20px;padding:40px 32px 44px;">
                         <div style="font-size:21px;font-weight:600;color:${dark};">Booking Summary</div>
                         ${field("Guest", escapeHtml(b.guest_name) || "—")}
                         ${field("Apartment", escapeHtml(apartmentLabel))}
                         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:32px;border:1px solid #e3e1de;border-radius:16px;">
                           <tr>
-                            <td style="padding:4px 20px;">
+                            <td class="em-panel-pad" style="padding:4px 20px;">
                               <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                                 ${row("Check-in", formatDateLong(b.check_in))}
                                 ${row("Check-out", formatDateLong(b.check_out))}
@@ -336,7 +366,7 @@ function confirmedEmail(b: any) {
                         </table>
                         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:20px;">
                           <tr>
-                            <td style="padding:0 20px;">
+                            <td class="em-summary-inner" style="padding:0 20px;">
                               <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                                 ${row(escapeHtml(stayLine), `GHS ${amount}`)}
                                 ${row("Reference", escapeHtml(b.reference), !paidOn)}
@@ -345,9 +375,9 @@ function confirmedEmail(b: any) {
                             </td>
                           </tr>
                         </table>
-                        <div style="margin-top:44px;padding:0 20px;text-align:right;">
+                        <div class="em-summary-inner" style="margin-top:44px;padding:0 20px;text-align:right;">
                           <div style="font-size:16px;color:${green};">Total paid</div>
-                          <div style="margin-top:6px;font-size:36px;font-weight:700;color:${green};letter-spacing:-.01em;">GHS ${amount}</div>
+                          <div class="em-total" style="margin-top:6px;font-size:36px;font-weight:700;color:${green};letter-spacing:-.01em;">GHS ${amount}</div>
                         </div>
                       </div>
                     </div>
