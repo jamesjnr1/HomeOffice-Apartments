@@ -1,4 +1,24 @@
 {
+  "redirects": [
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "home-officegroup.com" }],
+      "destination": "https://home-officegroup.com/group/",
+      "permanent": false
+    },
+    {
+      "source": "/(.*)",
+      "has": [{ "type": "host", "value": "www.home-officegroup.com" }],
+      "destination": "https://home-officegroup.com/group/",
+      "permanent": true
+    },
+    {
+      "source": "/:path((?!group(?:/|$)).+)",
+      "has": [{ "type": "host", "value": "home-officegroup.com" }],
+      "destination": "https://apartments.home-officegroup.com/:path",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     { "source": "/(.*)", "destination": "/" }
   ]
