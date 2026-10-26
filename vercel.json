@@ -23,7 +23,7 @@
       "permanent": false
     },
     {
-      "source": "/:path((?!group(?:/|$)).+)",
+      "source": "/:path((?!group(?:/|$)|google[0-9a-f]+\\.html$).+)",
       "has": [
         {
           "type": "host",
@@ -34,7 +34,7 @@
       "permanent": true
     },
     {
-      "source": "/:path((?!group(?:/|$)).+)",
+      "source": "/:path((?!group(?:/|$)|google[0-9a-f]+\\.html$).+)",
       "has": [
         {
           "type": "host",
