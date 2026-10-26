@@ -2,24 +2,53 @@
   "redirects": [
     {
       "source": "/",
-      "has": [{ "type": "host", "value": "home-officegroup.com" }],
-      "destination": "https://home-officegroup.com/group/",
+      "has": [
+        {
+          "type": "host",
+          "value": "home-officegroup.com"
+        }
+      ],
+      "destination": "/group/",
       "permanent": false
     },
     {
-      "source": "/(.*)",
-      "has": [{ "type": "host", "value": "www.home-officegroup.com" }],
-      "destination": "https://home-officegroup.com/group/",
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.home-officegroup.com"
+        }
+      ],
+      "destination": "/group/",
+      "permanent": false
+    },
+    {
+      "source": "/:path((?!group(?:/|$)).+)",
+      "has": [
+        {
+          "type": "host",
+          "value": "home-officegroup.com"
+        }
+      ],
+      "destination": "https://apartments.home-officegroup.com/:path",
       "permanent": true
     },
     {
       "source": "/:path((?!group(?:/|$)).+)",
-      "has": [{ "type": "host", "value": "home-officegroup.com" }],
+      "has": [
+        {
+          "type": "host",
+          "value": "www.home-officegroup.com"
+        }
+      ],
       "destination": "https://apartments.home-officegroup.com/:path",
       "permanent": true
     }
   ],
   "rewrites": [
-    { "source": "/(.*)", "destination": "/" }
+    {
+      "source": "/(.*)",
+      "destination": "/"
+    }
   ]
 }
