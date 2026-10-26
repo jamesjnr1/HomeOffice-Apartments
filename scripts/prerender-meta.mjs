@@ -1,11 +1,12 @@
 // After `vite build`: write dist/<page>/index.html for each public page,
 // with that page's title, description, canonical URL and link-preview
 // tags already in the HTML (from src/lib/seo.js), plus dist/sitemap.xml.
+// It also puts each page's main text and links inside #root.
 // Vercel serves these files before falling back to the SPA rewrite, so
 // Google sees the right details for every page without running React.
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { PAGE_META, SITE_URL } from '../src/lib/seo.mjs';
+import { PAGE_META, SITE_URL, staticPageHtml } from '../src/lib/seo.mjs';
 
 const dist = new URL('../dist/', import.meta.url).pathname;
 const template = readFileSync(join(dist, 'index.html'), 'utf8');
@@ -25,6 +26,9 @@ for (const [path, meta] of Object.entries(PAGE_META)) {
   html = swap(html, /<meta property="og:title" content="[^"]*" \/>/, `<meta property="og:title" content="${esc(meta.title)}" />`);
   html = swap(html, /<meta property="og:description" content="[^"]*" \/>/, `<meta property="og:description" content="${esc(meta.description)}" />`);
   html = swap(html, /<meta property="og:url" content="[^"]*" \/>/, `<meta property="og:url" content="${url}" />`);
+  // The page's real text and links, for crawlers that read the HTML
+  // before running JavaScript. React replaces it on load.
+  html = swap(html, /<div id="root"><\/div>/, `<div id="root">${staticPageHtml(path)}</div>`);
 
   if (path === '/') {
     writeFileSync(join(dist, 'index.html'), html);
