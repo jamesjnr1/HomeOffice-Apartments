@@ -129,8 +129,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* What guests say — the newest three, linking to the full list */}
-      <ReviewsSection limit={3} showCategories={false} />
+      {/* What guests say — same reviews section as /apartments */}
+      <ReviewsSection />
 
       {/* Closing CTA */}
       <section className="section cta-band">

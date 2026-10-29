@@ -479,16 +479,27 @@ h4 { font-size: 16px; }
 .review-card-meta { margin: 2px 0 0; font-size: 12.5px; color: var(--muted); }
 .review-card-top { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
 .review-card-date { font-size: 12.5px; color: var(--muted); }
-.review-card-comment { font-size: 14.5px; line-height: 1.6; color: var(--ink-2); margin: 0; }
-.review-card-comment.is-clamped {
+.review-card-comment {
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--ink-2);
+  margin: 0 0 16px;
+  min-height: calc(1.6em * 4);
   display: -webkit-box;
-  -webkit-line-clamp: 5;
+  -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+.review-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--line-2);
+}
 .review-card-toggle {
-  align-self: flex-start;
-  margin-top: 8px;
   padding: 0;
   border: 0;
   background: none;
@@ -500,8 +511,45 @@ h4 { font-size: 16px; }
   text-underline-offset: 3px;
   cursor: pointer;
 }
-.review-card-source { margin: auto 0 0; padding-top: 14px; font-size: 12px; color: var(--muted-2); }
-.reviews-more { margin-top: 28px; }
+.review-card-source { font-size: 12px; color: var(--muted-2); }
+.reviews-more { margin-top: 32px; text-align: center; }
+.review-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(20, 24, 22, .5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.review-dialog {
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  background: var(--bg);
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: var(--shadow-lg);
+}
+.review-dialog-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--bg-soft);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--ink);
+}
+.review-dialog-comment { font-size: 15.5px; line-height: 1.7; color: var(--ink-2); margin: 4px 0 18px; }
 
 /* ---------------- RATE CARDS ---------------- */
 .rate-cards {
