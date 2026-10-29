@@ -4,6 +4,8 @@
 // index.html per public page with these tags already in the HTML — so
 // a crawler sees the right title/description without running React.
 
+import { AIRBNB_REVIEWS } from '../data/airbnbReviews.mjs';
+
 export const SITE_URL = 'https://apartments.home-officegroup.com';
 export const SITE_NAME = 'Home-Office Apartments';
 export const DEFAULT_IMAGE = `${SITE_URL}/images/hero-property.jpg`;
@@ -56,6 +58,11 @@ const NAV = [
 
 const ADDRESS = 'Home-Office Apartments &amp; LivingSpring Gardens, Fiapre, Sunyani, Bono Region, Ghana · +233 20 630 1032';
 
+const esc = (t) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const REVIEWS_HTML = `<h2>Guest reviews</h2>
+    <p>Rated ${(AIRBNB_REVIEWS.reduce((n, r) => n + r.rating, 0) / AIRBNB_REVIEWS.length).toFixed(1)} out of 5 from ${AIRBNB_REVIEWS.length} guest reviews on Airbnb.</p>
+    <ul>${AIRBNB_REVIEWS.map((r) => `<li>“${esc(r.comment)}” — ${esc(r.name)}</li>`).join('')}</ul>`;
+
 export const PAGE_CONTENT = {
   '/': `
     <h1>A quiet place for hideout, retreat or work.</h1>
@@ -79,6 +86,7 @@ export const PAGE_CONTENT = {
     </ul>
     <h2>Simple pricing, better for longer stays.</h2>
     <p>GHS 388 a night, with discounts for stays of 5 nights or more and for 28–30 night stays.</p>
+    ${REVIEWS_HTML}
     <p><a href="/book">Enquire about dates, rates, and long stays.</a></p>`,
   '/gallery': `
     <h1>Photo gallery</h1>

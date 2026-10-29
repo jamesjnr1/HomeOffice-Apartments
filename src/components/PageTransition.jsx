@@ -19,6 +19,7 @@ export default function PageTransition() {
     if (isFirstRender.current) {
       isFirstRender.current = false;
       prevPath.current = location.pathname;
+      if (location.hash) scrollToHash(location.hash, 300);
       return;
     }
 
@@ -28,10 +29,13 @@ export default function PageTransition() {
       setActive(true);
       // Also scroll to top on route change (Lenis-safe)
       window.scrollTo({ top: 0, behavior: 'instant' });
+      // A link to a section (e.g. /apartments#reviews) lands on it once
+      // the curtain has covered the screen and the new page has rendered.
+      if (location.hash) scrollToHash(location.hash, 450);
       const t = setTimeout(() => setActive(false), 800);
       return () => clearTimeout(t);
     }
-  }, [location.pathname]);
+  }, [location.pathname, location.hash]);
 
   if (!active) return null;
 
@@ -49,4 +53,11 @@ export default function PageTransition() {
     </div>,
     document.body
   );
+}
+
+function scrollToHash(hash, delay) {
+  setTimeout(() => {
+    const el = document.getElementById(decodeURIComponent(hash.slice(1)));
+    if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 80, behavior: 'instant' });
+  }, delay);
 }

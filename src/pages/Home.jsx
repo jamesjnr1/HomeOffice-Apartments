@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, ExternalLink } from 'lucide-react';
 import WalkthroughSection from '../components/WalkthroughSection';
+import ReviewsSection from '../components/ReviewsSection';
 
 export default function Home() {
   return (
@@ -127,6 +128,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* What guests say — the newest three, linking to the full list */}
+      <ReviewsSection limit={3} showCategories={false} />
 
       {/* Closing CTA */}
       <section className="section cta-band">
