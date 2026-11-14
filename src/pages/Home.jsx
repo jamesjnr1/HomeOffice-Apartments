@@ -50,43 +50,40 @@ export default function Home() {
             </p>
           </div>
 
-          <ul className="intro-tiles reveal">
+          <ul className="intro-points reveal">
             <li>
-              <Tv size={26} strokeWidth={1.5} aria-hidden="true" />
-              <strong>Furnished hall</strong>
-              <span>A spacious, fully furnished hall with TV</span>
+              <span className="intro-points-icon"><Tv size={20} strokeWidth={1.6} aria-hidden="true" /></span>
+              <span>
+                <strong>Furnished hall</strong>
+                <span>Spacious, with TV</span>
+              </span>
             </li>
             <li>
-              <CookingPot size={26} strokeWidth={1.5} aria-hidden="true" />
-              <strong>Modern kitchen</strong>
-              <span>Equipped for convenience</span>
+              <span className="intro-points-icon"><CookingPot size={20} strokeWidth={1.6} aria-hidden="true" /></span>
+              <span>
+                <strong>Modern kitchen</strong>
+                <span>Equipped for convenience</span>
+              </span>
             </li>
             <li>
-              <BedDouble size={26} strokeWidth={1.5} aria-hidden="true" />
-              <strong>Two bedrooms</strong>
-              <span>King, Queen, and Standard beds</span>
+              <span className="intro-points-icon"><BedDouble size={20} strokeWidth={1.6} aria-hidden="true" /></span>
+              <span>
+                <strong>Two bedrooms</strong>
+                <span>King, Queen &amp; Standard beds</span>
+              </span>
             </li>
           </ul>
 
-          <div className="intro-airbnb">
-            <span className="intro-v2-airbnb-label">Also listed on Airbnb</span>
-            <a
-              href="https://www.airbnb.com/rooms/1773106679484408993"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="intro-v2-airbnb-link"
-            >
+          <p className="intro-airbnb">
+            Also on Airbnb:{' '}
+            <a href="https://www.airbnb.com/rooms/1773106679484408993" target="_blank" rel="noopener noreferrer">
               Home-Office Apartment <ExternalLink size={13} />
             </a>
-            <a
-              href="https://www.airbnb.com/rooms/1743067197312497878"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="intro-v2-airbnb-link"
-            >
+            <span aria-hidden="true"> · </span>
+            <a href="https://www.airbnb.com/rooms/1743067197312497878" target="_blank" rel="noopener noreferrer">
               LivingSpring Gardens <ExternalLink size={13} />
             </a>
-          </div>
+          </p>
         </div>
       </section>
 
