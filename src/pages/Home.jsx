@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, ExternalLink, Tv, CookingPot, BedDouble } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import WalkthroughSection from '../components/WalkthroughSection';
 import ReviewsSection from '../components/ReviewsSection';
 
@@ -9,9 +9,14 @@ export default function Home() {
       {/* Hero — full-bleed photo, editorial text at bottom-left */}
       <section className="hero-v2">
         <div className="hero-v2-bg" aria-hidden="true">
+          {/* Sized WebP versions (phones get the 1000px one), loaded first */}
           <img
             src="/images/hero-property.jpg"
+            srcSet="/images/hero-property-1000.webp 1000w, /images/hero-property-1600.webp 1600w"
+            sizes="100vw"
             alt="Home-Office Apartments — a considered stay"
+            fetchPriority="high"
+            decoding="async"
           />
           <div className="hero-v2-scrim" />
         </div>
@@ -49,41 +54,6 @@ export default function Home() {
               serene LivingSpring Gardens — designed for the way you work from home and the way you rest.
             </p>
           </div>
-
-          <ul className="intro-points reveal">
-            <li>
-              <span className="intro-points-icon"><Tv size={20} strokeWidth={1.6} aria-hidden="true" /></span>
-              <span>
-                <strong>Furnished hall</strong>
-                <span>Spacious, with TV</span>
-              </span>
-            </li>
-            <li>
-              <span className="intro-points-icon"><CookingPot size={20} strokeWidth={1.6} aria-hidden="true" /></span>
-              <span>
-                <strong>Modern kitchen</strong>
-                <span>Equipped for convenience</span>
-              </span>
-            </li>
-            <li>
-              <span className="intro-points-icon"><BedDouble size={20} strokeWidth={1.6} aria-hidden="true" /></span>
-              <span>
-                <strong>Two bedrooms</strong>
-                <span>King, Queen &amp; Standard beds</span>
-              </span>
-            </li>
-          </ul>
-
-          <p className="intro-airbnb">
-            Also on Airbnb:{' '}
-            <a href="https://www.airbnb.com/rooms/1773106679484408993" target="_blank" rel="noopener noreferrer">
-              Home-Office Apartment <ExternalLink size={13} />
-            </a>
-            <span aria-hidden="true"> · </span>
-            <a href="https://www.airbnb.com/rooms/1743067197312497878" target="_blank" rel="noopener noreferrer">
-              LivingSpring Gardens <ExternalLink size={13} />
-            </a>
-          </p>
         </div>
       </section>
 
