@@ -1,10 +1,10 @@
 /* =====================================================================
    HOME-OFFICE APARTMENTS at LIVING SPRING GARDENS — Design System
    ===================================================================== */
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 :root {
-  --font-body:  'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-body:  'Poppins', system-ui, -apple-system, sans-serif;
   --font-small: 'Space Grotesk', system-ui, -apple-system, sans-serif;
   --ink:        #1f2b26;
   --ink-2:      #3b3b3b;
@@ -45,7 +45,6 @@ body {
   color: var(--ink-body);
   background: var(--bg-page);
   font-size: 17.5px;
-  word-spacing: .04em; /* Plus Jakarta Sans sets words a little tight */
   line-height: 1.5;
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
@@ -75,14 +74,14 @@ button { font: inherit; cursor: pointer; }
 
 h1, h2, h3, h4 {
   margin: 0 0 .5em;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.025em;
   line-height: 1.12;
   color: var(--ink);
   font-weight: 600;
 }
 h1 {
   font-size: clamp(38px, 5.5vw, 68px);
-  letter-spacing: -0.014em;
+  letter-spacing: -0.035em;
   line-height: 1.05;
 }
 h2 { font-size: clamp(26px, 3.2vw, 40px); }
@@ -215,7 +214,7 @@ h4 { font-size: 17.5px; }
   font-family: var(--font-body);
   font-weight: 700;
   font-size: 21.5px;
-  letter-spacing: -0.012em;
+  letter-spacing: -0.03em;
   color: inherit;
 }
 .brand-accent { color: var(--accent); transition: color .3s var(--ease); }
@@ -483,11 +482,11 @@ h4 { font-size: 17.5px; }
   margin: 0;
   font-size: clamp(30px, 3.6vw, 48px);
   line-height: 1.22;
-  letter-spacing: -0.008em;
+  letter-spacing: -0.02em;
   color: var(--ink);
 }
 .reviews-slider-quote blockquote.is-medium { font-size: clamp(25px, 2.7vw, 34px); line-height: 1.35; }
-.reviews-slider-quote blockquote.is-long { font-size: clamp(20px, 1.9vw, 25px); line-height: 1.55; letter-spacing: -0.004em; }
+.reviews-slider-quote blockquote.is-long { font-size: clamp(20px, 1.9vw, 25px); line-height: 1.55; letter-spacing: -0.01em; }
 .reviews-slider-quote figcaption { display: flex; align-items: center; gap: 12px; margin-top: auto; padding-top: 36px; }
 .reviews-slider-avatar {
   width: 44px;
@@ -570,7 +569,7 @@ h4 { font-size: 17.5px; }
 .rate-card-price {
   font-size: 40px;
   font-weight: 600;
-  letter-spacing: -0.008em;
+  letter-spacing: -0.02em;
   color: var(--ink);
   line-height: 1;
   display: flex;
@@ -616,7 +615,7 @@ h4 { font-size: 17.5px; }
 .stat-value {
   font-size: 40px;
   font-weight: 600;
-  letter-spacing: -0.008em;
+  letter-spacing: -0.02em;
   color: var(--ink);
   line-height: 1;
 }
@@ -1106,7 +1105,7 @@ body:has(.auth-split) main { padding: 0; }
   color: #fff;
   font-size: clamp(30px, 3.4vw, 44px);
   font-weight: 600;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.025em;
   line-height: 1.15;
   margin: 0 0 20px;
 }
@@ -1163,7 +1162,7 @@ body:has(.auth-split) main { padding: 0; }
   justify-content: center;
   font-weight: 700;
   font-size: 19.5px;
-  letter-spacing: -0.008em;
+  letter-spacing: -0.02em;
   flex-shrink: 0;
 }
 .auth-photo .auth-mono-dot {
@@ -1177,7 +1176,7 @@ body:has(.auth-split) main { padding: 0; }
   line-height: 1.15;
   font-weight: 700;
   font-size: 21.5px;
-  letter-spacing: -0.008em;
+  letter-spacing: -0.02em;
   color: var(--accent);
 }
 .auth-photo .auth-mono-name {
@@ -1202,7 +1201,7 @@ body:has(.auth-split) main { padding: 0; }
 .auth-title {
   font-size: clamp(32px, 3.5vw, 44px);
   font-weight: 600;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.025em;
   line-height: 1.1;
   margin: 0 0 8px;
   color: var(--ink);
@@ -1299,7 +1298,7 @@ body:has(.auth-split) main { padding: 0; }
 .hero-title {
   font-size: clamp(44px, 6.5vw, 84px);
   font-weight: 600;
-  letter-spacing: -0.016em;
+  letter-spacing: -0.04em;
   line-height: 1.02;
   margin: 0 auto 28px;
   max-width: 900px;
@@ -1343,7 +1342,7 @@ body:has(.auth-split) main { padding: 0; }
   color: #fff;
   font-size: clamp(28px, 3.2vw, 42px);
   font-weight: 600;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.025em;
   line-height: 1.15;
   margin: 0 0 16px;
 }
@@ -1535,7 +1534,7 @@ body:has(.auth-split) main { padding: 0; }
 .hero-title-split {
   font-size: clamp(42px, 5.8vw, 72px);
   font-weight: 600;
-  letter-spacing: -0.014em;
+  letter-spacing: -0.035em;
   line-height: 1.05;
   color: var(--ink);
   margin: 0 0 24px;
@@ -1575,7 +1574,7 @@ body:has(.auth-split) main { padding: 0; }
   font-size: 23px;
   font-weight: 600;
   color: var(--ink);
-  letter-spacing: -0.004em;
+  letter-spacing: -0.01em;
   display: inline-flex;
   align-items: center;
   gap: 3px;
@@ -1736,7 +1735,7 @@ body:has(.auth-split) main { padding: 0; }
 .hero-v2-title {
   font-size: clamp(34px, 4.8vw, 62px);
   font-weight: 500;
-  letter-spacing: -0.018em;
+  letter-spacing: -0.045em;
   line-height: 1.02;
   color: #fff;
   margin: 0 0 28px;
@@ -1776,7 +1775,7 @@ body:has(.auth-split) main { padding: 0; }
 .page-header-v2 h1 {
   font-size: clamp(40px, 5.5vw, 68px);
   font-weight: 500;
-  letter-spacing: -0.014em;
+  letter-spacing: -0.035em;
   line-height: 1.02;
   margin: 0 0 24px;
 }
@@ -1853,7 +1852,7 @@ body:has(.auth-split) main { padding: 0; }
 .page-header-callout h3 {
   font-size: 23px;
   font-weight: 600;
-  letter-spacing: -0.004em;
+  letter-spacing: -0.01em;
   margin: 0 0 14px;
 }
 .page-header-callout .prose:last-of-type { margin-bottom: 20px; }
@@ -1874,7 +1873,7 @@ body:has(.auth-split) main { padding: 0; }
 .intro-v2 h2 {
   font-size: clamp(28px, 3.4vw, 44px);
   font-weight: 500;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.025em;
   line-height: 1.15;
   margin: 12px 0 20px;
 }
@@ -1946,13 +1945,13 @@ body:has(.auth-split) main { padding: 0; }
   margin: 12px 0 0;
   font-size: clamp(28px, 3.2vw, 40px);
   font-weight: 500;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.025em;
 }
 
 /* Cleaner base type — reduce heaviness for premium feel */
 h1, h2 { font-weight: 500; }
-h1 { letter-spacing: -0.014em; }
-h2 { letter-spacing: -0.01em; }
+h1 { letter-spacing: -0.035em; }
+h2 { letter-spacing: -0.025em; }
 
 /* Eyebrow refinement */
 .eyebrow {
@@ -1975,7 +1974,7 @@ h2 { letter-spacing: -0.01em; }
   margin: 0 0 12px;
   font-size: 24px;
   font-weight: 500;
-  letter-spacing: -0.008em;
+  letter-spacing: -0.02em;
 }
 .teaser-body .prose {
   max-width: none;
@@ -2008,7 +2007,7 @@ h2 { letter-spacing: -0.01em; }
   margin: 16px 0 6px;
   font-size: 18.5px;
   font-weight: 600;
-  letter-spacing: -0.002em;
+  letter-spacing: -0.005em;
 }
 .feature p {
   color: var(--muted);
@@ -2023,7 +2022,7 @@ h2 { letter-spacing: -0.01em; }
 }
 
 /* ============ STAT BAND — cleaner ============ */
-.stat-value { font-weight: 500; letter-spacing: -0.01em; }
+.stat-value { font-weight: 500; letter-spacing: -0.025em; }
 .stat-card { padding: 36px 24px; }
 
 /* ============ CTA BAND ============ */
@@ -2031,7 +2030,7 @@ h2 { letter-spacing: -0.01em; }
 .cta-content h2 {
   font-size: clamp(32px, 4vw, 48px);
   font-weight: 500;
-  letter-spacing: -0.012em;
+  letter-spacing: -0.03em;
   margin: 0 0 16px;
 }
 .cta-content { text-align: center; }
@@ -2361,7 +2360,7 @@ html.lenis, html.lenis body { height: auto; }
   font-family: var(--font-body);
   font-weight: 700;
   font-size: 23px;
-  letter-spacing: -0.012em;
+  letter-spacing: -0.03em;
   color: #fff;
 }
 .page-curtain-sub {
@@ -2894,8 +2893,7 @@ html.a11y-reduce-motion .reveal { opacity: 1 !important; transform: none !import
 }
 
 /* ============ TYPE: Space Grotesk for numbers and small text ============
-   Plus Jakarta Sans is the face for headings and reading text (body,
-   above); Space Grotesk carries the figures and the small labels —
+   Poppins is the face for headings and reading text (body, above); Space Grotesk carries the figures and the small labels —
    eyebrows, prices, stats, ratings, form labels, meta lines. */
 .eyebrow, .hero-eyebrow, .hero-v2-tag, .hero-tag, .hero-badge,
 .hero-meta-label, .hero-meta-value,
