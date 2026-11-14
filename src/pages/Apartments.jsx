@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import ReviewsSection from '../components/ReviewsSection';
+import { NIGHTLY_RATE_GHS, MULTI_NIGHT_DISCOUNT_GHS, LONG_STAY_DISCOUNT_PCT } from '../lib/pricing';
 
 export default function Apartments() {
   return (
@@ -42,21 +43,21 @@ export default function Apartments() {
           <div className="rate-cards">
             <RateCard
               eyebrow="Standard"
-              price="$41"
+              price={`GHS ${NIGHTLY_RATE_GHS}`}
               unit="/ night"
-              desc="The base rate per apartment (2 bedrooms), all-inclusive of the amenities listed above."
+              desc="The base rate per night for a whole apartment, with both bedrooms."
             />
             <RateCard
               eyebrow="5-night stays"
-              price="$10"
+              price={`GHS ${MULTI_NIGHT_DISCOUNT_GHS}`}
               unit="off"
-              desc="Book 5 nights or more and save $10 off your total."
+              desc={`Book 5 nights or more and save GHS ${MULTI_NIGHT_DISCOUNT_GHS} on your total.`}
             />
             <RateCard
               eyebrow="28–30 night stays"
-              price="20%"
+              price={`${LONG_STAY_DISCOUNT_PCT * 100}%`}
               unit="off"
-              desc="Book a full month and save 20% off your total."
+              desc="Stay 28–30 nights and save 20% on your total."
               featured
             />
           </div>

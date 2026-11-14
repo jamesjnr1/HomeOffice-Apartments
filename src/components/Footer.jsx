@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Instagram, Mail, Phone, MapPin } from 'lucide-react';
+import { Mail, Phone, MapPin } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -55,9 +55,6 @@ export default function Footer() {
               className="footer-loc"
             >
               <MapPin size={14} /> Fiapre, Sunyani
-            </a>
-            <a href="#" className="footer-social" aria-label="Instagram">
-              <Instagram size={14} /> Instagram
             </a>
           </div>
         </div>
