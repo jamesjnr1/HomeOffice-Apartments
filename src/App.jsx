@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -8,42 +9,45 @@ import SmoothScroll from './lib/SmoothScroll';
 import { useReveal } from './lib/useReveal';
 import { usePageMeta } from './lib/usePageMeta';
 
-// Public pages
+// Public pages people land on are in the main bundle; everything else
+// (booking, sign-in, the guest dashboard and the admin console) is split
+// into its own file and fetched only when someone opens it, so the first
+// visit downloads far less JavaScript.
 import Home from './pages/Home';
 import Apartments from './pages/Apartments';
 import Gallery from './pages/Gallery';
 import About from './pages/About';
-import Book from './pages/Book';
+import NotFound from './pages/NotFound';
+
+const Book = lazy(() => import('./pages/Book'));
+const PaymentComplete = lazy(() => import('./pages/PaymentComplete'));
 
 // Auth
-import SignIn from './pages/SignIn';
-import SignUp from './pages/SignUp';
-import NotFound from './pages/NotFound';
-import PaymentComplete from './pages/PaymentComplete';
+const SignIn = lazy(() => import('./pages/SignIn'));
+const SignUp = lazy(() => import('./pages/SignUp'));
 
 // Guest dashboard
-import DashboardLayout from './pages/dashboard/DashboardLayout';
-import Overview from './pages/dashboard/Overview';
-import Bookings from './pages/dashboard/Bookings';
-import Messages from './pages/dashboard/Messages';
-import Profile from './pages/dashboard/Profile';
+const DashboardLayout = lazy(() => import('./pages/dashboard/DashboardLayout'));
+const Overview = lazy(() => import('./pages/dashboard/Overview'));
+const Bookings = lazy(() => import('./pages/dashboard/Bookings'));
+const Messages = lazy(() => import('./pages/dashboard/Messages'));
+const Profile = lazy(() => import('./pages/dashboard/Profile'));
 
-// Admin dashboard
-import {
-  AdminSignIn,
-  AdminLayout,
-  AdminOverview,
-  AdminEnquiries,
-  AdminBookings,
-  AdminGuests,
-  AdminGuestDetail,
-  AdminReviews,
-  AdminMessages,
-  AdminRates,
-  AdminRevenue,
-  AdminAnalytics,
-  AdminSettings,
-} from './pages/admin';
+// Admin dashboard — one chunk for the whole console
+const admin = (name) => lazy(() => import('./pages/admin').then((m) => ({ default: m[name] })));
+const AdminSignIn = admin('AdminSignIn');
+const AdminLayout = admin('AdminLayout');
+const AdminOverview = admin('AdminOverview');
+const AdminEnquiries = admin('AdminEnquiries');
+const AdminBookings = admin('AdminBookings');
+const AdminGuests = admin('AdminGuests');
+const AdminGuestDetail = admin('AdminGuestDetail');
+const AdminReviews = admin('AdminReviews');
+const AdminMessages = admin('AdminMessages');
+const AdminRates = admin('AdminRates');
+const AdminRevenue = admin('AdminRevenue');
+const AdminAnalytics = admin('AdminAnalytics');
+const AdminSettings = admin('AdminSettings');
 
 function AppContent() {
   useReveal();
@@ -52,6 +56,7 @@ function AppContent() {
     <>
       <Header />
       <main>
+        <Suspense fallback={null}>
         <Routes>
           {/* Public */}
           <Route path="/" element={<Home />} />
@@ -92,6 +97,7 @@ function AppContent() {
 
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </Suspense>
       </main>
       <Footer />
       <PageTransition />

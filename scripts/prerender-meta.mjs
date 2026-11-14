@@ -31,6 +31,8 @@ for (const [path, meta] of Object.entries(PAGE_META)) {
   html = swap(html, /<div id="root"><\/div>/, `<div id="root">${staticPageHtml(path)}</div>`);
 
   if (path === '/') {
+    // Start the hero photo downloading with the HTML, before React runs.
+    html = swap(html, /<\/head>/, `    <link rel="preload" as="image" href="/images/hero-property-1000.webp" imagesrcset="/images/hero-property-1000.webp 1000w, /images/hero-property-1600.webp 1600w" imagesizes="100vw" fetchpriority="high" />\n  </head>`);
     writeFileSync(join(dist, 'index.html'), html);
   } else {
     mkdirSync(join(dist, path), { recursive: true });

@@ -1,7 +1,7 @@
 /* =====================================================================
    HOME-OFFICE APARTMENTS at LIVING SPRING GARDENS — Design System
    ===================================================================== */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+/* Fonts (Poppins, Space Grotesk) are loaded by a <link> in index.html */
 
 :root {
   --font-body:  'Poppins', system-ui, -apple-system, sans-serif;
@@ -1817,61 +1817,10 @@ body:has(.auth-split) main { padding: 0; }
   transition: border-color .15s ease, background .15s ease;
 }
 .intro-v2-airbnb-link:hover { border-color: var(--brick); background: rgba(166,81,43,.08); }
-/* Home intro: centred headline and paragraph, three equal feature
-   tiles, Airbnb links centred underneath. */
+/* Home intro: centred headline and paragraph. */
 .intro-simple { max-width: 900px; margin: 0 auto; text-align: center; }
 .intro-simple h2 { margin: 14px 0 20px; }
 .intro-simple .prose { margin: 0 auto; max-width: 680px; font-size: 19px; }
-.intro-points {
-  list-style: none;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  max-width: 980px;
-  margin: 52px auto 0;
-  padding: 28px 0;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-}
-.intro-points li {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  padding: 0 20px;
-  text-align: left;
-}
-.intro-points li + li { border-left: 1px solid var(--line); }
-.intro-points-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: var(--accent-soft);
-  color: var(--accent);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.intro-points strong { display: block; font-size: 17px; font-weight: 600; color: var(--ink); }
-.intro-points li > span:last-child > span { display: block; font-size: 15px; color: var(--muted); margin-top: 2px; }
-.intro-airbnb { margin: 28px 0 0; text-align: center; font-size: 15.5px; color: var(--muted); }
-.intro-airbnb a {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  color: var(--brick);
-  font-weight: 500;
-  text-decoration: underline;
-  text-decoration-color: rgba(166,81,43,.35);
-  text-underline-offset: 4px;
-}
-.intro-airbnb a:hover { text-decoration-color: var(--brick); }
-@media (max-width: 760px) {
-  .intro-points { grid-template-columns: 1fr; padding: 8px 0; margin-top: 36px; }
-  .intro-points li { justify-content: flex-start; padding: 16px 0; }
-  .intro-points li + li { border-left: 0; border-top: 1px solid var(--line); }
-}
-
 /* Home: two equal photo tiles with the text on the photo */
 .photo-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
 .photo-tile {
