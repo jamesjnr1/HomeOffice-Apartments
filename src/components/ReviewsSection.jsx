@@ -114,7 +114,7 @@ export default function ReviewsSection({ apartment, cream = false }) {
                   {r.rating.toFixed(1)} / 5
                   <span className="reviews-slider-stars" aria-label={`${r.rating} out of 5 stars`}>
                     {[1, 2, 3, 4, 5].map((n) => (
-                      <Star key={n} size={11} strokeWidth={0} fill={n <= r.rating ? 'currentColor' : '#cfd4d1'} aria-hidden="true" />
+                      <Star key={n} size={15} strokeWidth={0} fill={n <= r.rating ? 'currentColor' : '#cfd4d1'} aria-hidden="true" />
                     ))}
                   </span>
                 </span>

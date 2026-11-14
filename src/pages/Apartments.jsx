@@ -18,7 +18,7 @@ export default function Apartments() {
         </div>
       </section>
 
-      <section className="section">
+      <section className="section section-green">
         <div className="container">
           <div className="section-head-left reveal">
             <span className="eyebrow">AT A GLANCE</span>
