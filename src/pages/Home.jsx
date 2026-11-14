@@ -38,13 +38,16 @@ export default function Home() {
       {/* Intro */}
       <section className="section section-narrow">
         <div className="container">
-          <div className="intro-v2-grid intro-v2-grid-solo reveal">
-            <div className="intro-v2">
+          <div className="intro-split reveal">
+            <div className="intro-split-lead">
               <span className="eyebrow">A HOME AWAY FROM HOME</span>
               <h2>
                 <span className="intro-v2-accent">Jerusalem stone elegance</span>, a peaceful
                 pergola front yard, and expansive open space for relaxation or memorable events.
               </h2>
+            </div>
+
+            <div className="intro-split-body">
               <p className="prose">
                 Discover self‑contained apartments in a peaceful compound, thoughtfully designed
                 for the way you work from home and the way you rest.
