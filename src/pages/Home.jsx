@@ -38,22 +38,20 @@ export default function Home() {
       {/* Intro */}
       <section className="section section-narrow">
         <div className="container">
-          <div className="intro-split reveal">
-            <div className="intro-split-lead">
-              <span className="eyebrow">A HOME AWAY FROM HOME</span>
-              <h2>
-                <span className="intro-v2-accent">Jerusalem stone elegance</span>, a peaceful
-                pergola front yard, and expansive open space for relaxation or memorable events.
-              </h2>
-            </div>
+          <div className="intro-wide reveal">
+            <span className="eyebrow">A HOME AWAY FROM HOME</span>
+            <h2>
+              <span className="intro-v2-accent">Jerusalem stone elegance</span>, a peaceful
+              pergola front yard, and expansive open space for relaxation or memorable events.
+            </h2>
 
-            <div className="intro-split-body">
+            <div className="intro-wide-cols">
               <p className="prose">
                 Discover self‑contained apartments in a peaceful compound, thoughtfully designed
                 for the way you work from home and the way you rest.
               </p>
 
-              <div className="intro-v2-features">
+              <div>
                 <span className="intro-v2-features-label">Each apartment features</span>
                 <ul className="prose-list">
                   <li>A spacious, fully furnished hall with TV</li>
@@ -67,26 +65,26 @@ export default function Home() {
                 where well‑kept lawns and tranquil surroundings create the perfect setting for
                 relaxation, reflection, and holidays.
               </p>
+            </div>
 
-              <div className="intro-v2-airbnb">
-                <span className="intro-v2-airbnb-label">Also listed on Airbnb</span>
-                <a
-                  href="https://www.airbnb.com/rooms/1773106679484408993"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="intro-v2-airbnb-link"
-                >
-                  Home-Office Apartment <ExternalLink size={13} />
-                </a>
-                <a
-                  href="https://www.airbnb.com/rooms/1743067197312497878"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="intro-v2-airbnb-link"
-                >
-                  LivingSpring Gardens <ExternalLink size={13} />
-                </a>
-              </div>
+            <div className="intro-v2-airbnb">
+              <span className="intro-v2-airbnb-label">Also listed on Airbnb</span>
+              <a
+                href="https://www.airbnb.com/rooms/1773106679484408993"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="intro-v2-airbnb-link"
+              >
+                Home-Office Apartment <ExternalLink size={13} />
+              </a>
+              <a
+                href="https://www.airbnb.com/rooms/1743067197312497878"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="intro-v2-airbnb-link"
+              >
+                LivingSpring Gardens <ExternalLink size={13} />
+              </a>
             </div>
           </div>
         </div>
@@ -95,39 +93,31 @@ export default function Home() {
       {/* Video walkthrough of the property */}
       <WalkthroughSection />
 
-      {/* Two-card teaser */}
+      {/* Two features — photo and text side by side, alternating */}
       <section className="section section-cream">
-        <div className="container">
-          <div className="teaser-grid">
-            <Link to="/apartments" className="teaser-card reveal">
-              <div className="teaser-img">
-                <img
-                  src="/images/kitchen.jpg"
-                  alt="Kitchen at Home-Office Apartments"
-                />
-              </div>
-              <div className="teaser-body">
-                <span className="eyebrow">THE APARTMENT</span>
-                <h3>Built for how you work.</h3>
-                <p className="prose">Fast Wi-Fi, dedicated desk, and a well-considered kitchen.</p>
-                <span className="link-arrow">See the apartment <ArrowRight size={14} /></span>
-              </div>
-            </Link>
+        <div className="container features-alt">
+          <div className="feature-row reveal">
+            <div className="feature-row-img">
+              <img src="/images/living-room-1.jpg" alt="Living room with a work chair at Home-Office Apartments" loading="lazy" />
+            </div>
+            <div className="feature-row-text">
+              <span className="eyebrow">THE APARTMENT</span>
+              <h2>Built for how you work.</h2>
+              <p className="prose">Fast Wi-Fi, dedicated desk, and a well-considered kitchen.</p>
+              <Link to="/apartments" className="link-arrow">See the apartment <ArrowRight size={14} /></Link>
+            </div>
+          </div>
 
-            <Link to="/gallery" className="teaser-card reveal">
-              <div className="teaser-img">
-                <img
-                  src="/images/lounge.jpg"
-                  alt="Living room at Home-Office Apartments"
-                />
-              </div>
-              <div className="teaser-body">
-                <span className="eyebrow">TAKE A LOOK INSIDE</span>
-                <h3>Every room, well considered.</h3>
-                <p className="prose">Four bedrooms, a full kitchen, and living spaces built for a proper stay.</p>
-                <span className="link-arrow">See the gallery <ArrowRight size={14} /></span>
-              </div>
-            </Link>
+          <div className="feature-row feature-row-flip reveal">
+            <div className="feature-row-img">
+              <img src="/images/lounge.jpg" alt="Lounge at Home-Office Apartments" loading="lazy" />
+            </div>
+            <div className="feature-row-text">
+              <span className="eyebrow">TAKE A LOOK INSIDE</span>
+              <h2>Every room, well considered.</h2>
+              <p className="prose">Four bedrooms, a full kitchen, and living spaces built for a proper stay.</p>
+              <Link to="/gallery" className="link-arrow">See the gallery <ArrowRight size={14} /></Link>
+            </div>
           </div>
         </div>
       </section>
