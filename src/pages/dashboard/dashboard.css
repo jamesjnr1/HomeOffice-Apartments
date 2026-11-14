@@ -3,10 +3,10 @@
    Deliberately its own visual register from the admin ("mgmt-*")
    panel: a serif display face (Fraunces) on headings for an editorial,
    boutique-hotel warmth, a soft cream backdrop instead of flat grey,
-   and slightly richer shadows/radii throughout. Same Plus Jakarta Sans for body
+   and slightly richer shadows/radii throughout. Same Poppins for body
    text and controls — only the register changes, not the whole kit.
    ===================================================================== */
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap');
 
 /* Hide site chrome */
 body:has(.dash-shell) .site-header,
@@ -24,7 +24,7 @@ body:has(.dash-shell) main { padding: 0 !important; }
   min-height: 100vh;
   background: linear-gradient(180deg, #faf8f3 0%, #f5f3ee 100%);
   color: #1f2b26;
-  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-family: 'Poppins', system-ui, sans-serif;
   font-size: 14.5px;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
@@ -47,7 +47,7 @@ body:has(.dash-shell) main { padding: 0 !important; }
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   gap: 16px; padding: 40px;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Poppins', sans-serif;
   background: #f7f8f6;
 }
 .dash-loading p { color: #6a706d; margin: 0; font-size: 13px; }
@@ -254,7 +254,7 @@ body:has(.dash-shell) main { padding: 0 !important; }
   border: 0;
   background: transparent;
   color: rgba(255,255,255,.75);
-  font: 500 13px/1 'Plus Jakarta Sans', sans-serif;
+  font: 500 13px/1 'Poppins', sans-serif;
   border-radius: 8px;
   cursor: pointer;
   transition: background .15s ease, color .15s ease;
@@ -354,7 +354,7 @@ body:has(.dash-shell) main { padding: 0 !important; }
 .dash-btn {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 10px 18px; border-radius: 999px; border: 1px solid transparent;
-  font: 500 13.5px/1 'Plus Jakarta Sans', sans-serif;
+  font: 500 13.5px/1 'Poppins', sans-serif;
   cursor: pointer; text-decoration: none; transition: all .18s ease; line-height: 1;
 }
 .dash-btn-primary { background: #2d6a4f; color: #fff; }
@@ -448,7 +448,7 @@ body:has(.dash-shell) main { padding: 0 !important; }
 .dash-tab {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 11px 16px; border: 0; background: transparent;
-  color: #6a706d; font: 500 13.5px/1 'Plus Jakarta Sans', sans-serif;
+  color: #6a706d; font: 500 13.5px/1 'Poppins', sans-serif;
   cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;
   transition: all .18s ease;
 }
@@ -512,12 +512,12 @@ body:has(.dash-shell) main { padding: 0 !important; }
   display: flex; align-items: center; gap: 8px;
   padding: 12px 14px; border-bottom: 1px solid #e8ebe8; color: #9aa19d;
 }
-.dash-msg-search input { border: 0; outline: none; font: 13px 'Plus Jakarta Sans', sans-serif; flex: 1; background: transparent; }
+.dash-msg-search input { border: 0; outline: none; font: 13px 'Poppins', sans-serif; flex: 1; background: transparent; }
 .dash-msg-item {
   display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px;
   border: 0; background: transparent; cursor: pointer; text-align: left;
   border-bottom: 1px solid #f0f2ef; transition: background .15s ease; position: relative;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Poppins', sans-serif;
 }
 .dash-msg-item:hover { background: #f7f8f6; }
 .dash-msg-item.active { background: #e2ece6; }
@@ -555,7 +555,7 @@ body:has(.dash-shell) main { padding: 0 !important; }
 }
 .dash-msg-composer input {
   flex: 1; padding: 10px 16px; border: 1px solid #e8ebe8;
-  border-radius: 999px; outline: none; font: 13.5px 'Plus Jakarta Sans', sans-serif;
+  border-radius: 999px; outline: none; font: 13.5px 'Poppins', sans-serif;
   transition: border-color .2s ease;
 }
 .dash-msg-composer input:focus { border-color: #2d6a4f; }
@@ -633,7 +633,7 @@ body:has(.dash-shell) main { padding: 0 !important; }
 }
 .dash-field input, .dash-field select {
   padding: 10px 13px; border: 1px solid #e8ebe8; border-radius: 9px;
-  font: 14px 'Plus Jakarta Sans', sans-serif; background: #fff; outline: none;
+  font: 14px 'Poppins', sans-serif; background: #fff; outline: none;
   transition: border-color .2s ease; color: #1f2b26;
 }
 .dash-field input:focus, .dash-field select:focus { border-color: #2d6a4f; }
@@ -961,7 +961,7 @@ body:has(.dash-shell) main { padding: 0 !important; }
   padding: 12px 20px;
   border: 0; border-radius: 999px;
   background: #c2410c; color: #fff;
-  font: 600 14px/1 'Plus Jakarta Sans', sans-serif;
+  font: 600 14px/1 'Poppins', sans-serif;
   cursor: pointer;
   transition: background .15s ease;
 }
