@@ -4,14 +4,14 @@ import { Volume2, VolumeX } from 'lucide-react';
 /**
  * WalkthroughSection — the homepage video tour: one big video.
  * It starts playing (muted, looping) when it scrolls into view and
- * pauses when it scrolls out; a button unmutes it. The file only
- * downloads once the video is close to the screen. Visitors who ask
+ * pauses when it scrolls out; a button unmutes it. The file and its
+ * cover image only download once the video is close to the screen. Visitors who ask
  * for reduced motion get the cover image and normal controls instead.
  */
 export default function WalkthroughSection() {
   const videoRef = useRef(null);
   const visible = useRef(false);
-  // Sources are attached only once the video nears the screen.
+  // Sources (and the poster) are attached only once the video nears the screen.
   const [load, setLoad] = useState(false);
   const [muted, setMuted] = useState(true);
   const [reduced] = useState(() =>
@@ -62,7 +62,7 @@ export default function WalkthroughSection() {
         <video
           ref={videoRef}
           className="walk-video"
-          poster="/videos/walkthrough-poster.jpg"
+          poster={load ? '/videos/walkthrough-poster.jpg' : undefined}
           muted
           loop={!reduced}
           playsInline
