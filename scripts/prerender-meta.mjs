@@ -11,6 +11,11 @@ import { PAGE_META, SITE_URL, staticPageHtml } from '../src/lib/seo.mjs';
 const dist = new URL('../dist/', import.meta.url).pathname;
 const template = readFileSync(join(dist, 'index.html'), 'utf8');
 
+const PRELOAD = {
+  '/': { href: '/images/hero-property-1000.webp', srcset: '/images/hero-property-1000.webp 1000w, /images/hero-property-1600.webp 1600w' },
+  '/gallery': { href: '/images/exterior-1-800.webp', srcset: '/images/exterior-1-800.webp 800w, /images/exterior-1-1600.webp 1600w' },
+};
+
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 const swap = (html, re, value) => {
   if (!re.test(html)) throw new Error(`prerender-meta: tag not found: ${re}`);
@@ -30,9 +35,13 @@ for (const [path, meta] of Object.entries(PAGE_META)) {
   // before running JavaScript. React replaces it on load.
   html = swap(html, /<div id="root"><\/div>/, `<div id="root">${staticPageHtml(path)}</div>`);
 
+  // Start each page's first big photo downloading with the HTML, before React runs.
+  const preload = PRELOAD[path];
+  if (preload) {
+    html = swap(html, /<\/head>/, `    <link rel="preload" as="image" href="${preload.href}" imagesrcset="${preload.srcset}" imagesizes="100vw" fetchpriority="high" />\n  </head>`);
+  }
+
   if (path === '/') {
-    // Start the hero photo downloading with the HTML, before React runs.
-    html = swap(html, /<\/head>/, `    <link rel="preload" as="image" href="/images/hero-property-1000.webp" imagesrcset="/images/hero-property-1000.webp 1000w, /images/hero-property-1600.webp 1600w" imagesizes="100vw" fetchpriority="high" />\n  </head>`);
     writeFileSync(join(dist, 'index.html'), html);
   } else {
     mkdirSync(join(dist, path), { recursive: true });
