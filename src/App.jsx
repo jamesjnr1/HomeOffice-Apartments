@@ -5,7 +5,6 @@ import Footer from './components/Footer';
 import PageTransition from './components/PageTransition';
 import AccessibilityWidget from './components/AccessibilityWidget';
 import VisitTracker from './components/VisitTracker';
-import SmoothScroll from './lib/SmoothScroll';
 import { useReveal } from './lib/useReveal';
 import { usePageMeta } from './lib/usePageMeta';
 
@@ -109,8 +108,6 @@ function AppContent() {
 
 export default function App() {
   return (
-    <SmoothScroll>
-      <AppContent />
-    </SmoothScroll>
+    <AppContent />
   );
 }
