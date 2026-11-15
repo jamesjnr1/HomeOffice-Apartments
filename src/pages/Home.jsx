@@ -46,8 +46,8 @@ export default function Home() {
           <div className="intro-simple reveal">
             <span className="eyebrow">A HOME AWAY FROM HOME</span>
             <h2>
-              <span className="intro-v2-accent">Jerusalem stone elegance</span>, a peaceful
-              pergola front yard, and expansive open space for relaxation or memorable events.
+              <span className="intro-v2-accent">A peaceful pergola front yard</span> and expansive
+              open space for relaxation or memorable events.
             </h2>
             <p className="prose">
               Self‑contained apartments in a peaceful compound, each opening directly onto the
@@ -65,7 +65,7 @@ export default function Home() {
         <div className="container">
           <div className="photo-tiles">
             <Link to="/apartments" className="photo-tile reveal">
-              <img src="/images/living-room-1.jpg" alt="Living room with a work chair at Home-Office Apartments" loading="lazy" />
+              <img src="/images/lounge-window.jpg" srcSet="/images/lounge-window-800.webp 800w, /images/lounge-window-1280.webp 1280w" sizes="(max-width: 820px) 100vw, 50vw" alt="Lounge with a work chair at Home-Office Apartments" loading="lazy" decoding="async" />
               <div className="photo-tile-text">
                 <span className="eyebrow eyebrow-light">THE APARTMENT</span>
                 <h3>Built for how you work.</h3>
@@ -74,7 +74,7 @@ export default function Home() {
               </div>
             </Link>
             <Link to="/gallery" className="photo-tile reveal">
-              <img src="/images/lounge.jpg" alt="Lounge at Home-Office Apartments" loading="lazy" />
+              <img src="/images/lounge-kitchen-view.jpg" srcSet="/images/lounge-kitchen-view-800.webp 800w, /images/lounge-kitchen-view-1280.webp 1280w" sizes="(max-width: 820px) 100vw, 50vw" alt="View through the arch to the kitchen and dining area" loading="lazy" decoding="async" />
               <div className="photo-tile-text">
                 <span className="eyebrow eyebrow-light">TAKE A LOOK INSIDE</span>
                 <h3>Every room, well considered.</h3>
