@@ -67,7 +67,7 @@ export const PAGE_CONTENT = {
   '/': `
     <h1>A quiet place for hideout, retreat or work.</h1>
     <p>Home-Office Apartments — thoughtfully finished for how you actually spend your days, set in the calm of LivingSpring Gardens in Fiapre, Sunyani.</p>
-    <h2>A peaceful pergola front yard and expansive open space for relaxation or memorable events.</h2>
+    <h2>Jerusalem stone elegance, a peaceful pergola front yard, and expansive open space for relaxation or memorable events.</h2>
     <p>Discover self-contained apartments in a peaceful compound, thoughtfully designed for the way you work from home and the way you rest.</p>
     <ul>
       <li>A spacious, fully furnished hall with TV</li>

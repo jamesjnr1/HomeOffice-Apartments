@@ -46,8 +46,8 @@ export default function Home() {
           <div className="intro-simple reveal">
             <span className="eyebrow">A HOME AWAY FROM HOME</span>
             <h2>
-              <span className="intro-v2-accent">A peaceful pergola front yard</span> and expansive
-              open space for relaxation or memorable events.
+              <span className="intro-v2-accent">Jerusalem stone elegance</span>, a peaceful
+              pergola front yard, and expansive open space for relaxation or memorable events.
             </h2>
             <p className="prose">
               Self‑contained apartments in a peaceful compound, each opening directly onto the
