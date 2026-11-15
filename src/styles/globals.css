@@ -2320,15 +2320,8 @@ body {
 ::view-transition-old(root),
 ::view-transition-new(root) { animation: none !important; }
 
-/* --- Let Lenis own the scroll behavior. Native smooth conflicts. --- */
+/* --- Plain browser scrolling; jumps (route changes) are instant --- */
 html { scroll-behavior: auto !important; }
-
-/* Lenis sets these classes on <html> — needed for it to work with sticky/fixed elements */
-html.lenis, html.lenis body { height: auto; }
-.lenis.lenis-smooth { scroll-behavior: auto !important; }
-.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
-.lenis.lenis-stopped { overflow: hidden; }
-.lenis.lenis-scrolling iframe { pointer-events: none; }
 
 /* --- CURTAIN PAGE TRANSITION (aerodynamics-style) --- */
 .page-curtain {
@@ -2446,14 +2439,6 @@ html, body {
     overflow-y: auto !important;
     position: static !important;
     height: auto !important;
-  }
-  /* Lenis-set classes should not interfere on mobile */
-  html.lenis, html.lenis body {
-    height: auto !important;
-    overflow: auto !important;
-  }
-  .lenis.lenis-smooth {
-    scroll-behavior: auto !important;
   }
 }
 

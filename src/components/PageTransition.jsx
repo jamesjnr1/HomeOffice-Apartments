@@ -27,7 +27,7 @@ export default function PageTransition() {
       prevPath.current = location.pathname;
       // Trigger the curtain animation
       setActive(true);
-      // Also scroll to top on route change (Lenis-safe)
+      // Also scroll to top on route change
       window.scrollTo({ top: 0, behavior: 'instant' });
       // A link to a section (e.g. /apartments#reviews) lands on it once
       // the curtain has covered the screen and the new page has rendered.
